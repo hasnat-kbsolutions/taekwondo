@@ -3,6 +3,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -40,7 +41,10 @@ export default function Edit({ student, companies, organizations, clubs }: Props
         <AuthenticatedLayout header="Edit Student">
             <Head title="Edit Student" />
             <div className="container mx-auto py-10">
-                <div>
+                <div className="flex flex-wrap">
+                <div className="w-[50%] px-2">
+                     <Label className="block text-sm mb-1">
+                                                Select Company </Label>
                     <select
                         value={data.company_id}
                         onChange={(e) => setData("company_id", e.target.value)}
@@ -59,7 +63,9 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                         </p>
                     )}
                 </div>
-                <div>
+                <div className="w-[50%] px-2">
+                     <Label className="block text-sm mb-1">
+                                                Select Organization </Label>
                     <select
                         value={data.organization_id}
                         onChange={(e) =>
@@ -80,7 +86,9 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                         </p>
                     )}
                 </div>
-                <div>
+                <div className="w-[50%] px-2 mt-3">
+                     <Label className="block text-sm mb-1">
+                                                    Select Club </Label>
                     <select
                         value={data.club_id}
                         onChange={(e) => setData("club_id", e.target.value)}
@@ -97,7 +105,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                         <p className="text-red-500 text-sm">{errors.club_id}</p>
                     )}
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                </div>
+                <form onSubmit={handleSubmit} className="flex flex-wrap">
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    UID </Label>
                     <Input
                         placeholder="UID"
                         value={data.uid}
@@ -106,7 +118,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.uid && (
                         <p className="text-red-500 text-sm">{errors.uid}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                   Code </Label>
                     <Input
                         placeholder="Code"
                         value={data.code}
@@ -115,7 +131,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.code && (
                         <p className="text-red-500 text-sm">{errors.code}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                               Name </Label>
                     <Input
                         placeholder="Name"
                         value={data.name}
@@ -124,7 +144,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.name && (
                         <p className="text-red-500 text-sm">{errors.name}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Surname</Label>
                     <Input
                         placeholder="Surname"
                         value={data.surname}
@@ -133,7 +157,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.surname && (
                         <p className="text-red-500 text-sm">{errors.surname}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Nattionality </Label>
                     <Input
                         placeholder="Nationality"
                         value={data.nationality}
@@ -144,7 +172,10 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.nationality}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">  Date Of Birth </Label>
                     <Input
                         type="date"
                         placeholder="Date of Birth"
@@ -152,9 +183,12 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                         onChange={(e) => setData("dob", e.target.value)}
                     />
                     {errors.dob && (
-                        <p className="text-red-500 text-sm">{errors.dob}</p>
+                        <p className="text-red-500 text-sm"> {errors.dob} </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1"> Date of Birth </Label>
                     <Input
                         type="date"
                         placeholder="Date of Death"
@@ -164,7 +198,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.dod && (
                         <p className="text-red-500 text-sm">{errors.dod}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                   Grade </Label>
                     <Input
                         placeholder="Grade"
                         value={data.grade}
@@ -173,7 +211,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.grade && (
                         <p className="text-red-500 text-sm">{errors.grade}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                        <Label className="block text-sm mb-1">
+                                                  Gender </Label> 
                     <select
                         value={data.gender}
                         onChange={(e) => setData("gender", e.target.value)}
@@ -188,7 +230,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.gender && (
                         <p className="text-red-500 text-sm">{errors.gender}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Passport </Label>
                     <Input
                         placeholder="ID/Passport"
                         value={data.id_passport}
@@ -199,7 +245,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.id_passport}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Files 01 </Label>
                     <Input
                         type="file"
                         onChange={(e) =>
@@ -211,7 +261,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.profile_image}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                   Files 02 </Label>
                     <Input
                         type="file"
                         onChange={(e) =>
@@ -223,7 +277,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.id_passport_image}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Files 03 </Label>
                     <Input
                         type="file"
                         onChange={(e) =>
@@ -235,7 +293,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.signature_image}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Email </Label>
                     <Input
                         placeholder="Email"
                         value={data.email}
@@ -244,7 +306,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.email && (
                         <p className="text-red-500 text-sm">{errors.email}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                        <Label className="block text-sm mb-1">
+                                                   Phone </Label> 
                     <Input
                         placeholder="Phone"
                         value={data.phone}
@@ -253,7 +319,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.phone && (
                         <p className="text-red-500 text-sm">{errors.phone}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Skype </Label>
                     <Input
                         placeholder="Skype"
                         value={data.skype}
@@ -262,7 +332,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.skype && (
                         <p className="text-red-500 text-sm">{errors.skype}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                 Website </Label>
                     <Input
                         placeholder="Website"
                         value={data.website}
@@ -271,7 +345,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.website && (
                         <p className="text-red-500 text-sm">{errors.website}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                City </Label>
                     <Input
                         placeholder="City"
                         value={data.city}
@@ -280,7 +358,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.city && (
                         <p className="text-red-500 text-sm">{errors.city}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Postal Code </Label>
                     <Input
                         placeholder="Postal Code"
                         value={data.postal_code}
@@ -291,7 +373,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                             {errors.postal_code}
                         </p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Street </Label>
                     <Input
                         placeholder="Street"
                         value={data.street}
@@ -300,7 +386,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.street && (
                         <p className="text-red-500 text-sm">{errors.street}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Country </Label>
                     <Input
                         placeholder="Country"
                         value={data.country}
@@ -309,7 +399,11 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.country && (
                         <p className="text-red-500 text-sm">{errors.country}</p>
                     )}
+                    </div>
 
+                    <div className="w-[50%] px-2 mt-3">
+                         <Label className="block text-sm mb-1">
+                                                    Status </Label>
                     <Select
                         value={data.status?.toString()}
                         onValueChange={(val) =>
@@ -327,11 +421,14 @@ export default function Edit({ student, companies, organizations, clubs }: Props
                     {errors.status && (
                         <p className="text-red-500 text-sm">{errors.status}</p>
                     )}
+                    </div>
 
+                    <div className="w-full px-2 mt-3">
                     {/* Add other fields similarly */}
-                    <Button type="submit" disabled={processing}>
-                        Update
-                    </Button>
+                        <Button type="submit" disabled={processing}>
+                            Update
+                        </Button>
+                        </div>
                 </form>
             </div>
         </AuthenticatedLayout>

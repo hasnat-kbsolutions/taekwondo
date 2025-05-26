@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -44,11 +45,11 @@ export default function Edit({ company }: Props) {
                         <CardTitle>Edit Company</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm mb-1">
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
                                     Name
-                                </label>
+                                </Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) =>
@@ -62,10 +63,10 @@ export default function Edit({ company }: Props) {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
                                     Country
-                                </label>
+                                </Label>
                                 <Input
                                     value={data.country}
                                     onChange={(e) =>
@@ -79,10 +80,10 @@ export default function Edit({ company }: Props) {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-2">
+                                <Label className="block text-sm mb-1">
                                     City
-                                </label>
+                                </Label>
                                 <Input
                                     value={data.city}
                                     onChange={(e) =>
@@ -96,10 +97,10 @@ export default function Edit({ company }: Props) {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-2">
+                                <Label className="block text-sm mb-1">
                                     Street
-                                </label>
+                                </Label>
                                 <Input
                                     value={data.street}
                                     onChange={(e) =>
@@ -113,10 +114,10 @@ export default function Edit({ company }: Props) {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-2">
+                                <Label className="block text-sm mb-1">
                                     Postal Code
-                                </label>
+                                </Label>
                                 <Input
                                     value={data.postal_code}
                                     onChange={(e) =>
@@ -130,10 +131,10 @@ export default function Edit({ company }: Props) {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-2">
+                                <Label className="block text-sm mb-1">
                                     Logo Image
-                                </label>
+                                </Label>
                                 <Input
                                     type="file"
                                     onChange={(e) =>
@@ -149,10 +150,12 @@ export default function Edit({ company }: Props) {
                                     </p>
                                 )}
                             </div>
-
-                            <Button type="submit" disabled={processing}>
-                                Update
-                            </Button>
+                            
+                            <div className="w-full px-2 mt-2">
+                                    <Button type="submit" disabled={processing}>
+                                        Update
+                                    </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

@@ -2,6 +2,7 @@ import React from "react";
 import { useForm, Head } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
@@ -27,19 +28,27 @@ export default function Edit({ attendance }: any) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                 <Label className="block text-sm mb-1">
+                                                            Select </Label>
                             <select
                                 value={data.status}
                                 onChange={(e) =>
                                     setData("status", e.target.value)
                                 }
+                                className="w-full border rounded p-2"
                             >
                                 <option value="present">Present</option>
                                 <option value="absent">Absent</option>
                                 <option value="late">Late</option>
                                 <option value="excused">Excused</option>
                             </select>
+                            </div>
 
+                        <div className="w-[50%] px-2">
+                                     <Label className="block text-sm mb-1">
+                                                           Remarks </Label>
                             <Input
                                 placeholder="Remarks"
                                 value={data.remarks}
@@ -47,10 +56,13 @@ export default function Edit({ attendance }: any) {
                                     setData("remarks", e.target.value)
                                 }
                             />
+                            </div>
 
-                            <Button type="submit" disabled={processing}>
-                                Update
-                            </Button>
+                                <div className="w-full px-2 mt-3">
+                                    <Button type="submit" disabled={processing}>
+                                        Update
+                                    </Button>
+                                </div>
                         </form>
                     </CardContent>
                 </Card>

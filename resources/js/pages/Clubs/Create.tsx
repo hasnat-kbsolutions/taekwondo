@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -50,18 +51,19 @@ export default function Create({ companies, organizations }: Props) {
                         <CardTitle>Create New Club</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
                             {/* Company Dropdown */}
-                            <label className="block text-sm mb-1">
-                                Company
-                            </label>
-                            <select
-                                value={data.company_id}
-                                onChange={(e) =>
-                                    setData("company_id", e.target.value)
-                                }
-                                className="w-full border rounded px-3 py-2"
-                            >
+                            <div className="w-[50%] px-2">
+                                    <Label className="block text-sm mb-1">
+                                        Company
+                                    </Label>
+                                    <select
+                                        value={data.company_id}
+                                        onChange={(e) =>
+                                            setData("company_id", e.target.value)
+                                        }
+                                        className="w-full border rounded px-3 py-2"
+                                    >
                                 <option value="">Select Company</option>
                                 {companies.map((company) => (
                                     <option
@@ -78,33 +80,40 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.company_id}
                                 </p>
                             )}
-
+                            </div>
+                            
+                            <div className="w-[50%] px-2">
                             {/* Organization Dropdown */}
-                            <label className="block text-sm mb-1">
-                                Organization
-                            </label>
-                            <select
-                                value={data.organization_id}
-                                onChange={(e) =>
-                                    setData("organization_id", e.target.value)
-                                }
-                                className="w-full border rounded px-3 py-2"
-                            >
-                                <option value="">Select Organization</option>
-                                {organizations.map((org) => (
-                                    <option key={org.id} value={org.id}>
-                                        {org.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.organization_id && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.organization_id}
-                                </p>
-                            )}
+                                    <Label className="block text-sm mb-1">
+                                        Organization
+                                    </Label>
+                                    <select
+                                        value={data.organization_id}
+                                        onChange={(e) =>
+                                            setData("organization_id", e.target.value)
+                                        }
+                                        className="w-full border rounded px-3 py-2"
+                                    >
+                                        <option value="">Select Organization</option>
+                                        {organizations.map((org) => (
+                                            <option key={org.id} value={org.id}>
+                                                {org.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.organization_id && (
+                                        <p className="text-red-500 text-sm">
+                                            {errors.organization_id}
+                                        </p>
+                                    )}
+                                </div>
 
+                            <div className="w-[50%] px-2 mt-3">
                             {/* Name */}
-                            <Input
+                             <Label className="block text-sm mb-1">
+                                        Name
+                                    </Label>
+                            <Input type="text"
                                 placeholder="Name"
                                 value={data.name}
                                 onChange={(e) =>
@@ -116,67 +125,89 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.name}
                                 </p>
                             )}
+                            </div>
 
-                            {/* Tax Number (optional) */}
-                            <Input
-                                placeholder="Tax Number"
-                                value={data.tax_number}
-                                onChange={(e) =>
-                                    setData("tax_number", e.target.value)
-                                }
-                            />
-                            {errors.tax_number && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.tax_number}
-                                </p>
-                            )}
-
-                            {/* Invoice Prefix */}
-                            <Input
-                                placeholder="Invoice Prefix"
-                                value={data.invoice_prefix}
-                                onChange={(e) =>
-                                    setData("invoice_prefix", e.target.value)
-                                }
-                            />
-                            {errors.invoice_prefix && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.invoice_prefix}
-                                </p>
-                            )}
-
-                            {/* Logo */}
-                            <Input
-                                type="file"
-                                onChange={(e) =>
-                                    setData("logo", e.target.files?.[0] ?? null)
-                                }
-                            />
-                            {errors.logo && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.logo}
-                                </p>
-                            )}
-
-                            {/* Status */}
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={data.status}
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Tax Number (optional) */}
+                                 <Label className="block text-sm mb-1">
+                                        Tax Number
+                                    </Label>
+                                <Input type="number"
+                                    placeholder="Tax Number"
+                                    value={data.tax_number}
                                     onChange={(e) =>
-                                        setData("status", e.target.checked)
+                                        setData("tax_number", e.target.value)
                                     }
                                 />
-                                <span>Status</span>
-                            </label>
+                                {errors.tax_number && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.tax_number}
+                                    </p>
+                                )}
+                            </div>
+
+                                <div className="w-[50%] px-2 mt-3">
+                                    {/* Invoice Prefix */}
+                                     <Label className="block text-sm mb-1">
+                                            Invoice Prefix
+                                    </Label>
+                                    <Input
+                                        placeholder="Invoice Prefix"
+                                        value={data.invoice_prefix}
+                                        onChange={(e) =>
+                                            setData("invoice_prefix", e.target.value)
+                                        }
+                                    />
+                                    {errors.invoice_prefix && (
+                                        <p className="text-red-500 text-sm">
+                                            {errors.invoice_prefix}
+                                        </p>
+                                    )}
+                                </div>
+                            
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Logo */}
+                                 <Label className="block text-sm mb-1">
+                                       Files
+                                    </Label>
+                                <Input
+                                    type="file"
+                                    onChange={(e) =>
+                                        setData("logo", e.target.files?.[0] ?? null)
+                                    }
+                                />
+                                {errors.logo && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.logo}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                {/* Status */}
+                                <Label className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.status}
+                                        onChange={(e) =>
+                                            setData("status", e.target.checked)
+                                        }
+                                    />
+                                    <span>Status</span>
+                                </Label>
                             {errors.status && (
                                 <p className="text-red-500 text-sm">
                                     {errors.status}
                                 </p>
                             )}
+                            </div>
 
+                            <div className="w-[50%] px-2 mt-3">
                             {/* Email (optional) */}
-                            <Input
+                             <Label className="block text-sm mb-1">
+                                       Email
+                                    </Label>
+                            <Input type="email"
                                 placeholder="Email"
                                 value={data.email}
                                 onChange={(e) =>
@@ -188,9 +219,14 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.email}
                                 </p>
                             )}
+                            </div>
 
+                            <div className="w-[50%] px-2 mt-3">
                             {/* Phone (optional) */}
-                            <Input
+                             <Label className="block text-sm mb-1">
+                                       Phone
+                                    </Label>
+                            <Input type="number"
                                 placeholder="Phone"
                                 value={data.phone}
                                 onChange={(e) =>
@@ -202,9 +238,14 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.phone}
                                 </p>
                             )}
+                            </div>
 
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                       Skype
+                                    </Label>
                             {/* Skype (optional) */}
-                            <Input
+                            <Input type="text"
                                 placeholder="Skype"
                                 value={data.skype}
                                 onChange={(e) =>
@@ -216,9 +257,14 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.skype}
                                 </p>
                             )}
+                            </div>
 
+                            <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                       Notification Email
+                                    </Label>
                             {/* Notification Emails (optional) */}
-                            <Input
+                            <Input type="email"
                                 placeholder="Notification Emails"
                                 value={data.notification_emails}
                                 onChange={(e) =>
@@ -233,9 +279,14 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.notification_emails}
                                 </p>
                             )}
+                            </div>
 
+                            <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                       Website
+                                    </Label>
                             {/* Website (optional) */}
-                            <Input
+                            <Input type="text"
                                 placeholder="Website"
                                 value={data.website}
                                 onChange={(e) =>
@@ -247,9 +298,14 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.website}
                                 </p>
                             )}
+                            </div>
 
+                             <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                       Postal Code
+                                    </Label>
                             {/* Postal Code (optional) */}
-                            <Input
+                            <Input type="number"
                                 placeholder="Postal Code"
                                 value={data.postal_code}
                                 onChange={(e) =>
@@ -261,9 +317,15 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.postal_code}
                                 </p>
                             )}
+                            </div>
 
+                            
+                             <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                       City
+                                    </Label>
                             {/* City (optional) */}
-                            <Input
+                            <Input type="text"
                                 placeholder="City"
                                 value={data.city}
                                 onChange={(e) =>
@@ -275,7 +337,13 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.city}
                                 </p>
                             )}
+                            </div>
 
+                              
+                            <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                        Street
+                                    </Label>
                             {/* Street (optional) */}
                             <Input
                                 placeholder="Street"
@@ -289,25 +357,34 @@ export default function Create({ companies, organizations }: Props) {
                                     {errors.street}
                                 </p>
                             )}
+                            </div>
 
-                            {/* Country (optional) */}
-                            <Input
-                                placeholder="Country"
-                                value={data.country}
-                                onChange={(e) =>
-                                    setData("country", e.target.value)
-                                }
-                            />
-                            {errors.country && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.country}
-                                </p>
-                            )}
 
-                            {/* Submit */}
-                            <Button type="submit" disabled={processing}>
-                                Create
-                            </Button>
+                            <div className="w-[50%] px-2 mt-3">
+                                 <Label className="block text-sm mb-1">
+                                       City
+                                    </Label>
+                                {/* Country (optional) */}
+                                <Input
+                                    placeholder="Country"
+                                    value={data.country}
+                                    onChange={(e) =>
+                                        setData("country", e.target.value)
+                                    }
+                                />
+                                {errors.country && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.country}
+                                    </p>
+                                )}
+                            </div>
+                            
+                            <div className="w-full px-2 mt-3">
+                                {/* Submit */}
+                                <Button type="submit" disabled={processing}>
+                                    Create
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

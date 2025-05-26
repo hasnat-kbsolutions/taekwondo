@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useForm, Head } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import {
+  Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AttendanceData = {
     [field: string]: string;
@@ -82,60 +85,67 @@ export default function Create({ companies, organizations, clubs }: Props) {
                         <CardTitle>New Attendance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <Input
-                                type="date"
-                                value={data.date}
-                                onChange={(e) =>
-                                    setData("date", e.target.value)
-                                }
-                            />
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                    <Input
+                                        type="date"
+                                        value={data.date}
+                                        onChange={(e) =>
+                                            setData("date", e.target.value)
+                                        } />
+                            </div>
+                            
+                            <div className="w-[50%] px-2">
+                                <select
+                                    onChange={(e) =>
+                                        setFilters({
+                                            ...filters,
+                                            company_id: e.target.value,
+                                        })
+                                    } className="w-full p-2 border rounded-lg">
+                                    <option value="">Select Company</option>
+                                    {companies.map((c: any) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                </div>
 
-                            <select
-                                onChange={(e) =>
-                                    setFilters({
-                                        ...filters,
-                                        company_id: e.target.value,
-                                    })
-                                }
-                            >
-                                <option value="">Select Company</option>
-                                {companies.map((c: any) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
-                                onChange={(e) =>
-                                    setFilters({
-                                        ...filters,
-                                        organization_id: e.target.value,
-                                    })
-                                }
-                            >
-                                <option value="">Select Organization</option>
-                                {organizations.map((o: any) => (
-                                    <option key={o.id} value={o.id}>
-                                        {o.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
-                                onChange={(e) =>
-                                    setFilters({
-                                        ...filters,
-                                        club_id: e.target.value,
-                                    })
-                                }
-                            >
-                                <option value="">Select Club</option>
-                                {clubs.map((c: any) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <div className="w-[50%] px-2 mt-4">
+                                    <select
+                                        onChange={(e) =>
+                                            setFilters({
+                                                ...filters,
+                                                organization_id: e.target.value,
+                                            })
+                                        }
+                                    className="w-full p-2 border rounded-lg">
+                                        <option value="">Select Organization</option>
+                                        {organizations.map((o: any) => (
+                                            <option key={o.id} value={o.id}>
+                                                {o.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="w-[50%] px-2 mt-4">
+                                    <select
+                                        onChange={(e) =>
+                                            setFilters({
+                                                ...filters,
+                                                club_id: e.target.value,
+                                            })
+                                        } className="w-full p-2 border rounded-lg">
+                                        <option value="">Select Club</option>
+                                        {clubs.map((c: any) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
                             {students.length > 0 && (
                                 <table className="w-full border mt-4">
@@ -193,9 +203,12 @@ export default function Create({ companies, organizations, clubs }: Props) {
                                 </table>
                             )}
 
-                            <Button type="submit" disabled={processing}>
-                                Submit Attendance
-                            </Button>
+
+                             <div className="w-[50%] px-2 mt-4">
+                                    <Button type="submit" disabled={processing}>
+                                        Submit Attendance
+                                    </Button>
+                                </div>
                         </form>
                     </CardContent>
                 </Card>

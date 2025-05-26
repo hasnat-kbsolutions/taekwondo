@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -26,9 +27,9 @@ export default function Create() {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm mb-1">
+                                <Label className="block text-sm mb-1">
                                     Name
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="Organization Name"
                                     value={data.name}

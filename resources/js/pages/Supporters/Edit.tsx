@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -50,8 +51,10 @@ export default function Edit({
                         <CardTitle>Edit Supporter</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
+                                                            Select Company </Label>
                                 <select
                                     value={data.company_id}
                                     onChange={(e) =>
@@ -75,7 +78,9 @@ export default function Edit({
                                     </p>
                                 )}
                             </div>
-                            <div>
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
+                                                            Select Organization </Label>
                                 <select
                                     value={data.organization_id}
                                     onChange={(e) =>
@@ -101,7 +106,9 @@ export default function Edit({
                                     </p>
                                 )}
                             </div>
-                            <div>
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                        Club </Label>
                                 <select
                                     value={data.club_id}
                                     onChange={(e) =>
@@ -122,6 +129,10 @@ export default function Edit({
                                     </p>
                                 )}
                             </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                            Name </Label>
                             <Input
                                 placeholder="Name"
                                 value={data.name}
@@ -129,6 +140,11 @@ export default function Edit({
                                     setData("name", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                        Surname </Label>
                             <Input
                                 placeholder="Surename"
                                 value={data.surename}
@@ -136,6 +152,11 @@ export default function Edit({
                                     setData("surename", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                            Country </Label>
                             <Input
                                 placeholder="Country"
                                 value={data.country}
@@ -143,6 +164,11 @@ export default function Edit({
                                     setData("country", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                           Gender </Label>
                             <Input
                                 placeholder="Gender"
                                 value={data.gender}
@@ -150,6 +176,11 @@ export default function Edit({
                                     setData("gender", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                        Email </Label>
                             <Input
                                 placeholder="Email"
                                 value={data.email}
@@ -157,6 +188,11 @@ export default function Edit({
                                     setData("email", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                            Phone </Label>
                             <Input
                                 placeholder="Phone"
                                 value={data.phone}
@@ -164,6 +200,11 @@ export default function Edit({
                                     setData("phone", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                         Type</Label>
                             <Input
                                 placeholder="Type"
                                 value={data.type}
@@ -171,6 +212,11 @@ export default function Edit({
                                     setData("type", e.target.value)
                                 }
                             />
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                                            Files </Label>
                             <Input
                                 type="file"
                                 onChange={(e) =>
@@ -180,9 +226,13 @@ export default function Edit({
                                     )
                                 }
                             />
-                            <Button type="submit" disabled={processing}>
-                                Update
-                            </Button>
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                <Button type="submit" disabled={processing}>
+                                    Update
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -29,9 +30,10 @@ export default function Create() {
                         <CardTitle>Create New Location</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <Input
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                 <Label> Name </Label>
+                                <Input type="text"
                                     placeholder="Name"
                                     value={data.name}
                                     onChange={(e) =>
@@ -44,8 +46,9 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                            <div>
-                                <Input
+                            <div className="w-[50%] px-2">
+                                <Label> Description </Label>
+                                <Input type="text"
                                     placeholder="Description"
                                     value={data.description}
                                     onChange={(e) =>
@@ -58,7 +61,8 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                            <div>
+                             <div className="w-[50%] px-2 mt-3">
+                                <Label> Longitude </Label>
                                 <Input
                                     type="number"
                                     placeholder="Longitude"
@@ -73,7 +77,8 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                            <div>
+                             <div className="w-[50%] px-2 mt-3">
+                                 <Label> Latitude </Label>
                                 <Input
                                     type="number"
                                     placeholder="Latitude"
@@ -88,7 +93,8 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                            <div>
+                            <div className="w-full px-2 mt-3">
+                                <Label> Files </Label>
                                 <Input
                                     type="file"
                                     multiple
@@ -105,9 +111,12 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                            <Button type="submit" disabled={processing}>
-                                Save
-                            </Button>
+
+                            <div className="w-full px-2 mt-3">
+                                <Button type="submit" disabled={processing}>
+                                    Save
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

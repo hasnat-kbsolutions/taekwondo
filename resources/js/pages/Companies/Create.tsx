@@ -2,6 +2,7 @@ import React from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
@@ -31,11 +32,11 @@ export default function Create() {
                         <CardTitle>Create New Company</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm mb-1">
+                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
                                     Name
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="Name"
                                     value={data.name}
@@ -50,10 +51,10 @@ export default function Create() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2">
+                                <Label className="block text-sm mb-1">
                                     Country
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="Country"
                                     value={data.country}
@@ -68,10 +69,10 @@ export default function Create() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
                                     City
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="City"
                                     value={data.city}
@@ -86,10 +87,10 @@ export default function Create() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
                                     Street
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="Street"
                                     value={data.street}
@@ -104,10 +105,10 @@ export default function Create() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
                                     Postal Code
-                                </label>
+                                </Label>
                                 <Input
                                     placeholder="Postal Code"
                                     value={data.postal_code}
@@ -122,10 +123,10 @@ export default function Create() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
                                     Logo Image
-                                </label>
+                                </Label>
                                 <Input
                                     type="file"
                                     onChange={(e) =>
@@ -142,9 +143,12 @@ export default function Create() {
                                 )}
                             </div>
 
+                        <div className="w-full px-2 mt-3">          
                             <Button type="submit" disabled={processing}>
                                 Create
                             </Button>
+                        </div>
+
                         </form>
                     </CardContent>
                 </Card>
