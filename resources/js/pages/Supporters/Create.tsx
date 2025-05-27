@@ -6,7 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
     companies: any[];
@@ -46,10 +53,14 @@ export default function Create({ companies, organizations, clubs }: Props) {
                         <CardTitle>Create New Supporter</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Select Company </Label>
+                                    Select Company{" "}
+                                </Label>
                                 <select
                                     value={data.company_id}
                                     onChange={(e) =>
@@ -76,7 +87,8 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Select organization </Label>
+                                    Select organization{" "}
+                                </Label>
                                 <select
                                     value={data.organization_id}
                                     onChange={(e) =>
@@ -105,7 +117,8 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                    Select Club </Label>
+                                    Select Club{" "}
+                                </Label>
                                 <select
                                     value={data.club_id}
                                     onChange={(e) =>
@@ -129,118 +142,132 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                    Name </Label>
-                                    <Input type="name"
-                                        placeholder="Name"
-                                        value={data.name}
-                                        onChange={(e) =>
-                                            setData("name", e.target.value)
-                                        }
-                                    />
+                                    Name{" "}
+                                </Label>
+                                <Input
+                                    type="name"
+                                    placeholder="Name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData("name", e.target.value)
+                                    }
+                                />
                             </div>
 
-                             <div className="w-[50%] px-2 mt-3">
+                            <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                     Surename </Label>           
-                                    <Input
-                                        placeholder="Surename"
-                                        value={data.surename}
-                                        onChange={(e) =>
-                                            setData("surename", e.target.value)
-                                        }
-                                    />
+                                    Surename{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Surename"
+                                    value={data.surename}
+                                    onChange={(e) =>
+                                        setData("surename", e.target.value)
+                                    }
+                                />
                             </div>
 
-                           <div className="w-[50%] px-2 mt-3">
+                            <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                     Country </Label>         
-                            <Input
-                                placeholder="Country"
-                                value={data.country}
-                                onChange={(e) =>
-                                    setData("country", e.target.value)
-                                }
-                            />
+                                    Country{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Country"
+                                    value={data.country}
+                                    onChange={(e) =>
+                                        setData("country", e.target.value)
+                                    }
+                                />
                             </div>
 
-                             <div className="w-[50%] px-2 mt-3">
+                            <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                     Gender</Label>  
-                                      <Select  placeholder="Gender"
-                                        value={data.gender}
-                                        onChange={(e) =>
-                                            setData("gender", e.target.value)
-                                        }>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Gender" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
+                                    Gender
+                                </Label>
+                                <Select
+                                    value={data.gender}
+                                    onValueChange={(value) =>
+                                        setData("gender", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
                                             <SelectLabel>Gender</SelectLabel>
-                                            <SelectItem value="male">Male</SelectItem>
-                                            <SelectItem value="female">Female</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                        </Select>
-                                    </div>
-
-
-                                    <div className="w-[50%] px-2 mt-3">
-                                         <Label className="block text-sm mb-1">
-                                            Email </Label>
-                                        <Input type="email"
-                                            placeholder="Email"
-                                            value={data.email}
-                                            onChange={(e) =>
-                                                setData("email", e.target.value)
-                                            }
-                                        />
-                                </div>
-
-                              <div className="w-[50%] px-2 mt-3">
-                                      <Label className="block text-sm mb-1">
-                                            Phone </Label>             
-                                    <Input
-                                        placeholder="Phone"
-                                        value={data.phone}
-                                        onChange={(e) =>
-                                            setData("phone", e.target.value)
-                                        }
-                                    />
+                                            <SelectItem value="male">
+                                                Male
+                                            </SelectItem>
+                                            <SelectItem value="female">
+                                                Female
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                           <div className="w-[50%] px-2 mt-3">
-                                      <Label className="block text-sm mb-1">
-                                            Type </Label>                        
-                            <Input type="text"
-                                placeholder="Type"
-                                value={data.type}
-                                onChange={(e) =>
-                                    setData("type", e.target.value)
-                                }
-                            />
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Email{" "}
+                                </Label>
+                                <Input
+                                    type="email"
+                                    placeholder="Email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                />
                             </div>
 
-                        
-                         <div className="w-full px-2 mt-3">
-                                      <Label className="block text-sm mb-1">
-                                            Files </Label>   
-                            <Input
-                                type="file"
-                                onChange={(e) =>
-                                    setData(
-                                        "profile_image",
-                                        e.target.files?.[0] ?? null
-                                    )
-                                }
-                            />
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Phone{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
                             </div>
-                            
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Type{" "}
+                                </Label>
+                                <Input
+                                    type="text"
+                                    placeholder="Type"
+                                    value={data.type}
+                                    onChange={(e) =>
+                                        setData("type", e.target.value)
+                                    }
+                                />
+                            </div>
+
                             <div className="w-full px-2 mt-3">
-                                    <Button type="submit" disabled={processing}>
-                                        Create
-                                    </Button>
-                              </div>
+                                <Label className="block text-sm mb-1">
+                                    Files{" "}
+                                </Label>
+                                <Input
+                                    type="file"
+                                    onChange={(e) =>
+                                        setData(
+                                            "profile_image",
+                                            e.target.files?.[0] ?? null
+                                        )
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                <Button type="submit" disabled={processing}>
+                                    Create
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

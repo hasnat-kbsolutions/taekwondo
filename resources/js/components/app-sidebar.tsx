@@ -36,11 +36,11 @@ const data = {
             url: "/dashboard",
             icon: Home,
         },
-        {
-            title: "Location",
-            url: "/locations",
-            icon: Home,
-        },
+        // {
+        //     title: "Location",
+        //     url: "/locations",
+        //     icon: Home,
+        // },
         {
             title: "Companies",
             url: "#",
