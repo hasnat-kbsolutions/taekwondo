@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { Select,  SelectContent, SelectGroup, SelectItem,
+  SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
    // Props for Create and Edit
     interface Props {
@@ -57,7 +59,25 @@ export default function Create({ companies, organizations }: Props) {
                                     <Label className="block text-sm mb-1">
                                         Company
                                     </Label>
-                                    <select
+                                     <Select>
+                                        <SelectTrigger value={data.company_id}  onChange={(e) =>
+                                            setData("company_id", e.target.value)} className="w-full border rounded px-3 py-2">
+                                            <SelectValue placeholder="Select Company" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                        
+                                            {companies.map((company) => (
+                                            <SelectItem key={company.id}
+                                        value={company.id.toString()}>{company.name}</SelectItem>
+                                               ))}
+                                            {/* <SelectItem value="banana">Banana</SelectItem>
+                                            */}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                        </Select>
+                                        
+                                    {/* <select
                                         value={data.company_id}
                                         onChange={(e) =>
                                             setData("company_id", e.target.value)
@@ -73,7 +93,7 @@ export default function Create({ companies, organizations }: Props) {
                                         {company.name}
                                     </option>
                                 ))}
-                            </select>
+                            </select> */}
 
                             {errors.company_id && (
                                 <p className="text-red-500 text-sm">
@@ -87,7 +107,24 @@ export default function Create({ companies, organizations }: Props) {
                                     <Label className="block text-sm mb-1">
                                         Organization
                                     </Label>
-                                    <select
+                                    <Select>
+                                        <SelectTrigger value={data.organization_id}
+                                        onChange={(e) => setData("organization_id", e.target.value)
+                                        } className="w-full border rounded px-3 py-2">
+                                            <SelectValue placeholder="Select Organization" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                            {organizations.map((org) => (
+                                            <SelectItem key={org.id} value={org.id.toString()}> {org.name} </SelectItem>
+                                               ))}
+                                            {/* <SelectItem value="banana">Banana</SelectItem>
+                                            */}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                        </Select>
+
+                                    {/* <select
                                         value={data.organization_id}
                                         onChange={(e) =>
                                             setData("organization_id", e.target.value)
@@ -100,7 +137,7 @@ export default function Create({ companies, organizations }: Props) {
                                                 {org.name}
                                             </option>
                                         ))}
-                                    </select>
+                                    </select> */}
                                     {errors.organization_id && (
                                         <p className="text-red-500 text-sm">
                                             {errors.organization_id}

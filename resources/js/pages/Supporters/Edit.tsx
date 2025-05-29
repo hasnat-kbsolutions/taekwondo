@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { Select,  SelectContent, SelectGroup, SelectItem,
+  SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Props {
     supporter: any;
@@ -55,23 +57,37 @@ export default function Edit({
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
                                                             Select Company </Label>
-                                <select
-                                    value={data.company_id}
-                                    onChange={(e) =>
-                                        setData("company_id", e.target.value)
-                                    }
-                                    className="w-full border rounded p-2"
-                                >
-                                    <option value="">Select Company</option>
-                                    {companies.map((company) => (
-                                        <option
-                                            key={company.id}
-                                            value={company.id}
-                                        >
-                                            {company.name}
-                                        </option>
-                                    ))}
-                                </select>
+
+                               <Select>
+                                 <SelectTrigger value={data.company_id}
+                                  onChange={(e) => setData("company_id", parseInt(e.target.value)) } className="w-full border rounded px-3 py-2">
+                                    <SelectValue placeholder="Select Company" />
+                                   </SelectTrigger>
+                                   <SelectContent> {companies.map((company) => (
+                                               <SelectItem key={company.id} value={company.id.toString()}> {company.name} </SelectItem> ))}
+                                      </SelectContent>
+                                                                               
+                                 </Select> 
+
+                                {/* // <select
+                                //     value={data.company_id}
+                                //     onChange={(e) =>
+                                //         setData("company_id", e.target.value)
+                                //     }
+                                //     className="w-full border rounded p-2"
+                                // >
+                                //     <option value="">Select Company</option>
+                                //     {companies.map((company) => (
+                                //         <option
+                                //             key={company.id}
+                                //             value={company.id}
+                                //         >
+                                //             {company.name}
+                                //         </option>
+                                //     ))}
+                                // </select> */}
+
+
                                 {errors.company_id && (
                                     <p className="text-red-500 text-sm">
                                         {errors.company_id}
@@ -81,7 +97,20 @@ export default function Edit({
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
                                                             Select Organization </Label>
-                                <select
+
+                                <Select>
+                                   <SelectTrigger  value={data.organization_id}  onChange={(e) => setData("organization_id",  parseInt(e.target.value) )} className="w-full border rounded px-3 py-2">
+                                        <SelectValue placeholder="Select Organization" />
+                                                </SelectTrigger>
+                                            <SelectContent>
+                                       <SelectGroup> {organizations.map((org) => (
+                                    <SelectItem key={org.id} value={org.id.toString()}> {org.name} </SelectItem>  ))}
+                                        {/* <SelectItem value="banana">Banana</SelectItem>  */}
+                                        </SelectGroup>
+                                  </SelectContent>
+                              </Select>
+                                
+                                {/* <select
                                     value={data.organization_id}
                                     onChange={(e) =>
                                         setData(
@@ -99,7 +128,7 @@ export default function Edit({
                                             {org.name}
                                         </option>
                                     ))}
-                                </select>
+                                </select> */}
                                 {errors.organization_id && (
                                     <p className="text-red-500 text-sm">
                                         {errors.organization_id}
