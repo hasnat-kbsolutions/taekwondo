@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Select,  SelectContent, SelectGroup, SelectItem,
-  SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
     club: any;
@@ -52,25 +58,38 @@ export default function Edit({ club, companies, organizations }: Props) {
                         <CardTitle>Edit Club</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
                             {/* Company Dropdown */}
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
                                     Company
                                 </Label>
-                            
-                                 <Select>
-                                      <SelectTrigger value={data.company_id}
-                                    onChange={(e) => setData("company_id", parseInt(e.target.value)) } className="w-full border rounded px-3 py-2">
-                                            <SelectValue placeholder="Select Company" />
-                                        </SelectTrigger>
-                                        <SelectContent> {companies.map((company) => (
-                                                 <SelectItem key={company.id} value={company.id.toString()}> {company.name} </SelectItem> ))}
-                                        </SelectContent>
-                                                
-                                    </Select>        
-                         
-                             
+                                <Select
+                                    value={data.company_id?.toString()}
+                                    onValueChange={(value) =>
+                                        setData("company_id", parseInt(value))
+                                    }
+                                >
+                                    <SelectTrigger className="w-full border rounded px-3 py-2">
+                                        <SelectValue placeholder="Select Company" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {" "}
+                                        {companies.map((company) => (
+                                            <SelectItem
+                                                key={company.id}
+                                                value={company.id.toString()}
+                                            >
+                                                {" "}
+                                                {company.name}{" "}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
                                 {/* <select
                                     value={data.company_id}
                                     onChange={(e) =>
@@ -103,21 +122,31 @@ export default function Edit({ club, companies, organizations }: Props) {
                                 <Label className="block text-sm mb-1">
                                     Organization
                                 </Label>
-                                
-                                 <Select>
-                                   <SelectTrigger  value={data.organization_id}
-                                    onChange={(e) => setData(
-                                            "organization_id",  parseInt(e.target.value) )} className="w-full border rounded px-3 py-2">
-                                  <SelectValue placeholder="Select Organization" />
-                                      </SelectTrigger>
+                                <Select
+                                    value={data.organization_id?.toString()}
+                                    onValueChange={(value) =>
+                                        setData(
+                                            "organization_id",
+                                            parseInt(value)
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger className="w-full border rounded px-3 py-2">
+                                        <SelectValue placeholder="Select Organization" />
+                                    </SelectTrigger>
                                     <SelectContent>
-                                 <SelectGroup> {organizations.map((org) => (
-                                   <SelectItem key={org.id} value={org.id.toString()}> {org.name} </SelectItem>
-                                         ))}
-                                     {/* <SelectItem value="banana">Banana</SelectItem>  */}
-                                   </SelectGroup>
-                                 </SelectContent>
-                             </Select>
+                                        <SelectGroup>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={org.id.toString()}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
 
                                 {/* <select
                                     value={data.organization_id}
@@ -150,266 +179,283 @@ export default function Edit({ club, companies, organizations }: Props) {
                             {/* Name */}
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                        Name </Label>
-                            <Input
-                                placeholder="Name"
-                                value={data.name}
-                                onChange={(e) =>
-                                    setData("name", e.target.value)
-                                }
-                            />
-                            {errors.name && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.name}
-                                </p>
-                            )}
+                                    Name{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData("name", e.target.value)
+                                    }
+                                />
+                                {errors.name && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.name}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Tax Number </Label>
-                            {/* Tax Number */}
-                            <Input
-                                placeholder="Tax Number"
-                                value={data.tax_number}
-                                onChange={(e) =>
-                                    setData("tax_number", e.target.value)
-                                }
-                            />
-                            {errors.tax_number && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.tax_number}
-                                </p>
-                            )}
+                                    Tax Number{" "}
+                                </Label>
+                                {/* Tax Number */}
+                                <Input
+                                    placeholder="Tax Number"
+                                    value={data.tax_number}
+                                    onChange={(e) =>
+                                        setData("tax_number", e.target.value)
+                                    }
+                                />
+                                {errors.tax_number && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.tax_number}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
-                            {/* Invoice Prefix */}
-                            <Label className="block text-sm mb-1">
-                                                    Invoice </Label>
-                            <Input
-                                placeholder="Invoice Prefix"
-                                value={data.invoice_prefix}
-                                onChange={(e) =>
-                                    setData("invoice_prefix", e.target.value)
-                                }
-                            />
-                            {errors.invoice_prefix && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.invoice_prefix}
-                                </p>
-                            )}
+                                {/* Invoice Prefix */}
+                                <Label className="block text-sm mb-1">
+                                    Invoice{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Invoice Prefix"
+                                    value={data.invoice_prefix}
+                                    onChange={(e) =>
+                                        setData(
+                                            "invoice_prefix",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {errors.invoice_prefix && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.invoice_prefix}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Logo */}
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Files </Label>
-                            <Input
-                                type="file"
-                                onChange={(e) =>
-                                    setData("logo", e.target.files?.[0] ?? null)
-                                }
-                            />
-                            {errors.logo && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.logo}
-                                </p>
-                            )}
-                            </div>
-
-
-                            <div className="w-full px-2 mt-3">
-                            {/* Status */}
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={data.status}
+                                    Files{" "}
+                                </Label>
+                                <Input
+                                    type="file"
                                     onChange={(e) =>
-                                        setData("status", e.target.checked)
+                                        setData(
+                                            "logo",
+                                            e.target.files?.[0] ?? null
+                                        )
                                     }
                                 />
-                                <span>Status</span>
-                            </label>
-                            {errors.status && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.status}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                                            Email </Label>
-                            {/* Email */}
-                            <Input
-                                placeholder="Email"
-                                value={data.email}
-                                onChange={(e) =>
-                                    setData("email", e.target.value)
-                                }
-                            />
-                            {errors.email && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.email}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* Phone */}
-                            <Label className="block text-sm mb-1">
-                                                        Phone </Label>
-                            <Input
-                                placeholder="Phone"
-                                value={data.phone}
-                                onChange={(e) =>
-                                    setData("phone", e.target.value)
-                                }
-                            />
-                            {errors.phone && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.phone}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* Skype */}
-                            <Label className="block text-sm mb-1">
-                                                      Skype </Label>
-                            <Input
-                                placeholder="Skype"
-                                value={data.skype}
-                                onChange={(e) =>
-                                    setData("skype", e.target.value)
-                                }
-                            />
-                            {errors.skype && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.skype}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                                          Notification </Label>
-                            {/* Notification Emails */}
-                            <Input
-                                placeholder="Notification Emails"
-                                value={data.notification_emails}
-                                onChange={(e) =>
-                                    setData(
-                                        "notification_emails",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                            {errors.notification_emails && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.notification_emails}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                                            Website </Label>
-                            {/* Website */}
-                            <Input
-                                placeholder="Website"
-                                value={data.website}
-                                onChange={(e) =>
-                                    setData("website", e.target.value)
-                                }
-                            />
-                            {errors.website && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.website}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* Postal Code */}
-                            <Label className="block text-sm mb-1">
-                                                       Postal Code </Label>
-                            <Input
-                                placeholder="Postal Code"
-                                value={data.postal_code}
-                                onChange={(e) =>
-                                    setData("postal_code", e.target.value)
-                                }
-                            />
-                            {errors.postal_code && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.postal_code}
-                                </p>
-                            )}
-                            </div>
-
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* City */}
-                            <Label className="block text-sm mb-1">
-                                                    City </Label>
-                            <Input
-                                placeholder="City"
-                                value={data.city}
-                                onChange={(e) =>
-                                    setData("city", e.target.value)
-                                }
-                            />
-                            {errors.city && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.city}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* Street */}
-                            <Label className="block text-sm mb-1">
-                                                      Street </Label>
-                            <Input
-                                placeholder="Street"
-                                value={data.street}
-                                onChange={(e) =>
-                                    setData("street", e.target.value)
-                                }
-                            />
-                            {errors.street && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.street}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-3">
-                            {/* Country */}
-                            <Label className="block text-sm mb-1">
-                                                        Country </Label>
-                            <Input
-                                placeholder="Country"
-                                value={data.country}
-                                onChange={(e) =>
-                                    setData("country", e.target.value)
-                                }
-                            />
-                            {errors.country && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.country}
-                                </p>
-                            )}
+                                {errors.logo && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.logo}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="w-full px-2 mt-3">
-                            {/* Submit */}
-                                    <Button type="submit" disabled={processing}>
-                                        Update
-                                    </Button>
-                                </div>
+                                {/* Status */}
+                                <label className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.status}
+                                        onChange={(e) =>
+                                            setData("status", e.target.checked)
+                                        }
+                                    />
+                                    <span>Status</span>
+                                </label>
+                                {errors.status && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.status}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Email{" "}
+                                </Label>
+                                {/* Email */}
+                                <Input
+                                    placeholder="Email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                />
+                                {errors.email && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.email}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Phone */}
+                                <Label className="block text-sm mb-1">
+                                    Phone{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
+                                {errors.phone && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.phone}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Skype */}
+                                <Label className="block text-sm mb-1">
+                                    Skype{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Skype"
+                                    value={data.skype}
+                                    onChange={(e) =>
+                                        setData("skype", e.target.value)
+                                    }
+                                />
+                                {errors.skype && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.skype}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Notification{" "}
+                                </Label>
+                                {/* Notification Emails */}
+                                <Input
+                                    placeholder="Notification Emails"
+                                    value={data.notification_emails}
+                                    onChange={(e) =>
+                                        setData(
+                                            "notification_emails",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {errors.notification_emails && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.notification_emails}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Website{" "}
+                                </Label>
+                                {/* Website */}
+                                <Input
+                                    placeholder="Website"
+                                    value={data.website}
+                                    onChange={(e) =>
+                                        setData("website", e.target.value)
+                                    }
+                                />
+                                {errors.website && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.website}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Postal Code */}
+                                <Label className="block text-sm mb-1">
+                                    Postal Code{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Postal Code"
+                                    value={data.postal_code}
+                                    onChange={(e) =>
+                                        setData("postal_code", e.target.value)
+                                    }
+                                />
+                                {errors.postal_code && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.postal_code}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* City */}
+                                <Label className="block text-sm mb-1">
+                                    City{" "}
+                                </Label>
+                                <Input
+                                    placeholder="City"
+                                    value={data.city}
+                                    onChange={(e) =>
+                                        setData("city", e.target.value)
+                                    }
+                                />
+                                {errors.city && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.city}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Street */}
+                                <Label className="block text-sm mb-1">
+                                    Street{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Street"
+                                    value={data.street}
+                                    onChange={(e) =>
+                                        setData("street", e.target.value)
+                                    }
+                                />
+                                {errors.street && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.street}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-3">
+                                {/* Country */}
+                                <Label className="block text-sm mb-1">
+                                    Country{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Country"
+                                    value={data.country}
+                                    onChange={(e) =>
+                                        setData("country", e.target.value)
+                                    }
+                                />
+                                {errors.country && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.country}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                {/* Submit */}
+                                <Button type="submit" disabled={processing}>
+                                    Update
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

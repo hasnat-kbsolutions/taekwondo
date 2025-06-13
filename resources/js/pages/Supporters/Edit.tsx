@@ -53,21 +53,35 @@ export default function Edit({
                         <CardTitle>Edit Supporter</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                                            Select Company </Label>
+                                    Select Company{" "}
+                                </Label>
 
-                               <Select>
-                                 <SelectTrigger value={data.company_id}
-                                  onChange={(e) => setData("company_id", parseInt(e.target.value)) } className="w-full border rounded px-3 py-2">
-                                    <SelectValue placeholder="Select Company" />
-                                   </SelectTrigger>
-                                   <SelectContent> {companies.map((company) => (
-                                               <SelectItem key={company.id} value={company.id.toString()}> {company.name} </SelectItem> ))}
-                                      </SelectContent>
-                                                                               
-                                 </Select> 
+                                <Select
+                                    value={data.company_id?.toString()}
+                                    onValueChange={(value) =>
+                                        setData("company_id", parseInt(value))
+                                    }
+                                >
+                                    <SelectTrigger className="w-full border rounded px-3 py-2">
+                                        <SelectValue placeholder="Select Company" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {companies.map((company) => (
+                                            <SelectItem
+                                                key={company.id}
+                                                value={company.id.toString()}
+                                            >
+                                                {company.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
 
                                 {/* // <select
                                 //     value={data.company_id}
@@ -87,7 +101,6 @@ export default function Edit({
                                 //     ))}
                                 // </select> */}
 
-
                                 {errors.company_id && (
                                     <p className="text-red-500 text-sm">
                                         {errors.company_id}
@@ -96,20 +109,35 @@ export default function Edit({
                             </div>
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                                            Select Organization </Label>
+                                    Select Organization{" "}
+                                </Label>
 
-                                <Select>
-                                   <SelectTrigger  value={data.organization_id}  onChange={(e) => setData("organization_id",  parseInt(e.target.value) )} className="w-full border rounded px-3 py-2">
+                                <Select
+                                    value={data.organization_id?.toString()}
+                                    onValueChange={(value) =>
+                                        setData(
+                                            "organization_id",
+                                            parseInt(value)
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger className="w-full border rounded px-3 py-2">
                                         <SelectValue placeholder="Select Organization" />
-                                                </SelectTrigger>
-                                            <SelectContent>
-                                       <SelectGroup> {organizations.map((org) => (
-                                    <SelectItem key={org.id} value={org.id.toString()}> {org.name} </SelectItem>  ))}
-                                        {/* <SelectItem value="banana">Banana</SelectItem>  */}
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={org.id.toString()}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectGroup>
-                                  </SelectContent>
-                              </Select>
-                                
+                                    </SelectContent>
+                                </Select>
+
                                 {/* <select
                                     value={data.organization_id}
                                     onChange={(e) =>
@@ -137,7 +165,8 @@ export default function Edit({
                             </div>
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                        Club </Label>
+                                    Club{" "}
+                                </Label>
                                 <select
                                     value={data.club_id}
                                     onChange={(e) =>
@@ -161,100 +190,108 @@ export default function Edit({
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Name </Label>
-                            <Input
-                                placeholder="Name"
-                                value={data.name}
-                                onChange={(e) =>
-                                    setData("name", e.target.value)
-                                }
-                            />
+                                    Name{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData("name", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                        Surname </Label>
-                            <Input
-                                placeholder="Surename"
-                                value={data.surename}
-                                onChange={(e) =>
-                                    setData("surename", e.target.value)
-                                }
-                            />
+                                    Surname{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Surename"
+                                    value={data.surename}
+                                    onChange={(e) =>
+                                        setData("surename", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Country </Label>
-                            <Input
-                                placeholder="Country"
-                                value={data.country}
-                                onChange={(e) =>
-                                    setData("country", e.target.value)
-                                }
-                            />
+                                    Country{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Country"
+                                    value={data.country}
+                                    onChange={(e) =>
+                                        setData("country", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                           Gender </Label>
-                            <Input
-                                placeholder="Gender"
-                                value={data.gender}
-                                onChange={(e) =>
-                                    setData("gender", e.target.value)
-                                }
-                            />
+                                    Gender{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Gender"
+                                    value={data.gender}
+                                    onChange={(e) =>
+                                        setData("gender", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                        Email </Label>
-                            <Input
-                                placeholder="Email"
-                                value={data.email}
-                                onChange={(e) =>
-                                    setData("email", e.target.value)
-                                }
-                            />
+                                    Email{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Phone </Label>
-                            <Input
-                                placeholder="Phone"
-                                value={data.phone}
-                                onChange={(e) =>
-                                    setData("phone", e.target.value)
-                                }
-                            />
+                                    Phone{" "}
+                                </Label>
+                                <Input
+                                    placeholder="Phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                         Type</Label>
-                            <Input
-                                placeholder="Type"
-                                value={data.type}
-                                onChange={(e) =>
-                                    setData("type", e.target.value)
-                                }
-                            />
+                                    Type
+                                </Label>
+                                <Input
+                                    placeholder="Type"
+                                    value={data.type}
+                                    onChange={(e) =>
+                                        setData("type", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="w-full px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                            Files </Label>
-                            <Input
-                                type="file"
-                                onChange={(e) =>
-                                    setData(
-                                        "profile_image",
-                                        e.target.files?.[0] ?? null
-                                    )
-                                }
-                            />
+                                    Files{" "}
+                                </Label>
+                                <Input
+                                    type="file"
+                                    onChange={(e) =>
+                                        setData(
+                                            "profile_image",
+                                            e.target.files?.[0] ?? null
+                                        )
+                                    }
+                                />
                             </div>
 
                             <div className="w-full px-2 mt-3">
