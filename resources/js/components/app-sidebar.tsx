@@ -138,6 +138,22 @@ const data = {
             ],
         },
         {
+            title: "Payment",
+            url: "#",
+            icon: SquareTerminal,
+            isActive: false,
+            items: [
+                {
+                    title: "List",
+                    url: "/payments",
+                },
+                {
+                    title: "Create",
+                    url: "/payments/create",
+                },
+            ],
+        },
+        {
             title: "Role",
             url: "#",
             icon: SquareTerminal,

@@ -7,7 +7,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 type AttendanceData = {
     [field: string]: string;
@@ -73,7 +93,16 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("attendances.store"));
+    
+        post(route("attendances.store"), {
+            onSuccess: () => {
+                toast.success("Attendance submitted successfully!");
+            },
+            onError: (errors) => {
+                toast.error("Failed to submit attendance.");
+                console.error(errors); // Optional: log error details
+            },
+        });
     };
 
     return (
@@ -85,130 +114,242 @@ export default function Create({ companies, organizations, clubs }: Props) {
                         <CardTitle>New Attendance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
                             <div className="w-[50%] px-2">
-                                    <Input
-                                        type="date"
-                                        value={data.date}
-                                        onChange={(e) =>
-                                            setData("date", e.target.value)
-                                        } />
+                                <Label htmlFor="date">Date</Label>
+
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            data-empty={!data.date}
+                                            className="data-[empty=true]:text-muted-foreground w-full justify-start text-left font-normal"
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {data.date ? (
+                                                format(
+                                                    new Date(data.date),
+                                                    "PPP"
+                                                )
+                                            ) : (
+                                                <span>Pick a date</span>
+                                            )}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={
+                                                data.date
+                                                    ? new Date(data.date)
+                                                    : undefined
+                                            }
+                                            onSelect={(date) =>
+                                                setData(
+                                                    "date",
+                                                    date
+                                                        ? date
+                                                              .toISOString()
+                                                              .split("T")[0]
+                                                        : ""
+                                                )
+                                            }
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                             </div>
-                            
+
                             <div className="w-[50%] px-2">
-                                <select
-                                    onChange={(e) =>
+                                <Label htmlFor="company">Company</Label>
+
+                                <Select
+                                    value={filters.company_id}
+                                    onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            company_id: e.target.value,
+                                            company_id: value,
                                         })
-                                    } className="w-full p-2 border rounded-lg">
-                                    <option value="">Select Company</option>
-                                    {companies.map((c: any) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                </div>
+                                    }
+                                >
+                                    <SelectTrigger className="w-full p-2 border rounded-lg">
+                                        <SelectValue placeholder="Select Company" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {companies.map((c: any) => (
+                                                <SelectItem
+                                                    key={c.id}
+                                                    value={String(c.id)}
+                                                >
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                                <div className="w-[50%] px-2 mt-4">
-                                    <select
-                                        onChange={(e) =>
-                                            setFilters({
-                                                ...filters,
-                                                organization_id: e.target.value,
-                                            })
-                                        }
-                                    className="w-full p-2 border rounded-lg">
-                                        <option value="">Select Organization</option>
-                                        {organizations.map((o: any) => (
-                                            <option key={o.id} value={o.id}>
-                                                {o.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                            <div className="w-[50%] px-2 mt-4">
+                                <Label htmlFor="organization">
+                                    Organization
+                                </Label>
 
-                                <div className="w-[50%] px-2 mt-4">
-                                    <select
-                                        onChange={(e) =>
-                                            setFilters({
-                                                ...filters,
-                                                club_id: e.target.value,
-                                            })
-                                        } className="w-full p-2 border rounded-lg">
-                                        <option value="">Select Club</option>
-                                        {clubs.map((c: any) => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <Select
+                                    value={filters.organization_id}
+                                    onValueChange={(value) =>
+                                        setFilters({
+                                            ...filters,
+                                            organization_id: value,
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full p-2 border rounded-lg">
+                                        <SelectValue placeholder="Select Organization" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {organizations.map((o: any) => (
+                                                <SelectItem
+                                                    key={o.id}
+                                                    value={String(o.id)}
+                                                >
+                                                    {o.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="w-[50%] px-2 mt-4">
+                                <Label htmlFor="club">Club</Label>
+
+                                <Select
+                                    value={filters.club_id}
+                                    onValueChange={(value) =>
+                                        setFilters({
+                                            ...filters,
+                                            club_id: value,
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full p-2 border rounded-lg">
+                                        <SelectValue placeholder="Select Club" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {clubs.map((c: any) => (
+                                                <SelectItem
+                                                    key={c.id}
+                                                    value={String(c.id)}
+                                                >
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
                             {students.length > 0 && (
-                                <table className="w-full border mt-4">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                            <th>Remarks</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {students.map((student: any) => (
-                                            <tr key={student.id}>
-                                                <td>{student.name}</td>
-                                                <td>
-                                                    <select
-                                                        onChange={(e) =>
-                                                            handleAttendanceChange(
-                                                                student.id,
-                                                                "status",
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                    >
-                                                        <option value="present">
-                                                            Present
-                                                        </option>
-                                                        <option value="absent">
-                                                            Absent
-                                                        </option>
-                                                        <option value="late">
-                                                            Late
-                                                        </option>
-                                                        <option value="excused">
-                                                            Excused
-                                                        </option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <Input
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            handleAttendanceChange(
-                                                                student.id,
-                                                                "remarks",
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        placeholder="Remarks"
-                                                    />
-                                                </td>
+                                <div className="w-full mt-4 overflow-x-auto">
+                                    <table className="w-full table-auto border border-gray-300">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="text-left px-4 py-2 border-b">
+                                                    Name
+                                                </th>
+                                                <th className="text-left px-4 py-2 border-b">
+                                                    Attendance
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {students.map((student: any) => (
+                                                <tr key={student.id}>
+                                                    <td className="px-4 py-2 border-b">
+                                                        {student.name}
+                                                    </td>
+                                                    <td className="px-4 py-2 border-b">
+                                                        <div className="flex gap-6">
+                                                            <label className="flex items-center gap-2">
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`attendance-${student.id}`}
+                                                                    value="present"
+                                                                    checked={
+                                                                        data
+                                                                            .attendances[
+                                                                            student
+                                                                                .id
+                                                                        ]
+                                                                            ?.status ===
+                                                                        "present"
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        handleAttendanceChange(
+                                                                            student.id,
+                                                                            "status",
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <span>
+                                                                    Present
+                                                                </span>
+                                                            </label>
+                                                            <label className="flex items-center gap-2">
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`attendance-${student.id}`}
+                                                                    value="absent"
+                                                                    checked={
+                                                                        data
+                                                                            .attendances[
+                                                                            student
+                                                                                .id
+                                                                        ]
+                                                                            ?.status ===
+                                                                        "absent"
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        handleAttendanceChange(
+                                                                            student.id,
+                                                                            "status",
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <span>
+                                                                    Absent
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
 
-
-                             <div className="w-[50%] px-2 mt-4">
-                                    <Button type="submit" disabled={processing}>
-                                        Submit Attendance
-                                    </Button>
-                                </div>
+                            <div className="w-[100%] px-2 mt-4">
+                                <Button type="submit" disabled={processing}>
+                                    Submit Attendance
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

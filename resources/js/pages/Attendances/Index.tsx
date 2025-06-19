@@ -1,25 +1,78 @@
-// resources/js/Pages/Attendances/Index.tsx
-
 import React, { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, router } from "@inertiajs/react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/DataTable";
-import { columns } from "@/components/columns/attendances";
+import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
+import { toast } from "sonner";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import axios from "axios";
+
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+import {
+    Table,
+    TableHeader,
+    TableRow,
+    TableHead,
+    TableBody,
+    TableCell,
+} from "@/components/ui/table";
+
+type Student = {
+    id: number;
+    name: string;
+};
+
+type AttendanceRecord = {
+    student: Student;
+    records: Record<string, "present" | "absent" | undefined>; // e.g. { "2025-06-01": "present" }
+};
+
+type SelectOption = {
+    id: number;
+    name: string;
+};
+
+type Props = {
+    studentsWithAttendance: AttendanceRecord[];
+    companies: SelectOption[];
+    organizations: SelectOption[];
+    clubs: SelectOption[];
+    filters: {
+        company_id?: string;
+        organization_id?: string;
+        club_id?: string;
+        date?: string;
+    };
+};
 
 export default function Index({
-    attendances,
+    studentsWithAttendance,
     companies,
     organizations,
     clubs,
     filters: defaultFilters,
-}: any) {
+}: Props) {
     const [filters, setFilters] = useState({
         company_id: defaultFilters.company_id || "",
         organization_id: defaultFilters.organization_id || "",
         club_id: defaultFilters.club_id || "",
-        date: defaultFilters.date || "",
+        date: defaultFilters.date || new Date().toISOString().slice(0, 7), // "YYYY-MM"
     });
 
     useEffect(() => {
@@ -28,6 +81,50 @@ export default function Index({
             replace: true,
         });
     }, [filters]);
+
+    const monthDate = filters.date
+        ? new Date(filters.date + "-01")
+        : new Date();
+
+    const days = eachDayOfInterval({
+        start: startOfMonth(monthDate),
+        end: endOfMonth(monthDate),
+    });
+
+    const [attendanceData, setAttendanceData] = useState(
+        studentsWithAttendance
+    );
+
+
+    const handleAttendanceToggle = async (
+        studentId: number,
+        date: string,
+        checked: boolean
+    ) => {
+        const newStatus = checked ? "present" : "absent";
+
+        try {
+            await axios.post(route("attendances.toggle"), {
+                student_id: studentId,
+                date,
+                status: newStatus,
+            });
+
+            setAttendanceData((prevData) =>
+                prevData.map((entry) => ({
+                    ...entry,
+                    records:
+                        entry.student.id === studentId
+                            ? { ...entry.records, [date]: newStatus }
+                            : entry.records,
+                }))
+            );
+
+            toast.success(`Attendance marked as ${newStatus}`);
+        } catch (error) {
+            toast.error("Failed to update attendance");
+        }
+    };
 
     return (
         <AuthenticatedLayout header="Attendances">
@@ -38,68 +135,201 @@ export default function Index({
                         <CardTitle>Attendance List</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <select
+                            <Select
                                 value={filters.company_id}
-                                onChange={(e) =>
+                                onValueChange={(value) =>
                                     setFilters((prev) => ({
                                         ...prev,
-                                        company_id: e.target.value,
+                                        company_id: value,
                                     }))
                                 }
                             >
-                                <option value="">All Companies</option>
-                                {companies.map((c: any) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="All Companies" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {companies.map((c: any) => (
+                                            <SelectItem
+                                                key={c.id}
+                                                value={String(c.id)}
+                                            >
+                                                {c.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Select
                                 value={filters.organization_id}
-                                onChange={(e) =>
+                                onValueChange={(value) =>
                                     setFilters((prev) => ({
                                         ...prev,
-                                        organization_id: e.target.value,
+                                        organization_id: value,
                                     }))
                                 }
                             >
-                                <option value="">All Organizations</option>
-                                {organizations.map((o: any) => (
-                                    <option key={o.id} value={o.id}>
-                                        {o.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="All Organizations" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {organizations.map((o: any) => (
+                                            <SelectItem
+                                                key={o.id}
+                                                value={String(o.id)}
+                                            >
+                                                {o.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Select
                                 value={filters.club_id}
-                                onChange={(e) =>
+                                onValueChange={(value) =>
                                     setFilters((prev) => ({
                                         ...prev,
-                                        club_id: e.target.value,
+                                        club_id: value,
                                     }))
                                 }
                             >
-                                <option value="">All Clubs</option>
-                                {clubs.map((c: any) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <Input
-                                type="date"
-                                value={filters.date}
-                                onChange={(e) =>
-                                    setFilters((prev) => ({
-                                        ...prev,
-                                        date: e.target.value,
-                                    }))
-                                }
-                            />
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="All Clubs" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {clubs.map((c: any) => (
+                                            <SelectItem
+                                                key={c.id}
+                                                value={String(c.id)}
+                                            >
+                                                {c.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start text-left font-normal"
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {filters.date ? (
+                                            format(
+                                                new Date(filters.date + "-01"),
+                                                "MMMM yyyy"
+                                            )
+                                        ) : (
+                                            <span>Select Month</span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={
+                                            filters.date
+                                                ? new Date(filters.date + "-01")
+                                                : undefined
+                                        }
+                                        onSelect={(date) => {
+                                            if (date) {
+                                                const monthString = format(
+                                                    date,
+                                                    "yyyy-MM"
+                                                );
+                                                setFilters((prev) => ({
+                                                    ...prev,
+                                                    date: monthString,
+                                                }));
+                                            }
+                                        }}
+                                        captionLayout="dropdown"
+                                        fromYear={2020}
+                                        toYear={new Date().getFullYear()}
+                                        // Hides the individual days for a month-picking look
+                                        classNames={{
+                                            day: "hidden",
+                                        }}
+                                    />
+                                </PopoverContent>
+                            </Popover>
                         </div>
 
-                        <DataTable columns={columns} data={attendances} />
+                        {/* Attendance Table */}
+                        <div className="w-full overflow-x-auto">
+                            <div className="min-w-[800px]">
+                                {" "}
+                                {/* minimum width to allow scrolling on small screens */}
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student</TableHead>
+                                            {days.map((day) => (
+                                                <TableHead
+                                                    key={day.toString()}
+                                                    className="text-center min-w-[40px]"
+                                                >
+                                                    {format(day, "dd")}
+                                                </TableHead>
+                                            ))}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {attendanceData.map(
+                                            ({ student, records }: any) => (
+                                                <TableRow key={student.id}>
+                                                    <TableCell>
+                                                        {student.name}
+                                                    </TableCell>
+                                                    {days.map((day) => {
+                                                        const d = format(
+                                                            day,
+                                                            "yyyy-MM-dd"
+                                                        );
+                                                        const status =
+                                                            records[d];
+                                                        return (
+                                                            <TableCell
+                                                                key={d}
+                                                                className="text-center"
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={
+                                                                        status ===
+                                                                        "present"
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        handleAttendanceToggle(
+                                                                            student.id,
+                                                                            d,
+                                                                            e
+                                                                                .target
+                                                                                .checked
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </TableCell>
+                                                        );
+                                                    })}
+                                                </TableRow>
+                                            )
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
