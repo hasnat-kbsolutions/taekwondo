@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+
 import { Head, router } from "@inertiajs/react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,19 +69,35 @@ export default function Index({
     clubs,
     filters: defaultFilters,
 }: Props) {
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState(() => ({
         company_id: defaultFilters.company_id || "",
         organization_id: defaultFilters.organization_id || "",
         club_id: defaultFilters.club_id || "",
-        date: defaultFilters.date || new Date().toISOString().slice(0, 7), // "YYYY-MM"
-    });
+        date: defaultFilters.date || format(new Date(), 'yyyy-MM')
+    }));
+
+    // Stable reference for comparison
+    const defaultFiltersRef = useRef(defaultFilters);
 
     useEffect(() => {
-        router.get(route("attendances.index"), filters, {
-            preserveState: true,
-            replace: true,
-        });
+        const handler = setTimeout(() => {
+            const filtersChanged =
+                JSON.stringify(filters) !== JSON.stringify(defaultFiltersRef.current);
+
+            if (filtersChanged) {
+                router.get(route('attendances.index'), filters, {
+                    preserveState: true,
+                    replace: true,
+                    only: ['studentsWithAttendance'],
+                    onFinish: () => console.log('Request completed')
+                });
+            }
+        }, 500); // Delay in ms
+
+        return () => clearTimeout(handler);
     }, [filters]);
+
+
 
     const monthDate = filters.date
         ? new Date(filters.date + "-01")
@@ -215,53 +232,21 @@ export default function Index({
                                 </SelectContent>
                             </Select>
 
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full justify-start text-left font-normal"
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {filters.date ? (
-                                            format(
-                                                new Date(filters.date + "-01"),
-                                                "MMMM yyyy"
-                                            )
-                                        ) : (
-                                            <span>Select Month</span>
-                                        )}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={
-                                            filters.date
-                                                ? new Date(filters.date + "-01")
-                                                : undefined
-                                        }
-                                        onSelect={(date) => {
-                                            if (date) {
-                                                const monthString = format(
-                                                    date,
-                                                    "yyyy-MM"
-                                                );
-                                                setFilters((prev) => ({
-                                                    ...prev,
-                                                    date: monthString,
-                                                }));
-                                            }
-                                        }}
-                                        captionLayout="dropdown"
-                                        fromYear={2020}
-                                        toYear={new Date().getFullYear()}
-                                        // Hides the individual days for a month-picking look
-                                        classNames={{
-                                            day: "hidden",
-                                        }}
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <div className="grid gap-2">
+
+                                <input
+                                    id="month-picker"
+                                    type="month"
+                                    value={filters.date}
+                                    onChange={(e) => {
+                                        setFilters(prev => ({
+                                            ...prev,
+                                            date: e.target.value
+                                        }));
+                                    }}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                />
+                            </div>
                         </div>
 
                         {/* Attendance Table */}
