@@ -106,7 +106,7 @@ export default function OrganizationIndex({
     supporter,
 }: Props) {
     return (
-        <AuthenticatedLayout header="Students">
+        <AuthenticatedLayout header="Ahli Gabungan">
             <Head title="Students" />
             <div className="p-4 space-y-6">
                 <h1 className="text-2xl font-bold">Organizations</h1>

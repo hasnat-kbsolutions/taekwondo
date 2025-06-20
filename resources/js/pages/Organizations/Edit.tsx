@@ -27,7 +27,7 @@ export default function Edit({ organization }: Props) {
     };
 
     return (
-        <AuthenticatedLayout header="Edit Organization">
+        <AuthenticatedLayout header="Edit Ahli Gabungan">
             <Head title="Edit Organization" />
             <div className="container mx-auto py-10">
                 <Card>

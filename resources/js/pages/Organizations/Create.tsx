@@ -17,7 +17,7 @@ export default function Create() {
     };
 
     return (
-        <AuthenticatedLayout header="Create Organization">
+        <AuthenticatedLayout header="Create Ahli Gabungan">
             <Head title="Create Organization" />
             <div className="container mx-auto py-10">
                 <Card>
