@@ -44,7 +44,7 @@ const data = {
         // },
         {
             title: "Branches",
-            url: "#",
+            url: "/branches",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -60,7 +60,7 @@ const data = {
         },
         {
             title: "Organizations",
-            url: "#",
+            url: "/organizations",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -76,7 +76,7 @@ const data = {
         },
         {
             title: "Clubs",
-            url: "#",
+            url: "/clubs",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -92,7 +92,7 @@ const data = {
         },
         {
             title: "Supporters",
-            url: "#",
+            url: "/supporters",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -108,7 +108,7 @@ const data = {
         },
         {
             title: "Students",
-            url: "#",
+            url: "/students",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -124,7 +124,7 @@ const data = {
         },
         {
             title: "Attendance",
-            url: "#",
+            url: "/attendances",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -140,7 +140,7 @@ const data = {
         },
         {
             title: "Payment",
-            url: "#",
+            url: "/payments",
             icon: SquareTerminal,
             isActive: false,
             items: [
@@ -156,7 +156,7 @@ const data = {
         },
         {
             title: "Role",
-            url: "#",
+            url: "/roles",
             icon: SquareTerminal,
             isActive: false,
             items: [
