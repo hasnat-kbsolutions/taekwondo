@@ -252,12 +252,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     width="30%"
                                 />
 
-                                <div className="grid flex-1 text-left text-sm leading-tight">
+                                <div className="grid flex-1 text-left text-sm leading-tight ">
                                     <span className="truncate font-semibold">
                                         MTF
                                     </span>
-                                    <span className="truncate text-xs">
-                                        Malaysian Taekwon-Do Federation
+                                    <span className="truncate text-xs ">
+                                        Malaysian Taekwon-Do <br /> Federation
                                     </span>
                                 </div>
                             </Link>
