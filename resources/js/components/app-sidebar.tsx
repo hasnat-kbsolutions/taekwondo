@@ -54,11 +54,11 @@ const data = {
                     url: "/clubs",
                 },
                 {
-                    title: "Student",
+                    title: "Students",
                     url: "/students",
                 },
                 {
-                    title: "Supporter",
+                    title: "Supporters",
                     url: "/supporters",
                 },
             ],
