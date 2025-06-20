@@ -48,12 +48,12 @@ type SelectOption = {
 };
 
 type Props = {
-    companies: SelectOption[];
+    branches: SelectOption[];
     organizations: SelectOption[];
     clubs: SelectOption[];
 };
 
-export default function Create({ companies, organizations, clubs }: Props) {
+export default function Create({ branches, organizations, clubs }: Props) {
     const { data, setData, post, processing, errors } = useForm<{
         date: string;
         attendances: Attendances;
@@ -64,13 +64,13 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
     const [students, setStudents] = useState<Student[]>([]);
     const [filters, setFilters] = useState({
-        company_id: "",
+        branch_id: "",
         organization_id: "",
         club_id: "",
     });
 
     useEffect(() => {
-        if (filters.company_id && filters.organization_id && filters.club_id) {
+        if (filters.branch_id && filters.organization_id && filters.club_id) {
             axios
                 .get(route("students.filter"), { params: filters })
                 .then((res) => setStudents(res.data));
@@ -93,7 +93,7 @@ export default function Create({ companies, organizations, clubs }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         post(route("attendances.store"), {
             onSuccess: () => {
                 toast.success("Attendance submitted successfully!");
@@ -164,23 +164,23 @@ export default function Create({ companies, organizations, clubs }: Props) {
                             </div>
 
                             <div className="w-[50%] px-2">
-                                <Label htmlFor="company">Company</Label>
+                                <Label htmlFor="branch">Branch</Label>
 
                                 <Select
-                                    value={filters.company_id}
+                                    value={filters.branch_id}
                                     onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            company_id: value,
+                                            branch_id: value,
                                         })
                                     }
                                 >
                                     <SelectTrigger className="w-full p-2 border rounded-lg">
-                                        <SelectValue placeholder="Select Company" />
+                                        <SelectValue placeholder="Select Branch" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            {companies.map((c: any) => (
+                                            {branches.map((c: any) => (
                                                 <SelectItem
                                                     key={c.id}
                                                     value={String(c.id)}

@@ -11,7 +11,7 @@ class Supporter extends Model
     ];
 
     protected $fillable = [
-        'company_id',
+        'branch_id',
         'organization_id',
         'club_id',
         'name',

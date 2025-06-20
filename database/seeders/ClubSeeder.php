@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Club;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 use Faker\Factory as Faker;
 
@@ -14,12 +14,12 @@ class ClubSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $companyIds = Company::pluck('id')->toArray();
+        $branchIds = Branch::pluck('id')->toArray();
         $organizationIds = Organization::pluck('id')->toArray();
 
-        foreach (range(1, 10) as $i) {
+        foreach (range(1, 2) as $i) {
             Club::create([
-                'company_id' => $faker->randomElement($companyIds),
+                'branch_id' => $faker->randomElement($branchIds),
                 'organization_id' => $faker->randomElement($organizationIds),
                 'name' => $faker->word . ' Club',
                 'tax_number' => $faker->boolean(50) ? $faker->numerify('#########') : null,

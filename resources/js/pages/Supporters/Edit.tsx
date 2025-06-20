@@ -5,25 +5,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Select,  SelectContent, SelectGroup, SelectItem,
-  SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
     supporter: any;
-    companies: any[];
+    branches: any[];
     organizations: any[];
     clubs: any[];
 }
 
 export default function Edit({
     supporter,
-    companies,
+    branches,
     organizations,
     clubs,
 }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         _method: "PUT",
-        company_id: supporter.company_id || "",
+        branch_id: supporter.branch_id || "",
         country: supporter.country || "",
         organization_id: supporter.organization_id || "",
         club_id: supporter.club_id || "",
@@ -59,51 +66,51 @@ export default function Edit({
                         >
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Select Company{" "}
+                                    Select Branch{" "}
                                 </Label>
 
                                 <Select
-                                    value={data.company_id?.toString()}
+                                    value={data.branch_id?.toString()}
                                     onValueChange={(value) =>
-                                        setData("company_id", parseInt(value))
+                                        setData("branch_id", parseInt(value))
                                     }
                                 >
                                     <SelectTrigger className="w-full border rounded px-3 py-2">
-                                        <SelectValue placeholder="Select Company" />
+                                        <SelectValue placeholder="Select Branch" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {companies.map((company) => (
+                                        {branches.map((branch) => (
                                             <SelectItem
-                                                key={company.id}
-                                                value={company.id.toString()}
+                                                key={branch.id}
+                                                value={branch.id.toString()}
                                             >
-                                                {company.name}
+                                                {branch.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
 
                                 {/* // <select
-                                //     value={data.company_id}
+                                //     value={data.branch_id}
                                 //     onChange={(e) =>
-                                //         setData("company_id", e.target.value)
+                                //         setData("branch_id", e.target.value)
                                 //     }
                                 //     className="w-full border rounded p-2"
                                 // >
-                                //     <option value="">Select Company</option>
-                                //     {companies.map((company) => (
+                                //     <option value="">Select Branch</option>
+                                //     {branches.map((branch) => (
                                 //         <option
-                                //             key={company.id}
-                                //             value={company.id}
+                                //             key={branch.id}
+                                //             value={branch.id}
                                 //         >
-                                //             {company.name}
+                                //             {branch.name}
                                 //         </option>
                                 //     ))}
                                 // </select> */}
 
-                                {errors.company_id && (
+                                {errors.branch_id && (
                                     <p className="text-red-500 text-sm">
-                                        {errors.company_id}
+                                        {errors.branch_id}
                                     </p>
                                 )}
                             </div>

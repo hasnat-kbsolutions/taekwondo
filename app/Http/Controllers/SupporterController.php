@@ -6,7 +6,7 @@ use App\Models\Supporter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Club;
 class SupporterController extends Controller
@@ -27,12 +27,12 @@ class SupporterController extends Controller
     public function create()
     {
 
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
 
         return Inertia::render('Supporters/Create', [
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
             'clubs' => $clubs,
         ]);
@@ -41,7 +41,7 @@ class SupporterController extends Controller
     public function store(Request $request)
     {
         // $request->validate([
-        //     'company_id' => 'required|integer',
+        //     'branch_id' => 'required|integer',
         //     'organization_id' => 'required|integer',
         //     'club_id' => 'required|integer',
         //     'name' => 'required|string|max:255',
@@ -76,13 +76,13 @@ class SupporterController extends Controller
     public function edit(Supporter $supporter)
     {
 
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
 
         return Inertia::render('Supporters/Edit', [
             'supporter' => $supporter,
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
             'clubs' => $clubs,
         ]);
@@ -91,7 +91,7 @@ class SupporterController extends Controller
     public function update(Request $request, Supporter $supporter)
     {
         // $request->validate([
-        //     'company_id' => 'required|integer',
+        //     'branch_id' => 'required|integer',
         //     'organization_id' => 'required|integer',
         //     'club_id' => 'required|integer',
         //     'name' => 'required|string|max:255',

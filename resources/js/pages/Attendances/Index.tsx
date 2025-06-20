@@ -51,11 +51,11 @@ type SelectOption = {
 
 type Props = {
     studentsWithAttendance: AttendanceRecord[];
-    companies: SelectOption[];
+    branches: SelectOption[];
     organizations: SelectOption[];
     clubs: SelectOption[];
     filters: {
-        company_id?: string;
+        branch_id?: string;
         organization_id?: string;
         club_id?: string;
         date?: string;
@@ -64,16 +64,16 @@ type Props = {
 
 export default function Index({
     studentsWithAttendance,
-    companies,
+    branches,
     organizations,
     clubs,
     filters: defaultFilters,
 }: Props) {
     const [filters, setFilters] = useState(() => ({
-        company_id: defaultFilters.company_id || "",
+        branch_id: defaultFilters.branch_id || "",
         organization_id: defaultFilters.organization_id || "",
         club_id: defaultFilters.club_id || "",
-        date: defaultFilters.date || format(new Date(), 'yyyy-MM')
+        date: defaultFilters.date || format(new Date(), "yyyy-MM"),
     }));
 
     // Stable reference for comparison
@@ -82,22 +82,21 @@ export default function Index({
     useEffect(() => {
         const handler = setTimeout(() => {
             const filtersChanged =
-                JSON.stringify(filters) !== JSON.stringify(defaultFiltersRef.current);
+                JSON.stringify(filters) !==
+                JSON.stringify(defaultFiltersRef.current);
 
             if (filtersChanged) {
-                router.get(route('attendances.index'), filters, {
+                router.get(route("attendances.index"), filters, {
                     preserveState: true,
                     replace: true,
-                    only: ['studentsWithAttendance'],
-                    onFinish: () => console.log('Request completed')
+                    only: ["studentsWithAttendance"],
+                    onFinish: () => console.log("Request completed"),
                 });
             }
         }, 500); // Delay in ms
 
         return () => clearTimeout(handler);
     }, [filters]);
-
-
 
     const monthDate = filters.date
         ? new Date(filters.date + "-01")
@@ -111,7 +110,6 @@ export default function Index({
     const [attendanceData, setAttendanceData] = useState(
         studentsWithAttendance
     );
-
 
     const handleAttendanceToggle = async (
         studentId: number,
@@ -155,20 +153,20 @@ export default function Index({
                         {/* Filters */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <Select
-                                value={filters.company_id}
+                                value={filters.branch_id}
                                 onValueChange={(value) =>
                                     setFilters((prev) => ({
                                         ...prev,
-                                        company_id: value,
+                                        branch_id: value,
                                     }))
                                 }
                             >
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Companies" />
+                                    <SelectValue placeholder="All Branches" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {companies.map((c: any) => (
+                                        {branches.map((c: any) => (
                                             <SelectItem
                                                 key={c.id}
                                                 value={String(c.id)}
@@ -233,15 +231,14 @@ export default function Index({
                             </Select>
 
                             <div className="grid gap-2">
-
                                 <input
                                     id="month-picker"
                                     type="month"
                                     value={filters.date}
                                     onChange={(e) => {
-                                        setFilters(prev => ({
+                                        setFilters((prev) => ({
                                             ...prev,
-                                            date: e.target.value
+                                            date: e.target.value,
                                         }));
                                     }}
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

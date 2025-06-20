@@ -5,13 +5,13 @@ import { Head } from "@inertiajs/react";
 export default function DashboardCards({
     studentsCount,
     organizationsCount,
-    companiesCount,
+    branchesCount,
     clubsCount,
     SupportersCount,
 }: {
     studentsCount: number;
     organizationsCount: number;
-    companiesCount: number;
+    branchesCount: number;
     clubsCount: number;
     SupportersCount: number;
 }) {
@@ -27,8 +27,8 @@ export default function DashboardCards({
             icon: <Users className="h-6 w-6 text-primary" />,
         },
         {
-            label: "Companies",
-            count: companiesCount,
+            label: "Branches",
+            count: branchesCount,
             icon: <Building className="h-6 w-6 text-primary" />,
         },
         {

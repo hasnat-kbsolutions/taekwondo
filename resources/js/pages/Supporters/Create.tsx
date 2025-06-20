@@ -16,14 +16,14 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-    companies: any[];
+    branches: any[];
     organizations: any[];
     clubs: any[];
 }
 
-export default function Create({ companies, organizations, clubs }: Props) {
+export default function Create({ branches, organizations, clubs }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        company_id: "",
+        branch_id: "",
         country: "",
         organization_id: "",
         club_id: "",
@@ -59,28 +59,28 @@ export default function Create({ companies, organizations, clubs }: Props) {
                         >
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Select Company{" "}
+                                    Select Branch{" "}
                                 </Label>
                                 <select
-                                    value={data.company_id}
+                                    value={data.branch_id}
                                     onChange={(e) =>
-                                        setData("company_id", e.target.value)
+                                        setData("branch_id", e.target.value)
                                     }
                                     className="w-full border rounded p-2"
                                 >
-                                    <option value="">Select Company</option>
-                                    {companies.map((company) => (
+                                    <option value="">Select Branch</option>
+                                    {branches.map((branch) => (
                                         <option
-                                            key={company.id}
-                                            value={company.id}
+                                            key={branch.id}
+                                            value={branch.id}
                                         >
-                                            {company.name}
+                                            {branch.name}
                                         </option>
                                     ))}
                                 </select>
-                                {errors.company_id && (
+                                {errors.branch_id && (
                                     <p className="text-red-500 text-sm">
-                                        {errors.company_id}
+                                        {errors.branch_id}
                                     </p>
                                 )}
                             </div>

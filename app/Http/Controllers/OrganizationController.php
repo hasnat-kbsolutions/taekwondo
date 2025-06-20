@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Club;
 use App\Models\Student;
 use App\Models\Supporter;

@@ -17,14 +17,14 @@ import {
 
 // Props for Create and Edit
 interface Props {
-    companies: { id: number; name: string }[];
+    branches: { id: number; name: string }[];
     organizations: { id: number; name: string }[];
     club?: any; // for Edit
 }
 
-export default function Create({ companies, organizations }: Props) {
+export default function Create({ branches, organizations }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        company_id: "",
+        branch_id: "",
         organization_id: "",
         name: "",
         tax_number: "",
@@ -62,28 +62,28 @@ export default function Create({ companies, organizations }: Props) {
                             onSubmit={handleSubmit}
                             className="flex flex-wrap"
                         >
-                            {/* Company Dropdown */}
+                            {/* Branch Dropdown */}
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Company
+                                    Branch
                                 </Label>
                                 <Select
-                                    value={data.company_id}
+                                    value={data.branch_id}
                                     onValueChange={(value) =>
-                                        setData("company_id", value)
+                                        setData("branch_id", value)
                                     }
                                 >
                                     <SelectTrigger className="w-full border rounded px-3 py-2">
-                                        <SelectValue placeholder="Select Company" />
+                                        <SelectValue placeholder="Select Branch" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            {companies.map((company) => (
+                                            {branches.map((branch) => (
                                                 <SelectItem
-                                                    key={company.id}
-                                                    value={company.id.toString()}
+                                                    key={branch.id}
+                                                    value={branch.id.toString()}
                                                 >
-                                                    {company.name}
+                                                    {branch.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectGroup>
@@ -91,26 +91,26 @@ export default function Create({ companies, organizations }: Props) {
                                 </Select>
 
                                 {/* <select
-                                        value={data.company_id}
+                                        value={data.branch_id}
                                         onChange={(e) =>
-                                            setData("company_id", e.target.value)
+                                            setData("branch_id", e.target.value)
                                         }
                                         className="w-full border rounded px-3 py-2"
                                     >
-                                <option value="">Select Company</option>
-                                {companies.map((company) => (
+                                <option value="">Select Branch</option>
+                                {branches.map((branch) => (
                                     <option
-                                        key={company.id}
-                                        value={company.id.toString()}
+                                        key={branch.id}
+                                        value={branch.id.toString()}
                                     >
-                                        {company.name}
+                                        {branch.name}
                                     </option>
                                 ))}
                             </select> */}
 
-                                {errors.company_id && (
+                                {errors.branch_id && (
                                     <p className="text-red-500 text-sm">
-                                        {errors.company_id}
+                                        {errors.branch_id}
                                     </p>
                                 )}
                             </div>

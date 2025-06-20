@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Club;
 class StudentController extends Controller
@@ -26,12 +26,12 @@ class StudentController extends Controller
     public function create()
     {
 
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
 
         return Inertia::render('Students/Create', [
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
             'clubs' => $clubs,
         ]);
@@ -40,7 +40,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'company_id' => 'nullable|integer',
+            'branch_id' => 'nullable|integer',
             'organization_id' => 'nullable|integer',
             'club_id' => 'nullable|integer',
             'uid' => 'nullable|string',
@@ -81,13 +81,13 @@ class StudentController extends Controller
     public function edit(Student $student)
     {
 
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
 
         return Inertia::render('Students/Edit', [
             'student' => $student,
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
             'clubs' => $clubs,
         ]);
@@ -96,7 +96,7 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'company_id' => 'nullable|integer',
+            'branch_id' => 'nullable|integer',
             'organization_id' => 'nullable|integer',
             'club_id' => 'nullable|integer',
             'uid' => 'nullable|string',

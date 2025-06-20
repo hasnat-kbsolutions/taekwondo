@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SupporterController;
 use App\Http\Controllers\UserController;
@@ -19,7 +19,7 @@ use App\Http\Controllers\PaymentController;
 
 use App\Models\Student;
 use App\Models\Organization;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Club;
 use App\Models\Supporter;
 
@@ -39,7 +39,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('dashboard', [
         'studentsCount' => Student::count(),
         'organizationsCount' => Organization::count(),
-        'companiesCount' => Company::count(),
+        'branchesCount' => Branch::count(),
         'clubsCount' => Club::count(),
         'SupportersCount' => Supporter::count(),
     ]);
@@ -71,13 +71,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
 
-    // Company Routes
-    Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
-    Route::get('/companies/create', [CompanyController::class, 'create'])->name('companies.create');
-    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
-    Route::get('/companies/{company}/edit', [CompanyController::class, 'edit'])->name('companies.edit');
-    Route::put('/companies/{company}', [CompanyController::class, 'update'])->name('companies.update');
-    Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
+    // Branch Routes
+    Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
+    Route::get('/branches/create', [BranchController::class, 'create'])->name('branches.create');
+    Route::post('/branches', [BranchController::class, 'store'])->name('branches.store');
+    Route::get('/branches/{branch}/edit', [BranchController::class, 'edit'])->name('branches.edit');
+    Route::put('/branches/{branch}', [BranchController::class, 'update'])->name('branches.update');
+    Route::delete('/branches/{branch}', [BranchController::class, 'destroy'])->name('branches.destroy');
 
     // Organization Routes
     Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
@@ -126,7 +126,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
-    
+
 
     Route::get('/students/filter', [AttendanceController::class, 'filter'])->name('students.filter');
 });

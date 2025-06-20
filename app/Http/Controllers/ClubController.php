@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Club;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 class ClubController extends Controller
 {
@@ -24,11 +24,11 @@ class ClubController extends Controller
 
     public function create()
     {
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Clubs/Create', [
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
         ]);
     }
@@ -36,7 +36,7 @@ class ClubController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'company_id' => 'required|integer',
+            'branch_id' => 'required|integer',
             'organization_id' => 'required|integer',
             'name' => 'required|string|max:255',
             'tax_number' => 'nullable|string|max:100',
@@ -66,12 +66,12 @@ class ClubController extends Controller
     public function edit($id)
     {
         $club = Club::find($id);
-        $companies = Company::select('id', 'name')->get();
+        $branches = Branch::select('id', 'name')->get();
         $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Clubs/Edit', [
             'club' => $club,
-            'companies' => $companies,
+            'branches' => $branches,
             'organizations' => $organizations,
         ]);
     }
@@ -79,7 +79,7 @@ class ClubController extends Controller
     public function update(Request $request, Club $club)
     {
         $validated = $request->validate([
-            'company_id' => 'required|integer',
+            'branch_id' => 'required|integer',
             'organization_id' => 'required|integer',
             'name' => 'required|string|max:255',
             'tax_number' => 'nullable|string|max:100',

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export type Club = {
     id: number;
     name: string;
-    company_id: number;
+    branch_id: number;
     organization_id: number;
     tax_number?: string;
     invoice_prefix: string;

@@ -12,9 +12,9 @@ class OrganizationSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1, 5) as $i) {
+        foreach (range(1, 2) as $i) {
             Organization::create([
-                'name' => $faker->company . ' Org',
+                'name' => $faker->name . ' Org',
                 'status' => $faker->boolean(90),
             ]);
         }

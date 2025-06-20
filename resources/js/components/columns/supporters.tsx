@@ -4,7 +4,7 @@ import { Link } from "@inertiajs/react";
 
 export type Supporter = {
     id: number;
-    company_id: number;
+    branch_id: number;
     country?: string;
     organization_id: number;
     club_id: number;
@@ -17,7 +17,6 @@ export type Supporter = {
     status: boolean;
 };
 
-
 export const columns: ColumnDef<Supporter>[] = [
     { accessorKey: "id", header: "ID" },
     { accessorKey: "name", header: "Name" },
@@ -27,7 +26,7 @@ export const columns: ColumnDef<Supporter>[] = [
     { accessorKey: "phone", header: "Phone" },
     { accessorKey: "type", header: "Type" },
     { accessorKey: "status", header: "Status" },
-  
+
     {
         id: "actions",
         header: "Actions",

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Student;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Club;
 use Illuminate\Http\Request;
@@ -20,25 +20,27 @@ class AttendanceController extends Controller
     {
         // Parse date if provided (month-based filtering)
         $date = $request->date ? Carbon::parse($request->date . '-01') : null;
-    
-        // Fetch students with filtered company/org/club and preload their attendances
-        $students = Student::with(['attendances' => function ($q) use ($date) {
-            if ($date) {
-                $q->whereMonth('date', $date->month)
-                  ->whereYear('date', $date->year);
+
+        // Fetch students with filtered branch/org/club and preload their attendances
+        $students = Student::with([
+            'attendances' => function ($q) use ($date) {
+                if ($date) {
+                    $q->whereMonth('date', $date->month)
+                        ->whereYear('date', $date->year);
+                }
             }
-        }])
-            ->when($request->company_id, fn($q) => $q->where('company_id', $request->company_id))
+        ])
+            ->when($request->branch_id, fn($q) => $q->where('branch_id', $request->branch_id))
             ->when($request->organization_id, fn($q) => $q->where('organization_id', $request->organization_id))
             ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
             ->get();
-    
+
         // Map student + attendance into structured response
         $studentsWithAttendance = $students->map(function ($student) {
             $records = $student->attendances->groupBy(function ($a) {
                 return \Carbon\Carbon::parse($a->date)->format('Y-m-d');
             })->map(fn($a) => $a->first()->status);
-    
+
             return [
                 'student' => [
                     'id' => $student->id,
@@ -47,24 +49,24 @@ class AttendanceController extends Controller
                 'records' => $records,
             ];
         });
-    
+
         // Send to Inertia
         return Inertia::render('Attendances/Index', [
             'studentsWithAttendance' => $studentsWithAttendance,
-            'companies' => Company::all(),
+            'branches' => Branch::all(),
             'organizations' => Organization::all(),
             'clubs' => Club::all(),
-            'filters' => $request->only('company_id', 'organization_id', 'club_id', 'date'),
+            'filters' => $request->only('branch_id', 'organization_id', 'club_id', 'date'),
         ]);
     }
-    
+
 
     // public function index(Request $request)
     // {
     //     $query = Attendance::with('student');
 
-    //     if ($request->company_id) {
-    //         $query->whereHas('student', fn($q) => $q->where('company_id', $request->company_id));
+    //     if ($request->branch_id) {
+    //         $query->whereHas('student', fn($q) => $q->where('branch_id', $request->branch_id));
     //     }
     //     if ($request->organization_id) {
     //         $query->whereHas('student', fn($q) => $q->where('organization_id', $request->organization_id));
@@ -80,17 +82,17 @@ class AttendanceController extends Controller
 
     //     return Inertia::render('Attendances/Index', [
     //         'attendances' => $attendances,
-    //         'companies' => Company::all(),
+    //         'branches' => Branch::all(),
     //         'organizations' => Organization::all(),
     //         'clubs' => Club::all(),
-    //         'filters' => $request->only('company_id', 'organization_id', 'club_id', 'date')
+    //         'filters' => $request->only('branch_id', 'organization_id', 'club_id', 'date')
     //     ]);
     // }
 
     public function create()
     {
         return Inertia::render('Attendances/Create', [
-            'companies' => Company::all(),
+            'branches' => Branch::all(),
             'organizations' => Organization::all(),
             'clubs' => Club::all(),
         ]);
@@ -137,12 +139,12 @@ class AttendanceController extends Controller
     public function filter(Request $request)
     {
         $request->validate([
-            'company_id' => 'required|integer',
+            'branch_id' => 'required|integer',
             'organization_id' => 'required|integer',
             'club_id' => 'required|integer',
         ]);
 
-        $students = Student::where('company_id', $request->company_id)
+        $students = Student::where('branch_id', $request->branch_id)
             ->where('organization_id', $request->organization_id)
             ->where('club_id', $request->club_id)
             ->get();

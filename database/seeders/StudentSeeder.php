@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Student;
-use App\Models\Company;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Club;
 use Faker\Factory as Faker;
@@ -16,13 +16,13 @@ class StudentSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $companyIds = Company::pluck('id')->toArray();
+        $branchIds = Branch::pluck('id')->toArray();
         $organizationIds = Organization::pluck('id')->toArray();
         $clubIds = Club::pluck('id')->toArray();
 
-        foreach (range(1, 50) as $index) {
+        foreach (range(1, 5) as $index) {
             Student::create([
-                'company_id' => $faker->randomElement($companyIds),
+                'branch_id' => $faker->randomElement($branchIds),
                 'organization_id' => $faker->randomElement($organizationIds),
                 'club_id' => $faker->randomElement($clubIds),
                 'uid' => Str::uuid(),
