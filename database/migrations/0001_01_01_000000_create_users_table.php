@@ -15,8 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            $table->enum('type', ['admin', 'organization', 'branch', 'student', 'guardian']);
+
+            $table->foreignId('organization_id')->nullable(); // for branch/student/guardian
+            $table->foreignId('branch_id')->nullable(); // for students/guardians
+            $table->foreignId('club_id')->nullable(); // if student is in club
+
             $table->rememberToken();
             $table->timestamps();
         });

@@ -42,6 +42,28 @@ const data = {
         //     url: "/locations",
         //     icon: Home,
         // },
+
+        {
+            title: "Management",
+            url: "#",
+            icon: SquareTerminal,
+            isActive: false,
+            items: [
+                {
+                    title: "Clubs",
+                    url: "/clubs",
+                },
+                {
+                    title: "Student",
+                    url: "/students",
+                },
+                {
+                    title: "Supporter",
+                    url: "/supporters",
+                },
+            ],
+        },
+
         {
             title: "Branches",
             url: "/branches",
@@ -74,54 +96,54 @@ const data = {
                 },
             ],
         },
-        {
-            title: "Clubs",
-            url: "/clubs",
-            icon: SquareTerminal,
-            isActive: false,
-            items: [
-                {
-                    title: "List",
-                    url: "/clubs",
-                },
-                {
-                    title: "Create",
-                    url: "/clubs/create",
-                },
-            ],
-        },
-        {
-            title: "Supporters",
-            url: "/supporters",
-            icon: SquareTerminal,
-            isActive: false,
-            items: [
-                {
-                    title: "List",
-                    url: "/supporters",
-                },
-                {
-                    title: "Create",
-                    url: "/supporters/create",
-                },
-            ],
-        },
-        {
-            title: "Students",
-            url: "/students",
-            icon: SquareTerminal,
-            isActive: false,
-            items: [
-                {
-                    title: "List",
-                    url: "/students",
-                },
-                {
-                    title: "Create",
-                    url: "/students/create",
-                },
-            ],
-        },
+        // {
+        //     title: "Clubs",
+        //     url: "/clubs",
+        //     icon: SquareTerminal,
+        //     isActive: false,
+        //     items: [
+        //         {
+        //             title: "List",
+        //             url: "/clubs",
+        //         },
+        //         {
+        //             title: "Create",
+        //             url: "/clubs/create",
+        //         },
+        //     ],
+        // },
+        // {
+        //     title: "Supporters",
+        //     url: "/supporters",
+        //     icon: SquareTerminal,
+        //     isActive: false,
+        //     items: [
+        //         {
+        //             title: "List",
+        //             url: "/supporters",
+        //         },
+        //         {
+        //             title: "Create",
+        //             url: "/supporters/create",
+        //         },
+        //     ],
+        // },
+        // {
+        //     title: "Students",
+        //     url: "/students",
+        //     icon: SquareTerminal,
+        //     isActive: false,
+        //     items: [
+        //         {
+        //             title: "List",
+        //             url: "/students",
+        //         },
+        //         {
+        //             title: "Create",
+        //             url: "/students/create",
+        //         },
+        //     ],
+        // },
         {
             title: "Attendance",
             url: "/attendances",
@@ -145,13 +167,13 @@ const data = {
             isActive: false,
             items: [
                 {
-                    title: "List",
+                    title: "Payments",
                     url: "/payments",
                 },
-                {
-                    title: "Create",
-                    url: "/payments/create",
-                },
+                // {
+                //     title: "Create",
+                //     url: "/payments/create",
+                // },
             ],
         },
         {
