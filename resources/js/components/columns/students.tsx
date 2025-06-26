@@ -30,6 +30,20 @@ export type Student = {
 
 export const columns: ColumnDef<Student>[] = [
     { accessorKey: "id", header: "ID" },
+    {
+        id: "profile_image",
+        header: "Photo",
+        cell: ({ row }) =>
+            row.original.profile_image ? (
+                <img
+                    src={row.original.profile_image}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                />
+            ) : (
+                <span className="text-gray-400 italic">No image</span>
+            ),
+    },
     // { accessorKey: "uid", header: "UID" },
     { accessorKey: "code", header: "Code" },
     { accessorKey: "name", header: "Name" },

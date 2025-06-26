@@ -62,7 +62,8 @@ class StudentController extends Controller
         // Upload images if present
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
-                $data[$field] = $request->file($field)->store("students", "public");
+                $relativePath = $request->file($field)->store("students", "public");
+                $data[$field] = "/storage/" . $relativePath;
             }
         }
 
@@ -136,7 +137,8 @@ class StudentController extends Controller
         // Handle image uploads
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
-                $validated[$field] = $request->file($field)->store("students", "public");
+                $relativePath = $request->file($field)->store("students", "public");
+                $validated[$field] = "/storage/" . $relativePath;
             }
         }
 
