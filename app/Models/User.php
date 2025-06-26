@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -21,6 +22,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
+        'userable_type',
+        'userable_id',
     ];
 
     /**
@@ -46,8 +50,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function branch()
+    public function userable(): MorphTo
     {
-        return $this->belongsTo(Branch::class);
+        return $this->morphTo();
     }
+    
 }

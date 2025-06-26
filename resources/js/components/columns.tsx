@@ -38,13 +38,13 @@ export const columns: ColumnDef<Location>[] = [
         header: "Actions",
         cell: ({ row }) => (
             <div className="flex space-x-2">
-                <Link href={route("locations.edit", row.original.id)}>
+                <Link href={route("admin.locations.edit", row.original.id)}>
                     <Button variant="outline" size="sm">
                         Edit
                     </Button>
                 </Link>
                 <Link
-                    href={route("locations.destroy", row.original.id)}
+                    href={route("admin.locations.destroy", row.original.id)}
                     method="delete"
                     as="button"
                 >

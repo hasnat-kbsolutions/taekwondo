@@ -8,8 +8,17 @@ class Organization extends Model
 {
     protected $fillable = [
         'name',
+        'email',
+        'phone',
+        'website',
+        'skype',
+        'city',
+        'country',
+        'street',
+        'postal_code',
         'status',
     ];
+    
 
 
     public function clubs()
@@ -26,5 +35,13 @@ class Organization extends Model
     {
         return $this->hasMany(Supporter::class);
     }
+    public function user()
+    {
+        return $this->morphOne(User::class, 'userable');
+    }
 
+    public function branches()
+{
+    return $this->hasMany(Branch::class);
+}
 }

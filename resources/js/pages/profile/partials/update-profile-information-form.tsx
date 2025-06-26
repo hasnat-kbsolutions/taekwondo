@@ -1,106 +1,81 @@
-import { Link, useForm, usePage } from "@inertiajs/react";
-import { Transition } from "@headlessui/react";
-import { FormEventHandler } from "react";
+import { usePage, Head, useForm } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { InputError } from "@/components/ui/input-error";
+import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function UpdateProfileInformation({
-    mustVerifyEmail,
-    status,
-    className = "",
-}: {
-    mustVerifyEmail: boolean;
-    status?: string;
-    className?: string;
-}) {
-    const user = usePage<PageProps>().props.auth.user;
+export default function ProfileUpdate() {
+    const { auth } = usePage<PageProps>().props;
+
+    // Early return if user is not logged in (defensive programming)
+    if (!auth.user) {
+        return (
+            <AuthenticatedLayout header="Profile">
+                <Head title="Profile" />
+                <div className="container mx-auto py-10">
+                    <p className="text-red-500">User not authenticated.</p>
+                </div>
+            </AuthenticatedLayout>
+        );
+    }
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
-            name: user.name,
-            email: user.email,
+            name: auth.user.name,
+            email: auth.user.email,
         });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         patch(route("profile.update"));
     };
 
     return (
-        <section className={className}>
-            <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <Label htmlFor="name">Name</Label>
-
-                    <Input
-                        id="name"
-                        className="mt-1 block w-full"
-                        value={data.name}
-                        onChange={(e) => setData("name", e.target.value)}
-                        required
-                        autoComplete="name"
-                    />
-
-                    <InputError className="mt-2" message={errors.name} />
-                </div>
-
-                <div>
-                    <Label htmlFor="email">Email</Label>
-
-                    <Input
-                        id="email"
-                        type="email"
-                        className="mt-1 block w-full"
-                        value={data.email}
-                        onChange={(e) => setData("email", e.target.value)}
-                        required
-                        autoComplete="username"
-                    />
-
-                    <InputError className="mt-2" message={errors.email} />
-                </div>
-
-                {mustVerifyEmail && user.email_verified_at === null && (
+        <AuthenticatedLayout header="Update Profile">
+            <Head title="Profile" />
+            <div className="container mx-auto py-10">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <p className="text-sm mt-2 text-gray-800">
-                            Your email address is unverified.
-                            <Link
-                                href={route("verification.send")}
-                                method="post"
-                                as="button"
-                                className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            >
-                                Click here to re-send the verification email.
-                            </Link>
-                        </p>
-
-                        {status === "verification-link-sent" && (
-                            <div className="mt-2 font-medium text-sm text-green-600">
-                                A new verification link has been sent to your
-                                email address.
-                            </div>
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData("name", e.target.value)}
+                        />
+                        {errors.name && (
+                            <p className="text-red-500 text-sm">
+                                {errors.name}
+                            </p>
                         )}
                     </div>
-                )}
 
-                <div className="flex items-center gap-4">
-                    <Button disabled={processing}>Save</Button>
+                    <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            value={data.email}
+                            onChange={(e) => setData("email", e.target.value)}
+                        />
+                        {errors.email && (
+                            <p className="text-red-500 text-sm">
+                                {errors.email}
+                            </p>
+                        )}
+                    </div>
 
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0"
-                    >
-                        <p className="text-sm text-gray-600">Saved.</p>
-                    </Transition>
-                </div>
-            </form>
-        </section>
+                    <Button type="submit" disabled={processing}>
+                        Save
+                    </Button>
+
+                    {recentlySuccessful && (
+                        <p className="text-green-500 text-sm mt-2">
+                            Profile updated!
+                        </p>
+                    )}
+                </form>
+            </div>
+        </AuthenticatedLayout>
     );
 }

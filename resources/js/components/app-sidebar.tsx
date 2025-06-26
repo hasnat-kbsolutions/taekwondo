@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-    Command,
-    Frame,
-    Home,
-    LifeBuoy,
-    Send,
-    SquareTerminal,
-} from "lucide-react";
+import { Frame, Home, LifeBuoy, Send, SquareTerminal } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -23,158 +16,81 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link, usePage } from "@inertiajs/react";
+
 import { PageProps } from "@/types";
 
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    navMain: [
+// const { auth } = usePage<PageProps>().props;
+
+
+import { LucideIcon } from "lucide-react";
+
+type NavItem = {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+    isActive?: boolean;
+    items?: {
+        title: string;
+        url: string;
+    }[];
+};
+
+
+
+const NAV_MENUS: Record<string, NavItem[]> = {
+    admin: [
         {
             title: "Dashboard",
-            url: "/dashboard",
+            url: "/admin/dashboard",
             icon: Home,
         },
-        // {
-        //     title: "Location",
-        //     url: "/locations",
-        //     icon: Home,
-        // },
-
         {
             title: "Management",
             url: "#",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "Clubs",
-                    url: "/clubs",
-                },
-                {
-                    title: "Students",
-                    url: "/students",
-                },
-                {
-                    title: "Supporters",
-                    url: "/supporters",
-                },
+                { title: "Clubs", url: "/admin/clubs" },
+                { title: "Students", url: "/admin/students" },
+                { title: "Supporters", url: "/admin/supporters" },
             ],
         },
-
         {
             title: "Branches",
-            url: "/branches",
+            url: "/admin/branches",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "List",
-                    url: "/branches",
-                },
-                {
-                    title: "Create",
-                    url: "/branches/create",
-                },
+                { title: "List", url: "/admin/branches" },
+                { title: "Create", url: "/admin/branches/create" },
             ],
         },
         {
             title: "Ahli Gabungan",
-            url: "/organizations",
+            url: "/admin/organizations",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "List",
-                    url: "/organizations",
-                },
-                {
-                    title: "Create",
-                    url: "/organizations/create",
-                },
+                { title: "List", url: "/admin/organizations" },
+                { title: "Create", url: "/admin/organizations/create" },
             ],
         },
-        // {
-        //     title: "Clubs",
-        //     url: "/clubs",
-        //     icon: SquareTerminal,
-        //     isActive: false,
-        //     items: [
-        //         {
-        //             title: "List",
-        //             url: "/clubs",
-        //         },
-        //         {
-        //             title: "Create",
-        //             url: "/clubs/create",
-        //         },
-        //     ],
-        // },
-        // {
-        //     title: "Supporters",
-        //     url: "/supporters",
-        //     icon: SquareTerminal,
-        //     isActive: false,
-        //     items: [
-        //         {
-        //             title: "List",
-        //             url: "/supporters",
-        //         },
-        //         {
-        //             title: "Create",
-        //             url: "/supporters/create",
-        //         },
-        //     ],
-        // },
-        // {
-        //     title: "Students",
-        //     url: "/students",
-        //     icon: SquareTerminal,
-        //     isActive: false,
-        //     items: [
-        //         {
-        //             title: "List",
-        //             url: "/students",
-        //         },
-        //         {
-        //             title: "Create",
-        //             url: "/students/create",
-        //         },
-        //     ],
-        // },
         {
             title: "Attendance",
-            url: "/attendances",
+            url: "/admin/attendances",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "List",
-                    url: "/attendances",
-                },
-                {
-                    title: "Create",
-                    url: "/attendances/create",
-                },
+                { title: "List", url: "/admin/attendances" },
+                { title: "Create", url: "/admin/attendances/create" },
             ],
         },
         {
             title: "Payment",
-            url: "/payments",
+            url: "/admin/payments",
             icon: SquareTerminal,
             isActive: false,
-            items: [
-                {
-                    title: "Payments",
-                    url: "/payments",
-                },
-                // {
-                //     title: "Create",
-                //     url: "/payments/create",
-                // },
-            ],
+            items: [{ title: "Payments", url: "/admin/payments" }],
         },
         {
             title: "Online Exams",
@@ -182,59 +98,81 @@ const data = {
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "Exam Result",
-                    url: "#",
-                },
-                {
-                    title: "Sport Data",
-                    url: "#",
-                },
+                { title: "Exam Result", url: "#" },
+                { title: "Sport Data", url: "#" },
             ],
         },
         {
             title: "Role",
-            url: "/roles",
+            url: "/admin/roles",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                {
-                    title: "List",
-                    url: "/roles",
-                },
-                {
-                    title: "Create",
-                    url: "/roles/create",
-                },
+                { title: "List", url: "/admin/roles" },
+                { title: "Create", url: "/admin/roles/create" },
             ],
         },
-        // {
-        //     title: "Design Engineering",
-        //     url: "#",
-        //     icon: Frame,
-        // },
         {
             title: "Reporting",
             url: "#",
             icon: Home,
         },
     ],
-    navSecondary: [
+
+    organization: [
+        { title: "Dashboard", url: "/organization/dashboard", icon: Home },
         {
-            title: "Support",
-            url: "#",
-            icon: LifeBuoy,
+            title: "Branches",
+            url: "/organization/branches",
+            icon: SquareTerminal,
         },
         {
-            title: "Feedback",
-            url: "#",
-            icon: Send,
+            title: "Students",
+            url: "/organization/students",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Payments",
+            url: "/organization/payments",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Attendance",
+            url: "/organization/attendances",
+            icon: SquareTerminal,
         },
     ],
+
+    branch: [
+        { title: "Dashboard", url: "/branch/dashboard", icon: Home },
+
+        {
+            title: "Students",
+            url: "/branch/students",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Payments",
+            url: "/branch/payments",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Attendance",
+            url: "/branch/attendances",
+            icon: SquareTerminal,
+        },
+    ],
+
+    student: [{ title: "Dashboard", url: "/student/dashboard", icon: Home }],
 };
+
+  
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { auth } = usePage<PageProps>().props;
+    const role = (auth.user?.role ?? "student") as keyof typeof NAV_MENUS;
+
+    const navMain = NAV_MENUS[role];
 
     return (
         <Sidebar variant="inset" {...props}>
@@ -242,16 +180,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={route("dashboard")}>
-                                {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                    <Command className="size-4" />
-                                </div> */}
+                            <Link href={route("admin.dashboard")}>
+                                {" "}
+                                {/* Use route based on role if needed */}
                                 <img
-                                    src="public/assets/images/logo.jpg"
+                                    src="/assets/images/logo.jpg"
                                     alt=""
                                     width="30%"
                                 />
-
                                 <div className="grid flex-1 text-left text-sm leading-tight ">
                                     <span className="truncate font-semibold">
                                         MTF
@@ -266,11 +202,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+                <NavMain items={navMain} />
+                <NavSecondary
+                    items={[
+                        { title: "Support", url: "#", icon: LifeBuoy },
+                        { title: "Feedback", url: "#", icon: Send },
+                    ]}
+                    className="mt-auto"
+                />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={auth.user} />
+                {auth.user && <NavUser user={auth.user} />}
             </SidebarFooter>
         </Sidebar>
     );

@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AuthenticateAdmin::class,
             \Illuminate\Session\Middleware\StartSession::class,
         ]);
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+
+        ]);
 
         //
     })

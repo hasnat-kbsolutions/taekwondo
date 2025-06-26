@@ -9,6 +9,7 @@ use App\Models\Organization;
 use App\Models\Club;
 use Faker\Factory as Faker;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class StudentSeeder extends Seeder
 {
@@ -20,8 +21,8 @@ class StudentSeeder extends Seeder
         $organizationIds = Organization::pluck('id')->toArray();
         $clubIds = Club::pluck('id')->toArray();
 
-        foreach (range(1, 5) as $index) {
-            Student::create([
+        foreach (range(1, end: 1) as $index) {
+            $student = Student::create([
                 'branch_id' => $faker->randomElement($branchIds),
                 'organization_id' => $faker->randomElement($organizationIds),
                 'club_id' => $faker->randomElement($clubIds),
@@ -47,6 +48,14 @@ class StudentSeeder extends Seeder
                 'street' => $faker->streetAddress,
                 'country' => $faker->country,
                 'status' => $faker->boolean(80),
+            ]);
+            $student->user()->create([
+                'name' => 'Student User',
+                'email' => 'student@app.test',
+                'password' => Hash::make('password'),
+                'role' => 'student',
+                'userable_type' => Student::class,
+                'userable_id' => $student->id,
             ]);
         }
     }

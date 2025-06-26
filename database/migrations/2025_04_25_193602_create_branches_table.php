@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id');
             $table->string('name');
             $table->string('country')->nullable();
             $table->string('city')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration {
             $table->boolean('status')->default(false);
             $table->timestamps();
         });
+
     }
 
     /**

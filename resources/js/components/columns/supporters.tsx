@@ -32,13 +32,13 @@ export const columns: ColumnDef<Supporter>[] = [
         header: "Actions",
         cell: ({ row }) => (
             <div className="flex space-x-2">
-                <Link href={route("supporters.edit", row.original.id)}>
+                <Link href={route("admin.supporters.edit", row.original.id)}>
                     <Button variant="outline" size="sm">
                         Edit
                     </Button>
                 </Link>
                 <Link
-                    href={route("supporters.destroy", row.original.id)}
+                    href={route("admin.supporters.destroy", row.original.id)}
                     method="delete"
                     as="button"
                 >

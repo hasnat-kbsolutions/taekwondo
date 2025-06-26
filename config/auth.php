@@ -64,6 +64,26 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
+        'organization' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
+        'branch' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
+        'guardian' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
 
         // 'users' => [
         //     'driver' => 'database',

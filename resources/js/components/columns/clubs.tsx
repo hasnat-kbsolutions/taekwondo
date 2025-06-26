@@ -51,7 +51,7 @@ export const columns: ColumnDef<Club>[] = [
             const club = row.original;
             return (
                 <div className="flex space-x-2">
-                    <Link href={route("clubs.edit", club.id)}>
+                    <Link href={route("admin.clubs.edit", club.id)}>
                         <Button size="sm" variant="outline">
                             Edit
                         </Button>
@@ -59,7 +59,7 @@ export const columns: ColumnDef<Club>[] = [
                     <Link
                         as="button"
                         method="delete"
-                        href={route("clubs.destroy", club.id)}
+                        href={route("admin.clubs.destroy", club.id)}
                         onBefore={() => confirm("Are you sure?")}
                     >
                         <Button size="sm" variant="destructive">

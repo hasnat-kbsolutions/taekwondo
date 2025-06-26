@@ -18,6 +18,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
+
         return Inertia::render('auth/login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -30,11 +31,20 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard', absolute: false));
+    
+        $role = auth()->user()->role;
+    
+        return match ($role) {
+            'admin' => redirect()->intended(route('admin.dashboard')),
+            'organization' => redirect()->intended(route('organization.dashboard')),
+            'branch' => redirect()->intended(route('branch.dashboard')),
+            'student' => redirect()->intended(route('student.dashboard')),
+            'guardian' => redirect()->intended(route('guardian.dashboard')),
+            default => abort(403, 'Unknown role.'),
+        };
     }
+    
 
     /**
      * Destroy an authenticated session.
