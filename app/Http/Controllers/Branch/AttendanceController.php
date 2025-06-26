@@ -31,7 +31,7 @@ class AttendanceController extends Controller
         ]);
 
         // Always apply auth-based filtering for organization user
-        if (Auth::user()->role === 'organization') {
+        if (Auth::user()->role === 'branch') {
             $query->where('branch_id', Auth::user()->userable_id);
             $query->where('organization_id', Auth::user()->userable->organization_id);
         }
