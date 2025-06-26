@@ -9,9 +9,9 @@ Route::get('/', function () {
 });
 
 
-Route::get('/run-clear-cache', function () {
-    Artisan::call('cache:clear');
-    return 'Cache cleared!';
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return 'storage-linked';
 });
 
 
