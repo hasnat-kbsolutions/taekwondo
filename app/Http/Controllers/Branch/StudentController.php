@@ -63,7 +63,7 @@ class StudentController extends Controller
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $data[$field] = "/storage/" . $relativePath;
+                $data[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
             }
         }
 

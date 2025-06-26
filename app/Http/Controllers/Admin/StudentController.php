@@ -49,7 +49,7 @@ class StudentController extends Controller
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $data[$field] = "/storage/" . $relativePath;
+                $data[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
             }
         }
 
@@ -113,7 +113,7 @@ class StudentController extends Controller
             'country' => 'nullable|string',
             'status' => 'nullable|boolean',
         ]);
-    
+
         // Handle image uploads
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
@@ -121,10 +121,10 @@ class StudentController extends Controller
                 $validated[$field] = "/storage/" . $relativePath;
             }
         }
-    
+
         // Update the student
         $student->update($validated);
-    
+
         // Create or update user account
         if (!empty($validated['email'])) {
             User::updateOrCreate(
@@ -139,7 +139,7 @@ class StudentController extends Controller
                 ]
             );
         }
-    
+
         return redirect()->route('admin.students.index')->with('success', 'Student updated successfully');
     }
 
