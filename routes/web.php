@@ -1,12 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 
 Route::get('/', function () {
     return redirect('/login');
 });
 
+
+Route::get('/run-clear-cache', function () {
+    Artisan::call('cache:clear');
+    return 'Cache cleared!';
+});
 
 
 // Admin routes
