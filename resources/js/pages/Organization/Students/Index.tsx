@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
 export type Student = {
     id: number;
     uid: string;
@@ -75,13 +84,9 @@ export const columns: ColumnDef<Student>[] = [
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <span
-                className={
-                    row.original.status ? "text-green-600" : "text-red-600"
-                }
-            >
+            <Badge variant={row.original.status ? "default" : "destructive"}>
                 {row.original.status ? "Active" : "Inactive"}
-            </span>
+            </Badge>
         ),
     },
     // {
@@ -102,27 +107,34 @@ export const columns: ColumnDef<Student>[] = [
         id: "actions",
         header: "Actions",
         cell: ({ row }) => (
-            <div className="flex space-x-2">
-                <Link
-                    href={route("organization.students.edit", row.original.id)}
-                >
-                    <Button variant="outline" size="sm">
-                        Edit
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                </Link>
-                <Link
-                    href={route(
-                        "organization.students.destroy",
-                        row.original.id
-                    )}
-                    method="delete"
-                    as="button"
-                >
-                    <Button variant="destructive" size="sm">
-                        Delete
-                    </Button>
-                </Link>
-            </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route("organization.students.edit", row.original.id)}
+                        >
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "organization.students.destroy",
+                                row.original.id
+                            )}
+                            method="delete"
+                            as="button"
+                        >
+                            Delete
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         ),
     },
 ];

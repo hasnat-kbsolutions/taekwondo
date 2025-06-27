@@ -1,7 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/react";
-
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 export type Student = {
     id: number;
     uid: string;
@@ -44,71 +51,54 @@ export const columns: ColumnDef<Student>[] = [
                 <span className="text-gray-400 italic">No image</span>
             ),
     },
-    // { accessorKey: "uid", header: "UID" },
     { accessorKey: "code", header: "Code" },
     { accessorKey: "name", header: "Name" },
     { accessorKey: "surname", header: "Surname" },
-    // { accessorKey: "nationality", header: "Nationality" },
     { accessorKey: "dob", header: "DOB" },
-    // { accessorKey: "dod", header: "DOD" },
-    // { accessorKey: "grade", header: "Grade" },
-    // { accessorKey: "gender", header: "Gender" },
     { accessorKey: "id_passport", header: "ID/Passport" },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
-    // { accessorKey: "skype", header: "Skype" },
-    // { accessorKey: "website", header: "Website" },
-    // { accessorKey: "city", header: "City" },
-    // { accessorKey: "postal_code", header: "Postal Code" },
-    // { accessorKey: "street", header: "Street" },
-    // { accessorKey: "country", header: "Country" },
     {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <span
-                className={
-                    row.original.status ? "text-green-600" : "text-red-600"
-                }
-            >
+            <Badge variant={row.original.status ? "default" : "destructive"}>
                 {row.original.status ? "Active" : "Inactive"}
-            </span>
+            </Badge>
         ),
     },
-    // {
-    //     id: "profile_image",
-    //     header: "Profile Image",
-    //     cell: ({ row }) =>
-    //         row.original.profile_image ? (
-    //             <img
-    //                 src={`/storage/${row.original.profile_image}`}
-    //                 alt="profile"
-    //                 className="w-12 h-12 rounded-full object-cover"
-    //             />
-    //         ) : (
-    //             <span className="text-gray-400 italic">No image</span>
-    //         ),
-    // },
     {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => (
-            <div className="flex space-x-2">
-                <Link href={route("admin.students.edit", row.original.id)}>
-                    <Button variant="outline" size="sm">
-                        Edit
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                </Link>
-                <Link
-                    href={route("admin.students.destroy", row.original.id)}
-                    method="delete"
-                    as="button"
-                >
-                    <Button variant="destructive" size="sm">
-                        Delete
-                    </Button>
-                </Link>
-            </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route("admin.students.edit", row.original.id)}
+                        >
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "admin.students.destroy",
+                                row.original.id
+                            )}
+                            method="delete"
+                            as="button"
+                        >
+                            Delete
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         ),
     },
 ];

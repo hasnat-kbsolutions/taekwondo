@@ -11,13 +11,14 @@ use App\Models\Organization;
 use App\Models\Club;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
         $students = Student::when($request->organization_id, function ($query) use ($request) {
             $query->where('organization_id', $request->organization_id);
-        })->get();
+        })->latest()->get();
 
         return Inertia::render('Admin/Students/Index', [
             'students' => $students,
@@ -44,6 +45,10 @@ class StudentController extends Controller
     {
         // Skip validation for now
         $data = $request->all();
+    
+        // Generate UID and add to $data
+        $data['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+
 
         // Upload images if present
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
@@ -52,20 +57,20 @@ class StudentController extends Controller
                 $data[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
             }
         }
-
+    
         // Create student profile
         $student = Student::create($data);
-
+    
         // Create user only if email is provided
         if (!empty($data['email'])) {
             $student->user()->create([
                 'name' => $data['name'] . ' ' . ($data['surname'] ?? ''),
                 'email' => $data['email'],
-                'password' => Hash::make('password'), // Default password
+                'password' => Hash::make($request->password), 
                 'role' => 'student',
             ]);
         }
-
+    
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully');
     }
 
@@ -93,6 +98,7 @@ class StudentController extends Controller
             'uid' => 'nullable|string',
             'code' => 'nullable|string',
             'name' => 'required|string',
+            'password' => 'nullable|string|min:6',
             'surname' => 'nullable|string',
             'nationality' => 'nullable|string',
             'dob' => 'nullable|date',
@@ -127,16 +133,22 @@ class StudentController extends Controller
 
         // Create or update user account
         if (!empty($validated['email'])) {
+            $userData = [
+                'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
+                'role' => 'student',
+                'organization_id' => $validated['organization_id'] ?? null,
+                'branch_id' => $validated['branch_id'] ?? null,
+                'student_id' => $student->id,
+            ];
+
+            // Only include password if present in the request
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
             User::updateOrCreate(
-                ['email' => $validated['email']], // match by email
-                [
-                    'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
-                    'password' => Hash::make('password'), // only used on creation
-                    'role' => 'student',
-                    'organization_id' => $validated['organization_id'] ?? null,
-                    'branch_id' => $validated['branch_id'] ?? null,
-                    'student_id' => $student->id,
-                ]
+                ['email' => $validated['email']],
+                $userData
             );
         }
 
