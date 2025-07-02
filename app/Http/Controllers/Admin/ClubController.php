@@ -1,116 +1,170 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
 use App\Models\Club;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Branch;
 use App\Models\Organization;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+
 class ClubController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $clubs = Club::when($request->organization_id, function ($query) use ($request) {
-            $query->where('organization_id', $request->organization_id);
-        })->get();
+        $clubs = Club::with(['organization', 'user'])->get();
 
         return Inertia::render('Admin/Clubs/Index', [
             'clubs' => $clubs,
-            'organizationId' => $request->organization_id,
         ]);
     }
 
-
     public function create()
     {
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
-
         return Inertia::render('Admin/Clubs/Create', [
-            'branches' => $branches,
-            'organizations' => $organizations,
+            'organizations' => Organization::select('id', 'name')->get()
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'branch_id' => 'required|integer',
-            'organization_id' => 'required|integer',
+            'organization_id' => 'required|exists:organizations,id',
             'name' => 'required|string|max:255',
-            'tax_number' => 'nullable|string|max:100',
-            'invoice_prefix' => 'required|string|max:100',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status' => 'boolean',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'skype' => 'nullable|string|max:100',
-            'notification_emails' => 'nullable|string|max:255',
-            'website' => 'nullable|url',
-            'postal_code' => 'nullable|string|max:20',
-            'city' => 'nullable|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+
+            'country' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skype' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
+            'tax_number' => 'nullable|string|max:255',
+            'invoice_prefix' => 'nullable|string|max:255',
+            'status' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('clubs/logos', 'public');
+            $validated['logo'] = $request->file('logo')->store('clubs', 'public');
         }
 
-        Club::create($validated);
+        $club = Club::create([
+            'organization_id' => $validated['organization_id'],
+            'name' => $validated['name'],
+            'country' => $validated['country'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'street' => $validated['street'] ?? null,
+            'postal_code' => $validated['postal_code'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'skype' => $validated['skype'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'tax_number' => $validated['tax_number'] ?? null,
+            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
+            'status' => $validated['status'] ?? false,
+            'logo' => $validated['logo'] ?? null,
+        ]);
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully.');
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'club',
+            'userable_type' => Club::class,
+            'userable_id' => $club->id,
+        ]);
+
+        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully');
     }
 
-    public function edit($id)
+    public function edit( $id)
     {
-        $club = Club::find($id);
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
-
+        $club = Club::with('user')->findOrFail($id);
         return Inertia::render('Admin/Clubs/Edit', [
             'club' => $club,
-            'branches' => $branches,
-            'organizations' => $organizations,
+            'organizations' => Organization::select('id', 'name')->get(),
         ]);
     }
 
     public function update(Request $request, Club $club)
     {
         $validated = $request->validate([
-            'branch_id' => 'required|integer',
-            'organization_id' => 'required|integer',
             'name' => 'required|string|max:255',
-            'tax_number' => 'nullable|string|max:100',
-            'invoice_prefix' => 'required|string|max:100',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status' => 'boolean',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'skype' => 'nullable|string|max:100',
-            'notification_emails' => 'nullable|string|max:255',
-            'website' => 'nullable|url',
-            'postal_code' => 'nullable|string|max:20',
-            'city' => 'nullable|string|max:100',
+            'email' => 'required|email|unique:users,email,' . optional($club->user)->id,
+            'password' => 'required|string|min:8|confirmed',
+
+            'organization_id' => 'required|exists:organizations,id',
+            'country' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skype' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
+            'tax_number' => 'nullable|string|max:255',
+            'invoice_prefix' => 'nullable|string|max:255',
+            'status' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('clubs/logos', 'public');
+            if ($club->logo) {
+                Storage::disk('public')->delete($club->logo);
+            }
+            $validated['logo'] = $request->file('logo')->store('clubs', 'public');
         }
 
-        $club->update($validated);
+        $club->update([
+            'organization_id' => $validated['organization_id'],
+            'name' => $validated['name'],
+            'country' => $validated['country'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'street' => $validated['street'] ?? null,
+            'postal_code' => $validated['postal_code'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'skype' => $validated['skype'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'tax_number' => $validated['tax_number'] ?? null,
+            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
+            'status' => $validated['status'] ?? false,
+            'logo' => $validated['logo'] ?? $club->logo,
+        ]);
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club updated successfully.');
+        if ($club->user) {
+            $club->user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => $request->filled('password')
+                    ? Hash::make($request->password)
+                    : $club->user->password,
+            ]);
+        }
+
+
+        return redirect()->route('admin.clubs.index')->with('success', 'Club updated successfully');
     }
 
     public function destroy(Club $club)
     {
+        if ($club->user) {
+            $club->user->delete();
+        }
+
+        if ($club->logo) {
+            Storage::disk('public')->delete($club->logo);
+        }
+
         $club->delete();
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club deleted successfully.');
+        return redirect()->route('admin.clubs.index')->with('success', 'Club deleted successfully');
     }
 }

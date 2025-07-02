@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::select('id', 'name', 'email', 'role', 'organization_id', 'branch_id', 'created_at')
+        $users = User::select('id', 'name', 'email', 'role', 'organization_id', 'club_id', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('role');
@@ -34,9 +34,9 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,organization,branch,student,guardian',
+            'role' => 'required|in:admin,organization,club,student,guardian',
             'organization_id' => 'nullable|exists:organizations,id',
-            'branch_id' => 'nullable|exists:branches,id',
+            'club_id' => 'nullable|exists:clubs,id',
             'password' => 'nullable|string|min:6',
         ]);
 
@@ -59,9 +59,9 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,organization,branch,student,guardian',
+            'role' => 'required|in:admin,organization,club,student,guardian',
             'organization_id' => 'nullable|exists:organizations,id',
-            'branch_id' => 'nullable|exists:branches,id',
+            'club_id' => 'nullable|exists:clubs,id',
             'password' => 'nullable|string|min:6',
         ]);
 

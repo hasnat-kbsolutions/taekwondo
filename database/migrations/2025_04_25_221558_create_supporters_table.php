@@ -12,10 +12,9 @@ return new class extends Migration {
     {
         Schema::create('supporters', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('branch_id');
+            $table->unsignedBigInteger('club_id');
             $table->string('country')->nullable();
             $table->unsignedBigInteger('organization_id');
-            $table->unsignedBigInteger('club_id');
             $table->string('name');
             $table->string('surename');
             $table->string('gender');

@@ -4,10 +4,9 @@ import { Link } from "@inertiajs/react";
 
 export type Supporter = {
     id: number;
-    branch_id: number;
+    club_id: number;
     country?: string;
     organization_id: number;
-    club_id: number;
     name: string;
     surename: string;
     gender: string;

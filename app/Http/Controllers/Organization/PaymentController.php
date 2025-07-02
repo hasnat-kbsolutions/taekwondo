@@ -10,22 +10,31 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 class PaymentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         if ($user->role !== 'organization') {
             abort(403, 'Unauthorized');
         }
 
+        $status = $request->input('status');
+        $paymentMonth = $request->input('payment_month');
+
         $payments = Payment::with('student')
             ->whereHas('student', function ($query) use ($user) {
                 $query->where('organization_id', $user->userable_id);
             })
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($paymentMonth, fn($q) => $q->where('payment_month', $paymentMonth))
             ->latest()
             ->get();
 
         return Inertia::render('Organization/Payments/Index', [
             'payments' => $payments,
+            'filters' => [
+                'status' => $status,
+                'payment_month' => $paymentMonth,
+            ],
         ]);
     }
 

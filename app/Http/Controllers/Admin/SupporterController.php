@@ -7,9 +7,8 @@ use App\Models\Supporter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Branch;
-use App\Models\Organization;
 use App\Models\Club;
+use App\Models\Organization;
 class SupporterController extends Controller
 {
     public function index(Request $request)
@@ -28,23 +27,20 @@ class SupporterController extends Controller
     public function create()
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Admin/Supporters/Create', [
-            'branches' => $branches,
-            'organizations' => $organizations,
             'clubs' => $clubs,
+            'organizations' => $organizations,
         ]);
     }
 
     public function store(Request $request)
     {
         // $request->validate([
-        //     'branch_id' => 'required|integer',
-        //     'organization_id' => 'required|integer',
         //     'club_id' => 'required|integer',
+        //     'organization_id' => 'required|integer',
         //     'name' => 'required|string|max:255',
         //     'surename' => 'required|string|max:255',
         //     'gender' => 'required|string|max:10',
@@ -77,24 +73,21 @@ class SupporterController extends Controller
     public function edit(Supporter $supporter)
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Admin/Supporters/Edit', [
             'supporter' => $supporter,
-            'branches' => $branches,
-            'organizations' => $organizations,
             'clubs' => $clubs,
+            'organizations' => $organizations,
         ]);
     }
 
     public function update(Request $request, Supporter $supporter)
     {
         // $request->validate([
-        //     'branch_id' => 'required|integer',
-        //     'organization_id' => 'required|integer',
         //     'club_id' => 'required|integer',
+        //     'organization_id' => 'required|integer',
         //     'name' => 'required|string|max:255',
         //     'surename' => 'required|string|max:255',
         //     'gender' => 'required|string|max:10',

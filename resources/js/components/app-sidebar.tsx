@@ -21,7 +21,6 @@ import { PageProps } from "@/types";
 
 // const { auth } = usePage<PageProps>().props;
 
-
 import { LucideIcon } from "lucide-react";
 
 type NavItem = {
@@ -34,8 +33,6 @@ type NavItem = {
         url: string;
     }[];
 };
-
-
 
 const NAV_MENUS: Record<string, NavItem[]> = {
     admin: [
@@ -50,19 +47,18 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: SquareTerminal,
             isActive: false,
             items: [
-                { title: "Clubs", url: "/admin/clubs" },
                 { title: "Students", url: "/admin/students" },
                 { title: "Supporters", url: "/admin/supporters" },
             ],
         },
         {
-            title: "Branches",
-            url: "/admin/branches",
+            title: "Clubs",
+            url: "/admin/clubs",
             icon: SquareTerminal,
             isActive: false,
             items: [
-                { title: "List", url: "/admin/branches" },
-                { title: "Create", url: "/admin/branches/create" },
+                { title: "List", url: "/admin/clubs" },
+                { title: "Create", url: "/admin/clubs/create" },
             ],
         },
         {
@@ -122,8 +118,8 @@ const NAV_MENUS: Record<string, NavItem[]> = {
     organization: [
         { title: "Dashboard", url: "/organization/dashboard", icon: Home },
         {
-            title: "Branches",
-            url: "/organization/branches",
+            title: "Clubs",
+            url: "/organization/clubs",
             icon: SquareTerminal,
         },
         {
@@ -143,30 +139,28 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         },
     ],
 
-    branch: [
-        { title: "Dashboard", url: "/branch/dashboard", icon: Home },
+    club: [
+        { title: "Dashboard", url: "/club/dashboard", icon: Home },
 
         {
             title: "Students",
-            url: "/branch/students",
+            url: "/club/students",
             icon: SquareTerminal,
         },
         {
             title: "Payments",
-            url: "/branch/payments",
+            url: "/club/payments",
             icon: SquareTerminal,
         },
         {
             title: "Attendance",
-            url: "/branch/attendances",
+            url: "/club/attendances",
             icon: SquareTerminal,
         },
     ],
 
     student: [{ title: "Dashboard", url: "/student/dashboard", icon: Home }],
 };
-
-  
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { auth } = usePage<PageProps>().props;

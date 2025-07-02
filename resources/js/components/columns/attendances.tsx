@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export type Attendance = {
     id: number;
     name: string;
-    branch_id: number;
+    club_id: number;
     organization_id: number;
     tax_number?: string;
     invoice_prefix: string;

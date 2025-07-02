@@ -11,7 +11,7 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         // CRUD permissions
-        $entities = ['branch', 'organization', 'club', 'supporter', 'student', 'attendance'];
+        $entities = ['club', 'organization', 'supporter', 'student', 'attendance'];
         $actions = ['create', 'edit', 'delete', 'list'];
 
         $permissions = [];
@@ -29,7 +29,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create roles
         $superadmin = Role::firstOrCreate(['name' => 'superadmin']);
-        $branch = Role::firstOrCreate(['name' => 'Branch']);
+        $club = Role::firstOrCreate(['name' => 'Club']);
         $supporter = Role::firstOrCreate(['name' => 'Supporter']);
         $student = Role::firstOrCreate(['name' => 'Student']);
         $parent = Role::firstOrCreate(['name' => 'Parent']);
@@ -38,7 +38,7 @@ class RolePermissionSeeder extends Seeder
         $superadmin->syncPermissions(Permission::all());
 
         // Assign selective permissions to other roles if needed
-        $branch->syncPermissions(Permission::all()); // Optional if you want Branch to act like an admin
+        $club->syncPermissions(Permission::all()); // Optional if you want Club to act like an admin
     }
 }
 

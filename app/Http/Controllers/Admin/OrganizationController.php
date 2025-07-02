@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Branch;
 use App\Models\Club;
 use App\Models\Student;
 use App\Models\Supporter;
@@ -16,7 +15,7 @@ class OrganizationController extends Controller
 {
     public function index()
     {
-        $organizations = Organization::with(['clubs', 'students', 'supporters'])->get();
+        $organizations = Organization::with(['students', 'supporters'])->get();
 
         return Inertia::render('Admin/Organizations/Index', [
             'organizations' => $organizations,

@@ -6,9 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Branch;
-use App\Models\Organization;
 use App\Models\Club;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,14 +29,12 @@ class StudentController extends Controller
     public function create()
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Admin/Students/Create', [
-            'branches' => $branches,
-            'organizations' => $organizations,
             'clubs' => $clubs,
+            'organizations' => $organizations,
         ]);
     }
 
@@ -45,7 +42,7 @@ class StudentController extends Controller
     {
         // Skip validation for now
         $data = $request->all();
-    
+
         // Generate UID and add to $data
         $data['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
@@ -57,44 +54,41 @@ class StudentController extends Controller
                 $data[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
             }
         }
-    
+
         // Create student profile
         $student = Student::create($data);
-    
+
         // Create user only if email is provided
         if (!empty($data['email'])) {
             $student->user()->create([
                 'name' => $data['name'] . ' ' . ($data['surname'] ?? ''),
                 'email' => $data['email'],
-                'password' => Hash::make($request->password), 
+                'password' => Hash::make($request->password),
                 'role' => 'student',
             ]);
         }
-    
+
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully');
     }
 
     public function edit(Student $student)
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        $organizations = Organization::select('id', 'name')->get();
 
         return Inertia::render('Admin/Students/Edit', [
             'student' => $student,
-            'branches' => $branches,
-            'organizations' => $organizations,
             'clubs' => $clubs,
+            'organizations' => $organizations,
         ]);
     }
 
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'branch_id' => 'nullable|integer',
-            'organization_id' => 'nullable|integer',
             'club_id' => 'nullable|integer',
+            'organization_id' => 'nullable|integer',
             'uid' => 'nullable|string',
             'code' => 'nullable|string',
             'name' => 'required|string',
@@ -137,7 +131,7 @@ class StudentController extends Controller
                 'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
                 'role' => 'student',
                 'organization_id' => $validated['organization_id'] ?? null,
-                'branch_id' => $validated['branch_id'] ?? null,
+                'club_id' => $validated['club_id'] ?? null,
                 'student_id' => $student->id,
             ];
 

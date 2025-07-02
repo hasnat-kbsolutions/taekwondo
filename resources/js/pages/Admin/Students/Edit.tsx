@@ -19,17 +19,11 @@ interface Props {
 }
 
 interface Props {
-    branches: any[];
-    organizations: any[];
     clubs: any[];
+    organizations: any[];
 }
 
-export default function Edit({
-    student,
-    branches,
-    organizations,
-    clubs,
-}: Props) {
+export default function Edit({ student, clubs, organizations }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         ...student,
         profile_image: null,
@@ -49,31 +43,29 @@ export default function Edit({
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
                     <div className="w-[25%] px-2 mt-3">
                         <Label className="block text-sm mb-1">
-                            Select Branch
+                            Select Club
                         </Label>
                         <Select
-                            value={String(data.branch_id) || ""}
-                            onValueChange={(value) =>
-                                setData("branch_id", value)
-                            }
+                            value={String(data.club_id) || ""}
+                            onValueChange={(value) => setData("club_id", value)}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Branch" />
+                                <SelectValue placeholder="Select Club" />
                             </SelectTrigger>
                             <SelectContent>
-                                {branches.map((branch) => (
+                                {clubs.map((club) => (
                                     <SelectItem
-                                        key={branch.id}
-                                        value={String(branch.id)}
+                                        key={club.id}
+                                        value={String(club.id)}
                                     >
-                                        {branch.name}
+                                        {club.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.branch_id && (
+                        {errors.club_id && (
                             <p className="text-red-500 text-sm">
-                                {errors.branch_id}
+                                {errors.club_id}
                             </p>
                         )}
                     </div>
@@ -105,35 +97,6 @@ export default function Edit({
                         {errors.organization_id && (
                             <p className="text-red-500 text-sm">
                                 {errors.organization_id}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Select Club
-                        </Label>
-                        <Select
-                            value={String(data.club_id) || ""}
-                            onValueChange={(value) => setData("club_id", value)}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Club" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {clubs.map((club) => (
-                                    <SelectItem
-                                        key={club.id}
-                                        value={String(club.id)}
-                                    >
-                                        {club.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.club_id && (
-                            <p className="text-red-500 text-sm">
-                                {errors.club_id}
                             </p>
                         )}
                     </div>

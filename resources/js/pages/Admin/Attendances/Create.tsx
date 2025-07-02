@@ -48,12 +48,11 @@ type SelectOption = {
 };
 
 type Props = {
-    branches: SelectOption[];
-    organizations: SelectOption[];
     clubs: SelectOption[];
+    organizations: SelectOption[];
 };
 
-export default function Create({ branches, organizations, clubs }: Props) {
+export default function Create({ clubs, organizations }: Props) {
     const { data, setData, post, processing, errors } = useForm<{
         date: string;
         attendances: Attendances;
@@ -64,13 +63,12 @@ export default function Create({ branches, organizations, clubs }: Props) {
 
     const [students, setStudents] = useState<Student[]>([]);
     const [filters, setFilters] = useState({
-        branch_id: "",
-        organization_id: "",
         club_id: "",
+        organization_id: "",
     });
 
     useEffect(() => {
-        if (filters.branch_id && filters.organization_id && filters.club_id) {
+        if (filters.club_id && filters.organization_id) {
             axios
                 .get(route("admin.students.filter"), { params: filters })
                 .then((res) => setStudents(res.data));
@@ -164,23 +162,23 @@ export default function Create({ branches, organizations, clubs }: Props) {
                             </div>
 
                             <div className="w-[50%] px-2">
-                                <Label htmlFor="branch">Branch</Label>
+                                <Label htmlFor="club">Club</Label>
 
                                 <Select
-                                    value={filters.branch_id}
+                                    value={filters.club_id}
                                     onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            branch_id: value,
+                                            club_id: value,
                                         })
                                     }
                                 >
                                     <SelectTrigger className="w-full p-2 border rounded-lg">
-                                        <SelectValue placeholder="Select Branch" />
+                                        <SelectValue placeholder="Select Club" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            {branches.map((c: any) => (
+                                            {clubs.map((c: any) => (
                                                 <SelectItem
                                                     key={c.id}
                                                     value={String(c.id)}
@@ -218,36 +216,6 @@ export default function Create({ branches, organizations, clubs }: Props) {
                                                     value={String(o.id)}
                                                 >
                                                     {o.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="w-[50%] px-2 mt-4">
-                                <Label htmlFor="club">Club</Label>
-
-                                <Select
-                                    value={filters.club_id}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            club_id: value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full p-2 border rounded-lg">
-                                        <SelectValue placeholder="Select Club" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            {clubs.map((c: any) => (
-                                                <SelectItem
-                                                    key={c.id}
-                                                    value={String(c.id)}
-                                                >
-                                                    {c.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectGroup>

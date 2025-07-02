@@ -72,7 +72,7 @@ return [
             'driver' => 'session',
             'provider' => 'users'
         ],
-        'branch' => [
+        'club' => [
             'driver' => 'session',
             'provider' => 'users'
         ],

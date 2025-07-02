@@ -47,7 +47,7 @@ export default function Edit({ payment, students }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route("payments.update", payment.id));
+        put(route("admin.payments.update", payment.id));
     };
 
     return (
@@ -59,9 +59,12 @@ export default function Edit({ payment, students }: Props) {
                         <CardTitle>Edit Payment</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                        >
                             {/* Student */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Student</Label>
                                 <Select
                                     value={String(data.student_id)}
@@ -91,7 +94,7 @@ export default function Edit({ payment, students }: Props) {
                             </div>
 
                             {/* Amount */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Amount</Label>
                                 <Input
                                     type="number"
@@ -108,7 +111,7 @@ export default function Edit({ payment, students }: Props) {
                             </div>
 
                             {/* Status */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Status</Label>
                                 <Select
                                     value={data.status}
@@ -139,7 +142,7 @@ export default function Edit({ payment, students }: Props) {
                             </div>
 
                             {/* Method */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Method</Label>
                                 <Select
                                     value={data.method}
@@ -170,7 +173,7 @@ export default function Edit({ payment, students }: Props) {
                             </div>
 
                             {/* Payment Month */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Payment Month</Label>
                                 <Input
                                     type="month"
@@ -187,7 +190,7 @@ export default function Edit({ payment, students }: Props) {
                             </div>
 
                             {/* Pay At */}
-                            <div>
+                            <div className="col-span-1">
                                 <Label>Pay At</Label>
                                 <Input
                                     type="date"
@@ -203,8 +206,8 @@ export default function Edit({ payment, students }: Props) {
                                 )}
                             </div>
 
-                            {/* Notes */}
-                            <div>
+                            {/* Notes (full width) */}
+                            <div className="col-span-full">
                                 <Label>Notes</Label>
                                 <Input
                                     type="text"
@@ -220,9 +223,12 @@ export default function Edit({ payment, students }: Props) {
                                 )}
                             </div>
 
-                            <Button type="submit" disabled={processing}>
-                                Update
-                            </Button>
+                            {/* Submit Button */}
+                            <div className="col-span-full">
+                                <Button type="submit" disabled={processing}>
+                                    Update
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

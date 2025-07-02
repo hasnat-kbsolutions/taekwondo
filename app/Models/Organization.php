@@ -18,13 +18,10 @@ class Organization extends Model
         'postal_code',
         'status',
     ];
-    
 
 
-    public function clubs()
-    {
-        return $this->hasMany(Club::class);
-    }
+
+
 
     public function students()
     {
@@ -40,8 +37,8 @@ class Organization extends Model
         return $this->morphOne(User::class, 'userable');
     }
 
-    public function branches()
-{
-    return $this->hasMany(Branch::class);
-}
+    public function clubs()
+    {
+        return $this->hasMany(Club::class);
+    }
 }

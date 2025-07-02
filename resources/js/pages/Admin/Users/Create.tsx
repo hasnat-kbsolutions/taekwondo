@@ -130,8 +130,8 @@ export default function Create() {
                                         <SelectItem value="organization">
                                             Organization
                                         </SelectItem>
-                                        <SelectItem value="branch">
-                                            Branch
+                                        <SelectItem value="club">
+                                            Club
                                         </SelectItem>
                                         <SelectItem value="student">
                                             Student

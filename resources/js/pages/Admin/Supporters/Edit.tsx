@@ -17,23 +17,16 @@ import {
 
 interface Props {
     supporter: any;
-    branches: any[];
-    organizations: any[];
     clubs: any[];
+    organizations: any[];
 }
 
-export default function Edit({
-    supporter,
-    branches,
-    organizations,
-    clubs,
-}: Props) {
+export default function Edit({ supporter, clubs, organizations }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         _method: "PUT",
-        branch_id: supporter.branch_id || "",
+        club_id: supporter.club_id || "",
         country: supporter.country || "",
         organization_id: supporter.organization_id || "",
-        club_id: supporter.club_id || "",
         name: supporter.name || "",
         surename: supporter.surename || "",
         gender: supporter.gender || "",
@@ -66,51 +59,51 @@ export default function Edit({
                         >
                             <div className="w-[50%] px-2">
                                 <Label className="block text-sm mb-1">
-                                    Select Branch{" "}
+                                    Select Club{" "}
                                 </Label>
 
                                 <Select
-                                    value={data.branch_id?.toString()}
+                                    value={data.club_id?.toString()}
                                     onValueChange={(value) =>
-                                        setData("branch_id", parseInt(value))
+                                        setData("club_id", parseInt(value))
                                     }
                                 >
                                     <SelectTrigger className="w-full border rounded px-3 py-2">
-                                        <SelectValue placeholder="Select Branch" />
+                                        <SelectValue placeholder="Select Club" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {branches.map((branch) => (
+                                        {clubs.map((club) => (
                                             <SelectItem
-                                                key={branch.id}
-                                                value={branch.id.toString()}
+                                                key={club.id}
+                                                value={club.id.toString()}
                                             >
-                                                {branch.name}
+                                                {club.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
 
                                 {/* // <select
-                                //     value={data.branch_id}
+                                //     value={data.club_id}
                                 //     onChange={(e) =>
-                                //         setData("branch_id", e.target.value)
+                                //         setData("club_id", e.target.value)
                                 //     }
                                 //     className="w-full border rounded p-2"
                                 // >
-                                //     <option value="">Select Branch</option>
-                                //     {branches.map((branch) => (
+                                //     <option value="">Select Club</option>
+                                //     {clubs.map((club) => (
                                 //         <option
-                                //             key={branch.id}
-                                //             value={branch.id}
+                                //             key={club.id}
+                                //             value={club.id}
                                 //         >
-                                //             {branch.name}
+                                //             {club.name}
                                 //         </option>
                                 //     ))}
                                 // </select> */}
 
-                                {errors.branch_id && (
+                                {errors.club_id && (
                                     <p className="text-red-500 text-sm">
-                                        {errors.branch_id}
+                                        {errors.club_id}
                                     </p>
                                 )}
                             </div>
@@ -167,30 +160,6 @@ export default function Edit({
                                 {errors.organization_id && (
                                     <p className="text-red-500 text-sm">
                                         {errors.organization_id}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Club{" "}
-                                </Label>
-                                <select
-                                    value={data.club_id}
-                                    onChange={(e) =>
-                                        setData("club_id", e.target.value)
-                                    }
-                                    className="w-full border rounded p-2"
-                                >
-                                    <option value="">Select Club</option>
-                                    {clubs.map((club) => (
-                                        <option key={club.id} value={club.id}>
-                                            {club.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.club_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.club_id}
                                     </p>
                                 )}
                             </div>

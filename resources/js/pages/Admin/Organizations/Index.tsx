@@ -5,10 +5,6 @@ import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 
-interface Club {
-    id: number;
-    name: string;
-}
 
 interface Student {
     id: number;
@@ -29,14 +25,12 @@ interface Organization {
     country?: string;
     website?: string;
     status: boolean;
-    clubs: Club[];
     students: Student[];
     supporters: Supporter[];
 }
 
 interface Props {
     organizations: Organization[];
-    club: number;
     student: number;
     supporter: number;
 }
@@ -83,18 +77,7 @@ const columns: ColumnDef<Organization>[] = [
                 "-"
             ),
     },
-    {
-        header: "Clubs",
-        cell: ({ row }) => (
-            <Link
-                href={route("admin.clubs.index", {
-                    organization_id: row.original.id,
-                })}
-            >
-                {row.original.clubs?.length ?? 0}
-            </Link>
-        ),
-    },
+  
     {
         header: "Students",
         cell: ({ row }) => (
@@ -136,7 +119,6 @@ const columns: ColumnDef<Organization>[] = [
 
 export default function OrganizationIndex({
     organizations,
-    club,
     student,
     supporter,
 }: Props) {

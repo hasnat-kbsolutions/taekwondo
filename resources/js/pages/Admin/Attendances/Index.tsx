@@ -51,28 +51,24 @@ type SelectOption = {
 
 type Props = {
     studentsWithAttendance: AttendanceRecord[];
-    branches: SelectOption[];
-    organizations: SelectOption[];
     clubs: SelectOption[];
+    organizations: SelectOption[];
     filters: {
-        branch_id?: string;
-        organization_id?: string;
         club_id?: string;
+        organization_id?: string;
         date?: string;
     };
 };
 
 export default function Index({
     studentsWithAttendance,
-    branches,
-    organizations,
     clubs,
+    organizations,
     filters: defaultFilters,
 }: Props) {
     const [filters, setFilters] = useState(() => ({
-        branch_id: defaultFilters.branch_id || "",
-        organization_id: defaultFilters.organization_id || "",
         club_id: defaultFilters.club_id || "",
+        organization_id: defaultFilters.organization_id || "",
         date: defaultFilters.date || format(new Date(), "yyyy-MM"),
     }));
 
@@ -153,20 +149,20 @@ export default function Index({
                         {/* Filters */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <Select
-                                value={filters.branch_id}
+                                value={filters.club_id}
                                 onValueChange={(value) =>
                                     setFilters((prev) => ({
                                         ...prev,
-                                        branch_id: value,
+                                        club_id: value,
                                     }))
                                 }
                             >
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Branches" />
+                                    <SelectValue placeholder="All Clubs" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {branches.map((c: any) => (
+                                        {clubs.map((c: any) => (
                                             <SelectItem
                                                 key={c.id}
                                                 value={String(c.id)}
@@ -198,32 +194,6 @@ export default function Index({
                                                 value={String(o.id)}
                                             >
                                                 {o.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-
-                            <Select
-                                value={filters.club_id}
-                                onValueChange={(value) =>
-                                    setFilters((prev) => ({
-                                        ...prev,
-                                        club_id: value,
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Clubs" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        {clubs.map((c: any) => (
-                                            <SelectItem
-                                                key={c.id}
-                                                value={String(c.id)}
-                                            >
-                                                {c.name}
                                             </SelectItem>
                                         ))}
                                     </SelectGroup>

@@ -5,9 +5,8 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Attendance;
 use App\Models\Student;
-use App\Models\Branch;
-use App\Models\Organization;
 use App\Models\Club;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -22,7 +21,6 @@ class AttendanceController extends Controller
         // Parse date if provided (month-based filtering)
         $date = $request->date ? Carbon::parse($request->date . '-01') : null;
 
-        // Fetch students with filtered branch/org/club and preload their attendances
         $students = Student::with([
             'attendances' => function ($q) use ($date) {
                 if ($date) {
@@ -31,9 +29,8 @@ class AttendanceController extends Controller
                 }
             }
         ])
-            ->when($request->branch_id, fn($q) => $q->where('branch_id', $request->branch_id))
-            ->when($request->organization_id, fn($q) => $q->where('organization_id', $request->organization_id))
             ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
+            ->when($request->organization_id, fn($q) => $q->where('organization_id', $request->organization_id))
             ->get();
 
         // Map student + attendance into structured response
@@ -54,48 +51,20 @@ class AttendanceController extends Controller
         // Send to Inertia
         return Inertia::render('Admin/Attendances/Index', [
             'studentsWithAttendance' => $studentsWithAttendance,
-            'branches' => Branch::all(),
-            'organizations' => Organization::all(),
             'clubs' => Club::all(),
-            'filters' => $request->only('branch_id', 'organization_id', 'club_id', 'date'),
+            'organizations' => Organization::all(),
+            'filters' => $request->only('club_id', 'organization_id', 'date'),
         ]);
     }
 
 
-    // public function index(Request $request)
-    // {
-    //     $query = Attendance::with('student');
 
-    //     if ($request->branch_id) {
-    //         $query->whereHas('student', fn($q) => $q->where('branch_id', $request->branch_id));
-    //     }
-    //     if ($request->organization_id) {
-    //         $query->whereHas('student', fn($q) => $q->where('organization_id', $request->organization_id));
-    //     }
-    //     if ($request->club_id) {
-    //         $query->whereHas('student', fn($q) => $q->where('club_id', $request->club_id));
-    //     }
-    //     if ($request->date) {
-    //         $query->whereDate('date', $request->date);
-    //     }
-
-    //     $attendances = $query->latest()->get();
-
-    //     return Inertia::render('Admin/Attendances/Index', [
-    //         'attendances' => $attendances,
-    //         'branches' => Branch::all(),
-    //         'organizations' => Organization::all(),
-    //         'clubs' => Club::all(),
-    //         'filters' => $request->only('branch_id', 'organization_id', 'club_id', 'date')
-    //     ]);
-    // }
 
     public function create()
     {
         return Inertia::render('Admin/Attendances/Create', [
-            'branches' => Branch::all(),
-            'organizations' => Organization::all(),
             'clubs' => Club::all(),
+            'organizations' => Organization::all(),
         ]);
     }
 
@@ -140,14 +109,12 @@ class AttendanceController extends Controller
     public function filter(Request $request)
     {
         $request->validate([
-            'branch_id' => 'required|integer',
-            'organization_id' => 'required|integer',
             'club_id' => 'required|integer',
+            'organization_id' => 'required|integer',
         ]);
 
-        $students = Student::where('branch_id', $request->branch_id)
+        $students = Student::where('club_id', $request->club_id)
             ->where('organization_id', $request->organization_id)
-            ->where('club_id', $request->club_id)
             ->get();
 
         return response()->json($students);

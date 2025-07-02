@@ -47,13 +47,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'destroy'])->name('students.destroy');
 
-    // Branch Routes
-    Route::get('/branches', [App\Http\Controllers\Admin\BranchController::class, 'index'])->name('branches.index');
-    Route::get('/branches/create', [App\Http\Controllers\Admin\BranchController::class, 'create'])->name('branches.create');
-    Route::post('/branches', [App\Http\Controllers\Admin\BranchController::class, 'store'])->name('branches.store');
-    Route::get('/branches/{branch}/edit', [App\Http\Controllers\Admin\BranchController::class, 'edit'])->name('branches.edit');
-    Route::put('/branches/{branch}', [App\Http\Controllers\Admin\BranchController::class, 'update'])->name('branches.update');
-    Route::delete('/branches/{branch}', [App\Http\Controllers\Admin\BranchController::class, 'destroy'])->name('branches.destroy');
+    // Club Routes
+    Route::get('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'index'])->name('clubs.index');
+    Route::get('/clubs/create', [App\Http\Controllers\Admin\ClubController::class, 'create'])->name('clubs.create');
+    Route::post('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'store'])->name('clubs.store');
+    Route::get('/clubs/{club}/edit', [App\Http\Controllers\Admin\ClubController::class, 'edit'])->name('clubs.edit');
+    Route::put('/clubs/{club}', [App\Http\Controllers\Admin\ClubController::class, 'update'])->name('clubs.update');
+    Route::delete('/clubs/{club}', [App\Http\Controllers\Admin\ClubController::class, 'destroy'])->name('clubs.destroy');
 
     // Organization Routes
     Route::get('/organizations', [App\Http\Controllers\Admin\OrganizationController::class, 'index'])->name('organizations.index');
@@ -70,14 +70,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/supporters/{supporter}/edit', [App\Http\Controllers\Admin\SupporterController::class, 'edit'])->name('supporters.edit');
     Route::put('/supporters/{supporter}', [App\Http\Controllers\Admin\SupporterController::class, 'update'])->name('supporters.update');
     Route::delete('/supporters/{supporter}', [App\Http\Controllers\Admin\SupporterController::class, 'destroy'])->name('supporters.destroy');
-
-    // Club Routes
-    Route::get('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'index'])->name('clubs.index');
-    Route::get('/clubs/create', [App\Http\Controllers\Admin\ClubController::class, 'create'])->name('clubs.create');
-    Route::post('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'store'])->name('clubs.store');
-    Route::get('/clubs/{supporter}/edit', [App\Http\Controllers\Admin\ClubController::class, 'edit'])->name('clubs.edit');
-    Route::put('/clubs/{supporter}', [App\Http\Controllers\Admin\ClubController::class, 'update'])->name('clubs.update');
-    Route::delete('/clubs/{supporter}', [App\Http\Controllers\Admin\ClubController::class, 'destroy'])->name('clubs.destroy');
 
     Route::get('/attendances', [App\Http\Controllers\Admin\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Admin\AttendanceController::class, 'create'])->name('attendances.create');
@@ -110,13 +102,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // Organization routes
 Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('organization.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Organization\DashboardController::class, 'index'])->name('dashboard');
-    // Branch Routes
-    Route::get('/branches', [App\Http\Controllers\Organization\BranchController::class, 'index'])->name('branches.index');
-    Route::get('/branches/create', [App\Http\Controllers\Organization\BranchController::class, 'create'])->name('branches.create');
-    Route::post('/branches', [App\Http\Controllers\Organization\BranchController::class, 'store'])->name('branches.store');
-    Route::get('/branches/{branch}/edit', [App\Http\Controllers\Organization\BranchController::class, 'edit'])->name('branches.edit');
-    Route::put('/branches/{branch}', [App\Http\Controllers\Organization\BranchController::class, 'update'])->name('branches.update');
-    Route::delete('/branches/{branch}', [App\Http\Controllers\Organization\BranchController::class, 'destroy'])->name('branches.destroy');
+    // Club Routes
+    Route::get('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'index'])->name('clubs.index');
+    Route::get('/clubs/create', [App\Http\Controllers\Organization\ClubController::class, 'create'])->name('clubs.create');
+    Route::post('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'store'])->name('clubs.store');
+    Route::get('/clubs/{club}/edit', [App\Http\Controllers\Organization\ClubController::class, 'edit'])->name('clubs.edit');
+    Route::put('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'update'])->name('clubs.update');
+    Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
 
     Route::get('/students', [App\Http\Controllers\Organization\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/create', [App\Http\Controllers\Organization\StudentController::class, 'create'])->name('students.create');
@@ -144,31 +136,31 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
 
 });
 
-// Branch routes
-Route::middleware(['auth', 'role:branch'])->prefix('branch')->name('branch.')->group(function () {
-    Route::get('dashboard', [App\Http\Controllers\Branch\DashboardController::class, 'index'])->name('dashboard');
-    
-    Route::get('/students', [App\Http\Controllers\Branch\StudentController::class, 'index'])->name('students.index');
-    Route::get('/students/create', [App\Http\Controllers\Branch\StudentController::class, 'create'])->name('students.create');
-    Route::post('/students', [App\Http\Controllers\Branch\StudentController::class, 'store'])->name('students.store');
-    Route::get('/students/{student}/edit', [App\Http\Controllers\Branch\StudentController::class, 'edit'])->name('students.edit');
-    Route::put('/students/{student}', [App\Http\Controllers\Branch\StudentController::class, 'update'])->name('students.update');
-    Route::delete('/students/{student}', [App\Http\Controllers\Branch\StudentController::class, 'destroy'])->name('students.destroy');
+// Club routes
+Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(function () {
+    Route::get('dashboard', [App\Http\Controllers\Club\DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/payments', [App\Http\Controllers\Branch\PaymentController::class, 'index'])->name('payments.index');
-    Route::get('/payments/create', [App\Http\Controllers\Branch\PaymentController::class, 'create'])->name('payments.create');
-    Route::post('/payments', [App\Http\Controllers\Branch\PaymentController::class, 'store'])->name('payments.store');
-    Route::get('/payments/{payment}/edit', [App\Http\Controllers\Branch\PaymentController::class, 'edit'])->name('payments.edit');
-    Route::put('/payments/{payment}', [App\Http\Controllers\Branch\PaymentController::class, 'update'])->name('payments.update');
-    Route::delete('/payments/{payment}', [App\Http\Controllers\Branch\PaymentController::class, 'destroy'])->name('payments.destroy');
+    Route::get('/students', [App\Http\Controllers\Club\StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/create', [App\Http\Controllers\Club\StudentController::class, 'create'])->name('students.create');
+    Route::post('/students', [App\Http\Controllers\Club\StudentController::class, 'store'])->name('students.store');
+    Route::get('/students/{student}/edit', [App\Http\Controllers\Club\StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{student}', [App\Http\Controllers\Club\StudentController::class, 'update'])->name('students.update');
+    Route::delete('/students/{student}', [App\Http\Controllers\Club\StudentController::class, 'destroy'])->name('students.destroy');
 
-    Route::get('/attendances', [App\Http\Controllers\Branch\AttendanceController::class, 'index'])->name('attendances.index');
-    Route::get('/attendances/create', [App\Http\Controllers\Branch\AttendanceController::class, 'create'])->name('attendances.create');
-    Route::post('/attendances', [App\Http\Controllers\Branch\AttendanceController::class, 'store'])->name('attendances.store');
-    Route::get('/attendances/{attendance}/edit', [App\Http\Controllers\Branch\AttendanceController::class, 'edit'])->name('attendances.edit');
-    Route::put('/attendances/{attendance}', [App\Http\Controllers\Branch\AttendanceController::class, 'update'])->name('attendances.update');
-    Route::delete('/attendances/{attendance}', [App\Http\Controllers\Branch\AttendanceController::class, 'destroy'])->name('attendances.destroy');
-    Route::post('/attendances/toggle', [App\Http\Controllers\Branch\AttendanceController::class, 'toggle'])->name('attendances.toggle');
+    Route::get('/payments', [App\Http\Controllers\Club\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/create', [App\Http\Controllers\Club\PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/payments', [App\Http\Controllers\Club\PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/{payment}/edit', [App\Http\Controllers\Club\PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'destroy'])->name('payments.destroy');
+
+    Route::get('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('/attendances/create', [App\Http\Controllers\Club\AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'store'])->name('attendances.store');
+    Route::get('/attendances/{attendance}/edit', [App\Http\Controllers\Club\AttendanceController::class, 'edit'])->name('attendances.edit');
+    Route::put('/attendances/{attendance}', [App\Http\Controllers\Club\AttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('/attendances/{attendance}', [App\Http\Controllers\Club\AttendanceController::class, 'destroy'])->name('attendances.destroy');
+    Route::post('/attendances/toggle', [App\Http\Controllers\Club\AttendanceController::class, 'toggle'])->name('attendances.toggle');
 
 
 

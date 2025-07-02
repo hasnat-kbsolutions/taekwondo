@@ -32,19 +32,19 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
         $request->session()->regenerate();
-    
+
         $role = auth()->user()->role;
-    
+
         return match ($role) {
             'admin' => redirect()->intended(route('admin.dashboard')),
             'organization' => redirect()->intended(route('organization.dashboard')),
-            'branch' => redirect()->intended(route('branch.dashboard')),
+            'club' => redirect()->intended(route('club.dashboard')),
             'student' => redirect()->intended(route('student.dashboard')),
             'guardian' => redirect()->intended(route('guardian.dashboard')),
             default => abort(403, 'Unknown role.'),
         };
     }
-    
+
 
     /**
      * Destroy an authenticated session.

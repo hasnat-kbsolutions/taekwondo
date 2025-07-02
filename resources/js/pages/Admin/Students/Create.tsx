@@ -15,16 +15,14 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-    branches: any[];
-    organizations: any[];
     clubs: any[];
+    organizations: any[];
 }
 
-export default function Create({ branches, organizations, clubs }: Props) {
+export default function Create({ clubs, organizations }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        branch_id: "",
-        organization_id: "",
         club_id: "",
+        organization_id: "",
         name: "",
         email: "",
         password: "",
@@ -62,31 +60,29 @@ export default function Create({ branches, organizations, clubs }: Props) {
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
                     <div className="w-[25%] px-2 mt-3">
                         <Label className="block text-sm mb-1">
-                            Select Branch
+                            Select Club
                         </Label>
                         <Select
-                            value={data.branch_id || ""}
-                            onValueChange={(value) =>
-                                setData("branch_id", value)
-                            }
+                            value={data.club_id || ""}
+                            onValueChange={(value) => setData("club_id", value)}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Branch" />
+                                <SelectValue placeholder="Select Club" />
                             </SelectTrigger>
                             <SelectContent>
-                                {branches.map((branch) => (
+                                {clubs.map((club) => (
                                     <SelectItem
-                                        key={branch.id}
-                                        value={String(branch.id)}
+                                        key={club.id}
+                                        value={String(club.id)}
                                     >
-                                        {branch.name}
+                                        {club.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.branch_id && (
+                        {errors.club_id && (
                             <p className="text-red-500 text-sm">
-                                {errors.branch_id}
+                                {errors.club_id}
                             </p>
                         )}
                     </div>
@@ -118,35 +114,6 @@ export default function Create({ branches, organizations, clubs }: Props) {
                         {errors.organization_id && (
                             <p className="text-red-500 text-sm">
                                 {errors.organization_id}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Select Club
-                        </Label>
-                        <Select
-                            value={data.club_id || ""}
-                            onValueChange={(value) => setData("club_id", value)}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Club" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {clubs.map((club) => (
-                                    <SelectItem
-                                        key={club.id}
-                                        value={String(club.id)}
-                                    >
-                                        {club.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.club_id && (
-                            <p className="text-red-500 text-sm">
-                                {errors.club_id}
                             </p>
                         )}
                     </div>

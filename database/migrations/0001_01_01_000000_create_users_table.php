@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,7 +18,7 @@ return new class extends Migration
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
 
-            $table->enum('role', ['admin', 'organization', 'branch', 'student', 'guardian'])->default('student');
+            $table->enum('role', ['admin', 'organization', 'club', 'student', 'guardian'])->default('student');
 
             // Polymorphic relation
             $table->nullableMorphs('userable'); // userable_id + userable_type

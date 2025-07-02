@@ -15,13 +15,11 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-    branches: any[];
     clubs: any[];
 }
 
-export default function Create({ branches, clubs }: Props) {
+export default function Create({ clubs }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        branch_id: "",
         club_id: "",
         name: "",
         email: "",
@@ -58,39 +56,6 @@ export default function Create({ branches, clubs }: Props) {
             <Head title="Add Student" />
             <div className="container mx-auto py-10">
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Select Branch
-                        </Label>
-                        <Select
-                            value={data.branch_id || ""}
-                            onValueChange={(value) =>
-                                setData("branch_id", value)
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Branch" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {branches.map((branch) => (
-                                    <SelectItem
-                                        key={branch.id}
-                                        value={String(branch.id)}
-                                    >
-                                        {branch.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.branch_id && (
-                            <p className="text-red-500 text-sm">
-                                {errors.branch_id}
-                            </p>
-                        )}
-                    </div>
-
-            
-
                     <div className="w-[25%] px-2 mt-3">
                         <Label className="block text-sm mb-1">
                             Select Club

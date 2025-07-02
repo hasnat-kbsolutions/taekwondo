@@ -5,9 +5,9 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Attendance;
 use App\Models\Student;
-use App\Models\Branch;
-use App\Models\Organization;
 use App\Models\Club;
+use App\Models\Organization;
+
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -37,8 +37,8 @@ class AttendanceController extends Controller
 
         // Apply optional filters
         $query
-            ->when($request->branch_id, fn($q) => $q->where('branch_id', $request->branch_id))
-            ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id));
+            ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
+        ;
 
         $students = $query->get();
 
@@ -59,18 +59,18 @@ class AttendanceController extends Controller
 
         return Inertia::render('Organization/Attendances/Index', [ // or Admin/ based on role
             'studentsWithAttendance' => $studentsWithAttendance,
-            'branches' => Branch::all(),
             'clubs' => Club::all(),
-            'filters' => $request->only('branch_id', 'club_id', 'date'),
+
+            'filters' => $request->only('club_id', 'date'),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Organization/Attendances/Create', [
-            'branches' => Branch::all(),
-            // 'organizations' => Organization::all(),
             'clubs' => Club::all(),
+            // 'organizations' => Organization::all(),
+
         ]);
     }
 
@@ -122,14 +122,14 @@ class AttendanceController extends Controller
     public function filter(Request $request)
     {
         $request->validate([
-            'branch_id' => 'nullable|integer',
             'club_id' => 'nullable|integer',
+
         ]);
 
         $students = Student::query()
             ->where('organization_id', Auth::user()->userable_id)
-            ->when($request->branch_id, fn($q) => $q->where('branch_id', $request->branch_id))
             ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
+
             ->get();
 
         return response()->json($students);

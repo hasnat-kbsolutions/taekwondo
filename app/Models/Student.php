@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Student extends Model
 {
     protected $fillable = [
-        'branch_id',
-        'organization_id',
         'club_id',
+        'organization_id',
+
         'uid',
         'code',
         'name',

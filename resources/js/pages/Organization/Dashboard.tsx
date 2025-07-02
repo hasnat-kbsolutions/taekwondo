@@ -9,20 +9,18 @@ import {
     Hourglass,
 } from "lucide-react";
 
-
-
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head } from "@inertiajs/react";
 export default function DashboardCards({
     studentsCount,
-    branchesCount,
+    clubsCount,
     paymentsCount,
     paidCount,
     pendingCount,
     totalAmount,
 }: {
     studentsCount: number;
-    branchesCount: number;
+    clubsCount: number;
     paymentsCount: number;
     paidCount: number;
     pendingCount: number;
@@ -30,7 +28,7 @@ export default function DashboardCards({
 }) {
     const stats = [
         { label: "Students", count: studentsCount, icon: <GraduationCap /> },
-        { label: "Branches", count: branchesCount, icon: <Landmark /> },
+        { label: "Clubs", count: clubsCount, icon: <Landmark /> },
         { label: "Total Payments", count: paymentsCount, icon: <DollarSign /> },
         { label: "Paid", count: paidCount, icon: <BadgeCheck /> },
         { label: "Pending", count: pendingCount, icon: <Hourglass /> },

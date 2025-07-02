@@ -10,14 +10,21 @@ use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with('student')->latest()->get();
+        $payments = Payment::with('student')
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->payment_month, fn($q) => $q->where('payment_month', $request->payment_month))
+            ->latest()
+            ->get();
 
         return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
+            'filters' => $request->only(['status', 'payment_month']),
         ]);
     }
+
+
 
     public function create()
     {

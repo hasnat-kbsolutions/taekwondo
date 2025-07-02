@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Branch;
-use App\Models\Organization;
 use App\Models\Club;
+use App\Models\Organization;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -37,14 +37,14 @@ class StudentController extends Controller
     public function create()
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        // $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        // $organizations = Organization::select('id', 'name')->get();
+
 
         return Inertia::render('Organization/Students/Create', [
-            'branches' => $branches,
-            // 'organizations' => $organizations,
             'clubs' => $clubs,
+            // 'organizations' => $organizations,
+
         ]);
     }
 
@@ -86,24 +86,24 @@ class StudentController extends Controller
     public function edit(Student $student)
     {
 
-        $branches = Branch::select('id', 'name')->get();
-        // $organizations = Organization::select('id', 'name')->get();
         $clubs = Club::select('id', 'name')->get();
+        // $organizations = Organization::select('id', 'name')->get();
+
 
         return Inertia::render('Organization/Students/Edit', [
             'student' => $student,
-            'branches' => $branches,
-            // 'organizations' => $organizations,
             'clubs' => $clubs,
+            // 'organizations' => $organizations,
+
         ]);
     }
 
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'branch_id' => 'nullable|integer',
-            // 'organization_id' => 'nullable|integer',
             'club_id' => 'nullable|integer',
+            // 'organization_id' => 'nullable|integer',
+
             'uid' => 'nullable|string',
             'code' => 'nullable|string',
             'name' => 'required|string',
@@ -152,7 +152,7 @@ class StudentController extends Controller
                 'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
                 'role' => 'student',
                 'organization_id' => $validated['organization_id'] ?? null,
-                'branch_id' => $validated['branch_id'] ?? null,
+                'club_id' => $validated['club_id'] ?? null,
                 'student_id' => $student->id,
             ];
 

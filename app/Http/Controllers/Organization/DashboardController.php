@@ -9,8 +9,8 @@ use Inertia\Inertia;
 //Models
 use App\Models\Student;
 use App\Models\Organization;
-use App\Models\Branch;
 use App\Models\Club;
+
 use App\Models\Supporter;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Organization/Dashboard', [
             'studentsCount' => $organization->students()->count(),
-            'branchesCount' => $organization->branches()->count(),
+            'clubsCount' => $organization->clubs()->count(),
             'paymentsCount' => $paymentsCount,
             'paidCount' => $paidCount,
             'pendingCount' => $pendingCount,
