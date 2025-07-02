@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { router, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 export default function Create() {
     const { students } = usePage().props as any;
@@ -35,104 +37,143 @@ export default function Create() {
 
     return (
         <AuthenticatedLayout header="Add Payment">
-            <div className="p-4 max-w-2xl mx-auto">
-                <h1 className="text-2xl font-bold mb-4">Add Payment</h1>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block mb-1">Student</label>
-                        <Select
-                            value={form.student_id}
-                            onValueChange={(value) =>
-                                handleChange("student_id", value)
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Student" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {students.map((s: any) => (
-                                    <SelectItem key={s.id} value={String(s.id)}>
-                                        {s.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <label className="block mb-1">Amount</label>
-                        <Input
-                            type="number"
-                            value={form.amount}
-                            onChange={(e) =>
-                                handleChange("amount", e.target.value)
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-1">Status</label>
-                        <Select
-                            value={form.status}
-                            onValueChange={(value) =>
-                                handleChange("status", value)
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="paid">Paid</SelectItem>
-                                <SelectItem value="unpaid">Unpaid</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <label className="block mb-1">Method</label>
-                        <Select
-                            value={form.method}
-                            onValueChange={(value) =>
-                                handleChange("method", value)
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Method" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="cash">Cash</SelectItem>
-                                <SelectItem value="stripe">Stripe</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <label className="block mb-1">Payment Month</label>
-                        <Input
-                            type="month"
-                            value={form.payment_month}
-                            onChange={(e) =>
-                                handleChange("payment_month", e.target.value)
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-1">Pay At</label>
-                        <Input
-                            type="date"
-                            value={form.pay_at}
-                            onChange={(e) =>
-                                handleChange("pay_at", e.target.value)
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-1">Notes</label>
-                        <Input
-                            value={form.notes}
-                            onChange={(e) =>
-                                handleChange("notes", e.target.value)
-                            }
-                        />
-                    </div>
-                    <Button type="submit">Save</Button>
-                </form>
+            <Head title="Add Payment" />
+            <div className="p-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Add New Payment</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <Label>Student</Label>
+                                    <Select
+                                        value={form.student_id}
+                                        onValueChange={(value) =>
+                                            handleChange("student_id", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Student" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {students.map((s: any) => (
+                                                <SelectItem
+                                                    key={s.id}
+                                                    value={String(s.id)}
+                                                >
+                                                    {s.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>Amount</Label>
+                                    <Input
+                                        type="number"
+                                        value={form.amount}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "amount",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Status</Label>
+                                    <Select
+                                        value={form.status}
+                                        onValueChange={(value) =>
+                                            handleChange("status", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="paid">
+                                                Paid
+                                            </SelectItem>
+                                            <SelectItem value="unpaid">
+                                                Unpaid
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label>Method</Label>
+                                    <Select
+                                        value={form.method}
+                                        onValueChange={(value) =>
+                                            handleChange("method", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Method" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="cash">
+                                                Cash
+                                            </SelectItem>
+                                            <SelectItem value="stripe">
+                                                Stripe
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label>Payment Month</Label>
+                                    <Input
+                                        type="month"
+                                        value={form.payment_month}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "payment_month",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Pay At</Label>
+                                    <Input
+                                        type="date"
+                                        value={form.pay_at}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "pay_at",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-span-3">
+                                    <Label>Notes</Label>
+                                    <Input
+                                        value={form.notes}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "notes",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-4">
+                                <Button type="submit">Save</Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </AuthenticatedLayout>
     );
