@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm<{
@@ -137,13 +138,18 @@ export default function Create() {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Country</Label>
-                                    <Input
-                                        value={data.country}
-                                        onChange={(e) =>
-                                            setData("country", e.target.value)
-                                        }
-                                    />
+                                       <Label className="block text-sm mb-1">Country</Label>
+                                                                                              <CountryDropdown
+                                                                                                  placeholder="Select country"
+                                                                                                  defaultValue={data.country} // your default or empty
+                                                                                                  onChange={(c) => setData("country", c.alpha3)}
+                                                                                                  slim={false}
+                                                                                              />
+                                                                                              {errors.country && (
+                                                                                                  <p className="text-red-500 text-sm">
+                                                                                                      {errors.country}
+                                                                                                  </p>
+                                                                                              )}
                                 </div>
                                 <div>
                                     <Label>Street</Label>

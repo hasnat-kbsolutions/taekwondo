@@ -98,16 +98,16 @@ const NAV_MENUS: Record<string, NavItem[]> = {
                 { title: "Sport Data", url: "#" },
             ],
         },
-        {
-            title: "Role",
-            url: "/admin/roles",
-            icon: SquareTerminal,
-            isActive: false,
-            items: [
-                { title: "List", url: "/admin/roles" },
-                { title: "Create", url: "/admin/roles/create" },
-            ],
-        },
+        // {
+        //     title: "Role",
+        //     url: "/admin/roles",
+        //     icon: SquareTerminal,
+        //     isActive: false,
+        //     items: [
+        //         { title: "List", url: "/admin/roles" },
+        //         { title: "Create", url: "/admin/roles/create" },
+        //     ],
+        // },
         {
             title: "Reporting",
             url: "#",

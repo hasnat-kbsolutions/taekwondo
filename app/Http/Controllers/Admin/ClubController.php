@@ -13,14 +13,29 @@ use Inertia\Inertia;
 
 class ClubController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clubs = Club::with(['organization', 'user'])->get();
+        $organizations = Organization::all();
+        
+        $query = Club::with(['organization', 'user']);
+
+        if ($request->filled('organization_id')) {
+            $query->where('organization_id', $request->organization_id);
+        }
+
+        if ($request->filled('country')) {
+            $query->where('country', $request->country);
+        }
+
+        $clubs = $query->latest()->get();
 
         return Inertia::render('Admin/Clubs/Index', [
             'clubs' => $clubs,
+            'organizations' => $organizations,
+            'filters' => $request->only('organization_id', 'country'),
         ]);
     }
+
 
     public function create()
     {
@@ -50,10 +65,13 @@ class ClubController extends Controller
             'status' => 'boolean',
             'logo' => 'nullable|image|max:2048',
         ]);
-
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('clubs', 'public');
+            $relativePath = $request->file('logo')->store('clubs', 'public');
+            $validated['logo'] = asset('storage/' . $relativePath); // full URL path
         }
+
+
+
 
         $club = Club::create([
             'organization_id' => $validated['organization_id'],
@@ -69,7 +87,7 @@ class ClubController extends Controller
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
-            'logo' => $validated['logo'] ?? null,
+            'logo' => $validated['logo'],
         ]);
 
         User::create([
@@ -117,10 +135,17 @@ class ClubController extends Controller
 
         if ($request->hasFile('logo')) {
             if ($club->logo) {
-                Storage::disk('public')->delete($club->logo);
+                // Extract and delete the existing file from the storage path
+                $path = str_replace('/storage/', '', parse_url($club->logo, PHP_URL_PATH));
+                Storage::disk('public')->delete($path);
             }
-            $validated['logo'] = $request->file('logo')->store('clubs', 'public');
+
+            // Upload new logo and store full URL
+            $relativePath = $request->file('logo')->store('clubs', 'public');
+            $validated['logo'] = asset('storage/' . $relativePath);
         }
+
+
 
         $club->update([
             'organization_id' => $validated['organization_id'],
@@ -136,7 +161,7 @@ class ClubController extends Controller
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
-            'logo' => $validated['logo'] ?? $club->logo,
+            'logo' => $validated['logo'],
         ]);
 
         if ($club->user) {

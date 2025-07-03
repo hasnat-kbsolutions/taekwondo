@@ -13,14 +13,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ClubController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clubs = Club::with(['organization', 'user'])
-            ->where('organization_id', Auth::user()->userable_id)
-            ->get();
+        $query = Club::with(['organization', 'user'])
+            ->where('organization_id', Auth::user()->userable_id);
+
+        if ($request->filled('country')) {
+            $query->where('country', $request->country);
+        }
 
         return Inertia::render('Organization/Clubs/Index', [
-            'clubs' => $clubs,
+            'clubs' => $query->get(),
+            'filters' => [
+                'country' => $request->country,
+            ],
         ]);
     }
 
@@ -50,10 +56,12 @@ class ClubController extends Controller
             'status' => 'boolean',
         ]);
 
-        $logoPath = null;
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('clubs', 'public');
+            $relativePath = $request->file('logo')->store('clubs', 'public');
+            $validated['logo'] = asset('storage/' . $relativePath); // full URL path
         }
+
+
 
         $club = Club::create([
             'organization_id' => Auth::user()->userable_id,
@@ -64,7 +72,7 @@ class ClubController extends Controller
             'skype' => $validated['skype'] ?? null,
             'notification_emails' => $validated['notification_emails'] ?? null,
             'website' => $validated['website'] ?? null,
-            'logo' => $logoPath,
+            'logo' => $validated['logo'],
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
             'street' => $validated['street'] ?? null,
@@ -113,10 +121,19 @@ class ClubController extends Controller
             'status' => 'boolean',
         ]);
 
-        $logoPath = $club->logo;
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('clubs', 'public');
+            if ($club->logo) {
+                // Extract and delete the existing file from the storage path
+                $path = str_replace('/storage/', '', parse_url($club->logo, PHP_URL_PATH));
+                Storage::disk('public')->delete($path);
+            }
+
+            // Upload new logo and store full URL
+            $relativePath = $request->file('logo')->store('clubs', 'public');
+            $validated['logo'] = asset('storage/' . $relativePath);
         }
+
+
 
         $club->update([
             'name' => $validated['name'],
@@ -126,7 +143,7 @@ class ClubController extends Controller
             'skype' => $validated['skype'] ?? null,
             'notification_emails' => $validated['notification_emails'] ?? null,
             'website' => $validated['website'] ?? null,
-            'logo' => $logoPath,
+            'logo' => $validated['logo'],
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
             'street' => $validated['street'] ?? null,

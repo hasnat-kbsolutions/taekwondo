@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
 
 interface Organization {
     id: number;
@@ -101,236 +102,239 @@ export default function Edit({ club, organizations }: Props) {
                         <CardTitle>Edit Club</CardTitle>
                     </CardHeader>
                     <CardContent>
-                             <form
-                                                    onSubmit={handleSubmit}
-                                                    className="flex flex-wrap"
-                                                >
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Name</Label>
-                                                        <Input
-                                                            placeholder="Club Name"
-                                                            value={data.name}
-                                                            onChange={(e) =>
-                                                                setData("name", e.target.value)
-                                                            }
-                                                        />
-                                                        {errors.name && (
-                                                            <p className="text-red-500 text-sm">
-                                                                {errors.name}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Email</Label>
-                                                        <Input
-                                                            type="email"
-                                                            value={data.email}
-                                                            onChange={(e) =>
-                                                                setData("email", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Password</Label>
-                                                        <Input
-                                                            type="password"
-                                                            value={data.password}
-                                                            onChange={(e) =>
-                                                                setData("password", e.target.value)
-                                                            }
-                                                        />
-                                                        {errors.password && (
-                                                            <p className="text-red-500 text-sm">
-                                                                {errors.password}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Confirm Password</Label>
-                                                        <Input
-                                                            type="password"
-                                                            value={data.password_confirmation}
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "password_confirmation",
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Organization</Label>
-                                                        <Select
-                                                            value={data.organization_id}
-                                                            onValueChange={(value) =>
-                                                                setData("organization_id", value)
-                                                            }
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select Organization" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {organizations.map((org) => (
-                                                                    <SelectItem
-                                                                        key={org.id}
-                                                                        value={org.id.toString()}
-                                                                    >
-                                                                        {org.name}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Phone</Label>
-                                                        <Input
-                                                            value={data.phone}
-                                                            onChange={(e) =>
-                                                                setData("phone", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Skype</Label>
-                                                        <Input
-                                                            value={data.skype}
-                                                            onChange={(e) =>
-                                                                setData("skype", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Notification Emails</Label>
-                                                        <Input
-                                                            value={data.notification_emails}
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "notification_emails",
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Website</Label>
-                                                        <Input
-                                                            value={data.website}
-                                                            onChange={(e) =>
-                                                                setData("website", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Tax Number</Label>
-                                                        <Input
-                                                            value={data.tax_number}
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "tax_number",
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Invoice Prefix</Label>
-                                                        <Input
-                                                            value={data.invoice_prefix}
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "invoice_prefix",
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>City</Label>
-                                                        <Input
-                                                            value={data.city}
-                                                            onChange={(e) =>
-                                                                setData("city", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Country</Label>
-                                                        <Input
-                                                            value={data.country}
-                                                            onChange={(e) =>
-                                                                setData("country", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Street</Label>
-                                                        <Input
-                                                            value={data.street}
-                                                            onChange={(e) =>
-                                                                setData("street", e.target.value)
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Postal Code</Label>
-                                                        <Input
-                                                            value={data.postal_code}
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "postal_code",
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Logo</Label>
-                                                        <Input
-                                                            type="file"
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "logo",
-                                                                    e.target.files?.[0] || null
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                    
-                                                    <div className="w-[25%] px-2 mt-3">
-                                                        <Label>Status</Label>
-                                                        <Select
-                                                            value={data.status ? "1" : "0"}
-                                                            onValueChange={(value) =>
-                                                                setData("status", value === "1")
-                                                            }
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select Status" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="1">
-                                                                    Active
-                                                                </SelectItem>
-                                                                <SelectItem value="0">
-                                                                    Inactive
-                                                                </SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                    
-                                                    <div className="w-full px-2 mt-3">
-                                                        <Button type="submit" disabled={processing}>
-                                                            Submit
-                                                        </Button>
-                                                    </div>
-                                                </form>
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Name</Label>
+                                <Input
+                                    placeholder="Club Name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData("name", e.target.value)
+                                    }
+                                />
+                                {errors.name && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.name}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Email</Label>
+                                <Input
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Password</Label>
+                                <Input
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                />
+                                {errors.password && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.password}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Confirm Password</Label>
+                                <Input
+                                    type="password"
+                                    value={data.password_confirmation}
+                                    onChange={(e) =>
+                                        setData(
+                                            "password_confirmation",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Organization</Label>
+                                <Select
+                                    value={data.organization_id}
+                                    onValueChange={(value) =>
+                                        setData("organization_id", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Organization" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {organizations.map((org) => (
+                                            <SelectItem
+                                                key={org.id}
+                                                value={org.id.toString()}
+                                            >
+                                                {org.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Phone</Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Skype</Label>
+                                <Input
+                                    value={data.skype}
+                                    onChange={(e) =>
+                                        setData("skype", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Notification Emails</Label>
+                                <Input
+                                    value={data.notification_emails}
+                                    onChange={(e) =>
+                                        setData(
+                                            "notification_emails",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Website</Label>
+                                <Input
+                                    value={data.website}
+                                    onChange={(e) =>
+                                        setData("website", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Tax Number</Label>
+                                <Input
+                                    value={data.tax_number}
+                                    onChange={(e) =>
+                                        setData("tax_number", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Invoice Prefix</Label>
+                                <Input
+                                    value={data.invoice_prefix}
+                                    onChange={(e) =>
+                                        setData(
+                                            "invoice_prefix",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>City</Label>
+                                <Input
+                                    value={data.city}
+                                    onChange={(e) =>
+                                        setData("city", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label className="block text-sm mb-1">
+                                    Country
+                                </Label>
+                                <CountryDropdown
+                                    placeholder="Select country"
+                                    defaultValue={data.country} // your default or empty
+                                    onChange={(c) =>
+                                        setData("country", c.alpha3)
+                                    }
+                                    slim={false}
+                                />
+                                {errors.country && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.country}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Street</Label>
+                                <Input
+                                    value={data.street}
+                                    onChange={(e) =>
+                                        setData("street", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Postal Code</Label>
+                                <Input
+                                    value={data.postal_code}
+                                    onChange={(e) =>
+                                        setData("postal_code", e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Logo</Label>
+                                <Input
+                                    type="file"
+                                    onChange={(e) =>
+                                        setData(
+                                            "logo",
+                                            e.target.files?.[0] || null
+                                        )
+                                    }
+                                />
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Status</Label>
+                                <Select
+                                    value={data.status ? "1" : "0"}
+                                    onValueChange={(value) =>
+                                        setData("status", value === "1")
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1">
+                                            Active
+                                        </SelectItem>
+                                        <SelectItem value="0">
+                                            Inactive
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="w-full px-2 mt-3">
+                                <Button type="submit" disabled={processing}>
+                                    Submit
+                                </Button>
+                            </div>
+                        </form>
                     </CardContent>
                 </Card>
             </div>
