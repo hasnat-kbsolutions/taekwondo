@@ -13,6 +13,8 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+    protected $flash = ['success', 'error'];
+
 
     /**
      * Determine the current asset version.

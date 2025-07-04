@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { PageProps } from "@/types"; // We'll define this below
+
 import {
     Select,
     SelectTrigger,
@@ -14,6 +16,7 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
+import { toast } from "sonner"; // or any toast lib
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import {
     DropdownMenu,
@@ -146,11 +149,32 @@ const columns: ColumnDef<Club>[] = [
     },
 ];
 
-export default function ClubIndex({
+export default function Index({
     clubs,
     organizations = [],
     filters,
+    
 }: Props) {
+    // Use correct typing
+    const { props } = usePage<PageProps>();
+    const success = props.flash?.success;
+
+    useEffect(() => {
+        if (success) {
+            console.log("Flash success:", success);
+            toast.success(success);
+        }
+    }, [success]);
+    
+
+    const error = props.flash?.error;
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
+
     const [organizationId, setOrganizationId] = useState(
         filters.organization_id || ""
     );

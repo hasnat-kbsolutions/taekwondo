@@ -99,7 +99,8 @@ class ClubController extends Controller
             'userable_id' => $club->id,
         ]);
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully');
+        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully.');
+
     }
 
     public function edit( $id)
@@ -116,7 +117,9 @@ class ClubController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . optional($club->user)->id,
-            'password' => 'required|string|min:8|confirmed',
+
+            // password is optional, but must meet rules if filled
+            'password' => 'nullable|string|min:8|confirmed',
 
             'organization_id' => 'required|exists:organizations,id',
             'country' => 'nullable|string|max:255',
@@ -132,6 +135,7 @@ class ClubController extends Controller
             'status' => 'boolean',
             'logo' => 'nullable|image|max:2048',
         ]);
+
 
         if ($request->hasFile('logo')) {
             if ($club->logo) {
@@ -165,17 +169,22 @@ class ClubController extends Controller
         ]);
 
         if ($club->user) {
-            $club->user->update([
+            $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => $request->filled('password')
-                    ? Hash::make($request->password)
-                    : $club->user->password,
-            ]);
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $club->user->update($updateData);
         }
 
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club updated successfully');
+
+        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully');
+
     }
 
     public function destroy(Club $club)
