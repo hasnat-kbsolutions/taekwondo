@@ -12,6 +12,8 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
+    SelectGroup,
+    SelectLabel,
 } from "@/components/ui/select";
 
 interface Props {
@@ -177,25 +179,86 @@ export default function Create({ clubs, organizations }: Props) {
                     </div>
 
                     <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Date </Label>
-                        <Input
-                            type="date"
-                            placeholder="Date of Death"
-                            value={data.dod}
-                            onChange={(e) => setData("dod", e.target.value)}
-                        />
-                        {errors.dod && (
-                            <p className="text-red-500 text-sm">{errors.dod}</p>
-                        )}
-                    </div>
+                        <Label className="block text-sm mb-1">Grade</Label>
+                        <Select
+                            value={data.grade || ""}
+                            onValueChange={(value) => setData("grade", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>
+                                        Gup (Student Grades)
+                                    </SelectLabel>
+                                    <SelectItem value="10th Gup - White">
+                                        10th Gup - White
+                                    </SelectItem>
+                                    <SelectItem value="9th Gup - White w/ Yellow Tag">
+                                        9th Gup - White w/ Yellow Tag
+                                    </SelectItem>
+                                    <SelectItem value="8th Gup - Yellow">
+                                        8th Gup - Yellow
+                                    </SelectItem>
+                                    <SelectItem value="7th Gup - Yellow w/ Green Tag">
+                                        7th Gup - Yellow w/ Green Tag
+                                    </SelectItem>
+                                    <SelectItem value="6th Gup - Green">
+                                        6th Gup - Green
+                                    </SelectItem>
+                                    <SelectItem value="5th Gup - Green w/ Blue Tag">
+                                        5th Gup - Green w/ Blue Tag
+                                    </SelectItem>
+                                    <SelectItem value="4th Gup - Blue">
+                                        4th Gup - Blue
+                                    </SelectItem>
+                                    <SelectItem value="3rd Gup - Blue w/ Red Tag">
+                                        3rd Gup - Blue w/ Red Tag
+                                    </SelectItem>
+                                    <SelectItem value="2nd Gup - Red">
+                                        2nd Gup - Red
+                                    </SelectItem>
+                                    <SelectItem value="1st Gup - Red w/ Black Tag">
+                                        1st Gup - Red w/ Black Tag
+                                    </SelectItem>
+                                </SelectGroup>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Grade </Label>
-                        <Input
-                            placeholder="Grade"
-                            value={data.grade}
-                            onChange={(e) => setData("grade", e.target.value)}
-                        />
+                                <SelectGroup>
+                                    <SelectLabel>
+                                        Dan (Black Belt Ranks)
+                                    </SelectLabel>
+                                    <SelectItem value="1st Dan - Black Belt">
+                                        1st Dan - Black Belt
+                                    </SelectItem>
+                                    <SelectItem value="2nd Dan - Assistant Instructor">
+                                        2nd Dan - Assistant Instructor
+                                    </SelectItem>
+                                    <SelectItem value="3rd Dan - Instructor">
+                                        3rd Dan - Instructor
+                                    </SelectItem>
+                                    <SelectItem value="4th Dan - International Instructor">
+                                        4th Dan - International Instructor
+                                    </SelectItem>
+                                    <SelectItem value="5th Dan - International Instructor">
+                                        5th Dan - International Instructor
+                                    </SelectItem>
+                                    <SelectItem value="6th Dan - Senior Instructor">
+                                        6th Dan - Senior Instructor
+                                    </SelectItem>
+                                    <SelectItem value="7th Dan - Master">
+                                        7th Dan - Master
+                                    </SelectItem>
+                                    <SelectItem value="8th Dan - Senior Master">
+                                        8th Dan - Senior Master
+                                    </SelectItem>
+                                    <SelectItem value="9th Dan - Grand Master">
+                                        9th Dan - Grand Master
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+
                         {errors.grade && (
                             <p className="text-red-500 text-sm">
                                 {errors.grade}
