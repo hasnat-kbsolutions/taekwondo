@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 export default function Create() {
-    const { students } = usePage().props as any;
+    const { students, errors } = usePage().props as any;
 
     const [form, setForm] = useState({
         student_id: "",
@@ -35,19 +35,26 @@ export default function Create() {
         router.post(route("admin.payments.store"), form);
     };
 
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
     return (
         <AuthenticatedLayout header="Add Payment">
             <Head title="Add Payment" />
             <div className="p-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Add New Payment</CardTitle>
+                        <CardTitle>Add Payment</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <Label>Student</Label>
+                                    <Label>
+                                        Student
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.student_id}
                                         onValueChange={(value) =>
@@ -68,9 +75,13 @@ export default function Create() {
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {renderError("student_id")}
                                 </div>
                                 <div>
-                                    <Label>Amount</Label>
+                                    <Label>
+                                        Amount
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Input
                                         type="number"
                                         value={form.amount}
@@ -81,9 +92,13 @@ export default function Create() {
                                             )
                                         }
                                     />
+                                    {renderError("amount")}
                                 </div>
                                 <div>
-                                    <Label>Status</Label>
+                                    <Label>
+                                        Status
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.status}
                                         onValueChange={(value) =>
@@ -102,10 +117,14 @@ export default function Create() {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {renderError("status")}
                                 </div>
 
                                 <div>
-                                    <Label>Method</Label>
+                                    <Label>
+                                        Method
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.method}
                                         onValueChange={(value) =>
@@ -124,10 +143,14 @@ export default function Create() {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {renderError("method")}
                                 </div>
 
                                 <div>
-                                    <Label>Payment Month</Label>
+                                    <Label>
+                                        Payment Month
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Input
                                         type="month"
                                         value={form.payment_month}
@@ -138,10 +161,14 @@ export default function Create() {
                                             )
                                         }
                                     />
+                                    {renderError("payment_month")}
                                 </div>
 
                                 <div>
-                                    <Label>Pay At</Label>
+                                    <Label>
+                                        Pay At
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Input
                                         type="date"
                                         value={form.pay_at}
@@ -152,6 +179,7 @@ export default function Create() {
                                             )
                                         }
                                     />
+                                    {renderError("pay_at")}
                                 </div>
 
                                 <div className="col-span-3">

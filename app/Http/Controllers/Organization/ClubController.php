@@ -38,24 +38,24 @@ class ClubController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+        
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
 
-            'tax_number' => 'nullable|string|max:255',
-            'invoice_prefix' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
-            'notification_emails' => 'nullable|string|max:255',
-            'website' => 'nullable|string|max:255',
-            'logo' => 'nullable|file|image|max:2048',
             'country' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skype' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
+            'tax_number' => 'nullable|string|max:255',
+            'invoice_prefix' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
-
         if ($request->hasFile('logo')) {
             $relativePath = $request->file('logo')->store('clubs', 'public');
             $validated['logo'] = asset('storage/' . $relativePath); // full URL path
@@ -63,21 +63,22 @@ class ClubController extends Controller
 
 
 
+
         $club = Club::create([
             'organization_id' => Auth::user()->userable_id,
             'name' => $validated['name'],
-            'tax_number' => $validated['tax_number'] ?? null,
-            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'skype' => $validated['skype'] ?? null,
-            'notification_emails' => $validated['notification_emails'] ?? null,
-            'website' => $validated['website'] ?? null,
-            'logo' => $validated['logo'],
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'skype' => $validated['skype'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'tax_number' => $validated['tax_number'] ?? null,
+            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
+            'logo' => $validated['logo'],
         ]);
 
         User::create([
@@ -89,7 +90,8 @@ class ClubController extends Controller
             'userable_id' => $club->id,
         ]);
 
-        return redirect()->route('organization.clubs.index')->with('success', 'Club created successfully');
+        return redirect()->route('organization.clubs.index')->with('success', 'Club created successfully.');
+
     }
 
     public function edit($id)
@@ -105,21 +107,24 @@ class ClubController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . optional($club->user)->id,
-            'password' => 'required|string|min:8|confirmed',
 
-            'tax_number' => 'nullable|string|max:255',
-            'invoice_prefix' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
-            'notification_emails' => 'nullable|string|max:255',
-            'website' => 'nullable|string|max:255',
-            'logo' => 'nullable|file|image|max:2048',
+            // password is optional, but must meet rules if filled
+            'password' => 'nullable|string|min:8|confirmed',
+
             'country' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skype' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
+            'tax_number' => 'nullable|string|max:255',
+            'invoice_prefix' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
+
 
         if ($request->hasFile('logo')) {
             if ($club->logo) {
@@ -137,31 +142,37 @@ class ClubController extends Controller
 
         $club->update([
             'name' => $validated['name'],
-            'tax_number' => $validated['tax_number'] ?? null,
-            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'skype' => $validated['skype'] ?? null,
-            'notification_emails' => $validated['notification_emails'] ?? null,
-            'website' => $validated['website'] ?? null,
-            'logo' => $validated['logo'],
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'skype' => $validated['skype'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'tax_number' => $validated['tax_number'] ?? null,
+            'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
+            'logo' => $validated['logo'],
         ]);
 
         if ($club->user) {
-            $club->user->update([
+            $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => $request->filled('password')
-                    ? Hash::make($request->password)
-                    : $club->user->password,
-            ]);
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $club->user->update($updateData);
         }
 
+
+
         return redirect()->route('organization.clubs.index')->with('success', 'Club updated successfully');
+
     }
 
     public function destroy(Club $club)

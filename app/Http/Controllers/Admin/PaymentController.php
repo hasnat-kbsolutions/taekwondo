@@ -26,6 +26,8 @@ class PaymentController extends Controller
 
 
 
+
+
     public function create()
     {
         return Inertia::render('Admin/Payments/Create', [
@@ -41,7 +43,7 @@ class PaymentController extends Controller
             'method' => 'required|in:cash,stripe,bank,other',
             'status' => 'required|in:pending,paid,failed,refunded',
             'payment_month' => 'required|date_format:Y-m',
-            'pay_at' => 'nullable|date',
+            'pay_at' => 'required|date',
             'notes' => 'nullable|string',
             'transaction_id' => 'nullable|string|max:255',
         ]);

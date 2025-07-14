@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { PageProps } from "@/types"; // We'll define this below
-
+import { Eye } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Select,
     SelectTrigger,
@@ -16,7 +16,6 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { toast } from "sonner"; // or any toast lib
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import {
     DropdownMenu,
@@ -60,12 +59,12 @@ interface Props {
     };
 }
 
-
 const columns: ColumnDef<Club>[] = [
     {
-        header: "ID",
-        accessorKey: "id",
+        header: "#",
+        cell: ({ row }) => row.index + 1,
     },
+
     {
         header: "Logo",
         cell: ({ row }) =>
@@ -149,31 +148,7 @@ const columns: ColumnDef<Club>[] = [
     },
 ];
 
-export default function Index({
-    clubs,
-    organizations = [],
-    filters,
-    
-}: Props) {
-    // Use correct typing
-    const { props } = usePage<PageProps>();
-    const success = props.flash?.success;
-
-    useEffect(() => {
-        if (success) {
-            console.log("Flash success:", success);
-            toast.success(success);
-        }
-    }, [success]);
-    
-
-    const error = props.flash?.error;
-
-    useEffect(() => {
-        if (error) {
-            toast.error(error);
-        }
-    }, [error]);
+export default function Index({ clubs, organizations = [], filters }: Props) {
 
     const [organizationId, setOrganizationId] = useState(
         filters.organization_id || ""
@@ -210,71 +185,83 @@ export default function Index({
     };
 
     return (
-        <AuthenticatedLayout header="Cawangan">
-            <Head title="Clubs" />
-            <div className="p-4 space-y-6">
-                {/* Filters */}
-                <div className="flex items-end gap-4 flex-wrap">
-                    <div className="flex flex-col w-[200px]">
-                        <Label className="text-sm mb-1">Organizations</Label>
-                        <Select
-                            value={organizationId || ""}
-                            onValueChange={(val) => {
-                                setOrganizationId(val);
-                                handleFilterChange({ country });
-                            }}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="All Organizations" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All</SelectItem>
-                                {organizations.map((org) => (
-                                    <SelectItem
-                                        key={org.id}
-                                        value={org.id.toString()}
-                                    >
-                                        {org.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="flex flex-col w-[200px]">
-                        <Label className="text-sm mb-1">Country</Label>
-                        <CountryDropdown
-                            placeholder="All Countries"
-                            defaultValue={country || ""}
-                            onChange={(c) => {
-                                const selected = c?.alpha3 || "";
-                                setCountry(selected);
-                                handleFilterChange({
-                                    organization_id: organizationId,
-                                });
-                            }}
-                            slim={false}
-                        />
-                    </div>
-
-                    <div className="flex items-end">
-                        <Button variant="outline" onClick={resetFilters}>
-                            Reset Filters
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Header and Add Button */}
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Clubs</h1>
-                    <Link href={route("admin.clubs.create")}>
-                        <Button>Add Club</Button>
-                    </Link>
-                </div>
-
-                {/* Data Table */}
+        <AuthenticatedLayout header="Clubs">
+            <Head title="Organizations" />
+            <div className="container mx-auto py-10">
                 <Card>
-                    <DataTable columns={columns} data={clubs} />
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Filters</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-end gap-4 flex-wrap ">
+                            <div className="flex flex-col w-[200px]">
+                                <Label className="text-sm mb-1">
+                                    Organizations
+                                </Label>
+                                <Select
+                                    value={organizationId || ""}
+                                    onValueChange={(val) => {
+                                        setOrganizationId(val);
+                                        handleFilterChange({ country });
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Organizations" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All</SelectItem>
+                                        {organizations.map((org) => (
+                                            <SelectItem
+                                                key={org.id}
+                                                value={org.id.toString()}
+                                            >
+                                                {org.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex flex-col w-[200px]">
+                                <Label className="text-sm mb-1">Country</Label>
+                                <CountryDropdown
+                                    placeholder="All Countries"
+                                    defaultValue={country || ""}
+                                    onChange={(c) => {
+                                        const selected = c?.alpha3 || "";
+                                        setCountry(selected);
+                                        handleFilterChange({
+                                            organization_id: organizationId,
+                                        });
+                                    }}
+                                    slim={false}
+                                />
+                            </div>
+
+                            <div className="flex items-end">
+                                <Button
+                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                                    onClick={resetFilters}
+                                >
+                                    Reset Filters
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="container mx-auto ">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Clubs</CardTitle>
+                        <Link href={route("admin.clubs.create")}>
+                            {" "}
+                            <Button>Add Club</Button>{" "}
+                        </Link>
+                    </CardHeader>
+                    <CardContent>
+                        <DataTable columns={columns} data={clubs} />
+                    </CardContent>
                 </Card>
             </div>
         </AuthenticatedLayout>

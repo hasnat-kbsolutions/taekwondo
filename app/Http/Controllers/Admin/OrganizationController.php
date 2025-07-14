@@ -33,6 +33,8 @@ class OrganizationController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+    
             'phone' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'skype' => 'nullable|string|max:255',
@@ -43,6 +45,7 @@ class OrganizationController extends Controller
             'status' => 'boolean',
         ]);
 
+    
         $organization = Organization::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -55,17 +58,19 @@ class OrganizationController extends Controller
             'postal_code' => $validated['postal_code'] ?? null,
             'status' => $validated['status'] ?? false,
         ]);
-
+    
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make('password'),
+            'password' => Hash::make($validated['password']),
             'role' => 'organization',
             'userable_type' => Organization::class,
             'userable_id' => $organization->id,
         ]);
-
-        return redirect()->route('admin.organizations.index')->with('success', 'Organization created successfully');
+    
+        return redirect()
+            ->route('admin.organizations.index')
+            ->with('success', 'Organization created successfully');
     }
 
     public function edit(Organization $organization)
@@ -80,6 +85,8 @@ class OrganizationController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . optional($organization->user)->id,
+            'password' => 'nullable|string|min:8|confirmed',
+
             'phone' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'skype' => 'nullable|string|max:255',
@@ -89,6 +96,8 @@ class OrganizationController extends Controller
             'postal_code' => 'nullable|string|max:255',
             'status' => 'boolean',
         ]);
+
+
 
         $organization->update([
             'name' => $validated['name'],
@@ -104,19 +113,36 @@ class OrganizationController extends Controller
         ]);
 
         if ($organization->user) {
-            $organization->user->update([
+            $updateUser = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-            ]);
+            ];
+
+            if (!empty($validated['password'])) {
+                $updateUser['password'] = Hash::make($validated['password']);
+            }
+
+            $organization->user->update($updateUser);
         }
 
-        return redirect()->route('admin.organizations.index')->with('success', 'Organization updated successfully');
+        return redirect()
+            ->route('admin.organizations.index')
+            ->with('success', 'Organization updated successfully');
     }
+
 
     public function destroy(Organization $organization)
     {
+        // Delete the associated user first
+        if ($organization->user) {
+            $organization->user()->delete();
+        }
+        // Then delete the organization
         $organization->delete();
-
-        return redirect()->route('admin.organizations.index')->with('success', 'Organization deleted successfully');
+    
+        return redirect()
+            ->route('admin.organizations.index')
+            ->with('success', 'Organization and associated user deleted successfully');
     }
+    
 }

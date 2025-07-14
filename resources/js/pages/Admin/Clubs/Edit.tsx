@@ -13,7 +13,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
-import { toast } from "sonner";
 
 interface Organization {
     id: number;
@@ -50,7 +49,9 @@ export default function Edit({ club, organizations }: Props) {
         club.logo_url || null
     );
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
+        _method: "PUT",
+
         name: club.user?.name || "",
         email: club.user?.email || "",
         password: "",
@@ -77,8 +78,7 @@ export default function Edit({ club, organizations }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         
         e.preventDefault();
-        toast.dismiss();
-        put(route("admin.clubs.update", club.id));
+        post(route("admin.clubs.update", club.id));
     };
 
 
@@ -86,13 +86,12 @@ export default function Edit({ club, organizations }: Props) {
 
 
 
-    useEffect(() => {
-        if (Object.keys(errors).length > 0) {
-            Object.entries(errors).forEach(([_, message]) => {
-                toast.error(message);
-            });
-        }
-    }, [errors]);
+
+
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
 
     return (
         <AuthenticatedLayout header="Edit Club">
@@ -112,17 +111,23 @@ export default function Edit({ club, organizations }: Props) {
                         >
                             {/* Required Fields */}
                             <div className="w-[25%] px-2 mt-3">
-                                <Label>Name <span className="text-red-500">*</span></Label>
+                                <Label>
+                                    Name <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) =>
                                         setData("name", e.target.value)
                                     }
                                 />
+                                {renderError("name")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
-                                <Label>Email <span className="text-red-500">*</span></Label>
+                                <Label>
+                                    Email{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     type="email"
                                     value={data.email}
@@ -130,6 +135,7 @@ export default function Edit({ club, organizations }: Props) {
                                         setData("email", e.target.value)
                                     }
                                 />
+                                {renderError("email")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
@@ -141,6 +147,7 @@ export default function Edit({ club, organizations }: Props) {
                                         setData("password", e.target.value)
                                     }
                                 />
+                                {renderError("password")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
@@ -155,10 +162,14 @@ export default function Edit({ club, organizations }: Props) {
                                         )
                                     }
                                 />
+                                {renderError("password_confirmation")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
-                                <Label>Organization <span className="text-red-500">*</span></Label>
+                                <Label>
+                                    Organization{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
                                 <Select
                                     value={data.organization_id}
                                     onValueChange={(value) =>
@@ -179,42 +190,113 @@ export default function Edit({ club, organizations }: Props) {
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {renderError("organization_id")}
                             </div>
 
-                            {[
-                                "phone",
-                                "skype",
-                                "notification_emails",
-                                "website",
-                                "tax_number",
-                                "invoice_prefix",
-                                "city",
-                                "street",
-                                "postal_code",
-                            ].map((field) => (
-                                <div className="w-[25%] px-2 mt-3" key={field}>
-                                    <Label>
-                                        {field
-                                            .replace("_", " ")
-                                            .replace(/\b\w/g, (c) =>
-                                                c.toUpperCase()
-                                            )}
-                                    </Label>
-                                    <Input
-                                        value={
-                                            (data[
-                                                field as keyof typeof data
-                                            ] as string) ?? ""
-                                        }
-                                        onChange={(e) =>
-                                            setData(
-                                                field as keyof typeof data,
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
-                            ))}
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Phone</Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
+                                {renderError("phone")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Skype</Label>
+                                <Input
+                                    value={data.skype}
+                                    onChange={(e) =>
+                                        setData("skype", e.target.value)
+                                    }
+                                />
+                                {renderError("skype")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Notification Emails</Label>
+                                <Input
+                                    value={data.notification_emails}
+                                    onChange={(e) =>
+                                        setData(
+                                            "notification_emails",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {renderError("notification_emails")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Website</Label>
+                                <Input
+                                    value={data.website}
+                                    onChange={(e) =>
+                                        setData("website", e.target.value)
+                                    }
+                                />
+                                {renderError("website")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Tax Number</Label>
+                                <Input
+                                    value={data.tax_number}
+                                    onChange={(e) =>
+                                        setData("tax_number", e.target.value)
+                                    }
+                                />
+                                {renderError("tax_number")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Invoice Prefix</Label>
+                                <Input
+                                    value={data.invoice_prefix}
+                                    onChange={(e) =>
+                                        setData(
+                                            "invoice_prefix",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {renderError("invoice_prefix")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>City</Label>
+                                <Input
+                                    value={data.city}
+                                    onChange={(e) =>
+                                        setData("city", e.target.value)
+                                    }
+                                />
+                                {renderError("city")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Street</Label>
+                                <Input
+                                    value={data.street}
+                                    onChange={(e) =>
+                                        setData("street", e.target.value)
+                                    }
+                                />
+                                {renderError("street")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Postal Code</Label>
+                                <Input
+                                    value={data.postal_code}
+                                    onChange={(e) =>
+                                        setData("postal_code", e.target.value)
+                                    }
+                                />
+                                {renderError("postal_code")}
+                            </div>
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Country</Label>

@@ -3,29 +3,22 @@ import { Head, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
-// Define form data keys
-type OrgFormFields =
-    | "name"
-    | "email"
-    | "phone"
-    | "website"
-    | "skype"
-    | "city"
-    | "country"
-    | "street"
-    | "postal_code";
-
-type OrgFormData = {
-    [K in OrgFormFields]: string;
-} & { status: boolean };
-
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm<OrgFormData>({
+    const { data, setData, post, processing, errors } = useForm({
         name: "",
         email: "",
+        password: "",
+        password_confirmation: "",
         phone: "",
         website: "",
         skype: "",
@@ -41,17 +34,10 @@ export default function Create() {
         post(route("admin.organizations.store"));
     };
 
-    const fields: { id: OrgFormFields; label: string; type: string }[] = [
-        { id: "name", label: "Name", type: "text" },
-        { id: "email", label: "Email", type: "email" },
-        { id: "phone", label: "Phone", type: "text" },
-        { id: "website", label: "Website", type: "text" },
-        { id: "skype", label: "Skype", type: "text" },
-        { id: "city", label: "City", type: "text" },
-        { id: "country", label: "Country", type: "text" },
-        { id: "street", label: "Street", type: "text" },
-        { id: "postal_code", label: "Postal Code", type: "text" },
-    ];
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
 
     return (
         <AuthenticatedLayout header="Create Ahli Gabungan">
@@ -59,35 +45,175 @@ export default function Create() {
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Create New Organization</CardTitle>
+                        <CardTitle>Create Organization</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {fields.map(({ id, label, type }) => (
-                                <div key={id}>
-                                    <Label
-                                        htmlFor={id}
-                                        className="block text-sm mb-1"
-                                    >
-                                        {label}
-                                    </Label>
-                                    <Input
-                                        id={id}
-                                        type={type}
-                                        value={data[id]}
-                                        onChange={(e) =>
-                                            setData(id, e.target.value)
-                                        }
-                                    />
-                                    {errors[id] && (
-                                        <p className="text-red-500 text-sm">
-                                            {errors[id]}
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Name <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData("name", e.target.value)
+                                    }
+                                />
+                                {renderError("name")}
+                            </div>
 
-                            <div className="flex justify-end">
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Email{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                />
+                                {renderError("email")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                />
+                                {renderError("password")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Confirm Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="password"
+                                    value={data.password_confirmation}
+                                    onChange={(e) =>
+                                        setData(
+                                            "password_confirmation",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {renderError("password_confirmation")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Phone</Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
+                                {renderError("phone")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Skype</Label>
+                                <Input
+                                    value={data.skype}
+                                    onChange={(e) =>
+                                        setData("skype", e.target.value)
+                                    }
+                                />
+                                {renderError("skype")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Website</Label>
+                                <Input
+                                    value={data.website}
+                                    onChange={(e) =>
+                                        setData("website", e.target.value)
+                                    }
+                                />
+                                {renderError("website")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>City</Label>
+                                <Input
+                                    value={data.city}
+                                    onChange={(e) =>
+                                        setData("city", e.target.value)
+                                    }
+                                />
+                                {renderError("city")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Country</Label>
+                                <Input
+                                    value={data.country}
+                                    onChange={(e) =>
+                                        setData("country", e.target.value)
+                                    }
+                                />
+                                {renderError("country")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Street</Label>
+                                <Input
+                                    value={data.street}
+                                    onChange={(e) =>
+                                        setData("street", e.target.value)
+                                    }
+                                />
+                                {renderError("street")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Postal Code</Label>
+                                <Input
+                                    value={data.postal_code}
+                                    onChange={(e) =>
+                                        setData("postal_code", e.target.value)
+                                    }
+                                />
+                                {renderError("postal_code")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Status</Label>
+                                <Select
+                                    value={data.status ? "1" : "0"}
+                                    onValueChange={(value) =>
+                                        setData("status", value === "1")
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1">
+                                            Active
+                                        </SelectItem>
+                                        <SelectItem value="0">
+                                            Inactive
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {renderError("status")}
+                            </div>
+
+                            <div className="w-full px-2 mt-6">
                                 <Button type="submit" disabled={processing}>
                                     Create
                                 </Button>

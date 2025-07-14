@@ -1,19 +1,18 @@
 import React from "react";
 import { Head, useForm } from "@inertiajs/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
 
 interface Props {
     clubs: any[];
@@ -23,7 +22,6 @@ interface Props {
 export default function Create({ clubs, organizations }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         club_id: "",
-        country: "",
         organization_id: "",
         name: "",
         surename: "",
@@ -31,16 +29,20 @@ export default function Create({ clubs, organizations }: Props) {
         email: "",
         phone: "",
         type: "",
+        country: "",
         status: false,
         profile_image: null as File | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("admin.supporters.store"), {
-            forceFormData: true,
-        });
+        post(route("admin.supporters.store"), { forceFormData: true });
     };
+
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
 
     return (
         <AuthenticatedLayout header="Create Supporter">
@@ -48,111 +50,117 @@ export default function Create({ clubs, organizations }: Props) {
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Create New Supporter</CardTitle>
+                        <CardTitle>Create Supporter</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form
                             onSubmit={handleSubmit}
-                            className="flex flex-wrap"
+                            className="grid grid-cols-2 gap-4"
                         >
-                            <div className="w-[50%] px-2">
-                                <Label className="block text-sm mb-1">
-                                    Select Club{" "}
+                            {/* Club */}
+                            <div>
+                                <Label>
+                                    Club <span className="text-red-500">*</span>
                                 </Label>
-                                <select
+                                <Select
                                     value={data.club_id}
-                                    onChange={(e) =>
-                                        setData("club_id", e.target.value)
+                                    onValueChange={(value) =>
+                                        setData("club_id", value)
                                     }
-                                    className="w-full border rounded p-2"
                                 >
-                                    <option value="">Select Club</option>
-                                    {clubs.map((club) => (
-                                        <option key={club.id} value={club.id}>
-                                            {club.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.club_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.club_id}
-                                    </p>
-                                )}
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Club" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {clubs.map((club) => (
+                                            <SelectItem
+                                                key={club.id}
+                                                value={String(club.id)}
+                                            >
+                                                {club.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {renderError("club_id")}
                             </div>
 
-                            <div className="w-[50%] px-2">
-                                <Label className="block text-sm mb-1">
-                                    Select organization{" "}
+                            {/* Organization */}
+                            <div>
+                                <Label>
+                                    Organization{" "}
+                                    <span className="text-red-500">*</span>
                                 </Label>
-                                <select
+                                <Select
                                     value={data.organization_id}
-                                    onChange={(e) =>
-                                        setData(
-                                            "organization_id",
-                                            e.target.value
-                                        )
+                                    onValueChange={(value) =>
+                                        setData("organization_id", value)
                                     }
-                                    className="w-full border rounded p-2"
                                 >
-                                    <option value="">
-                                        Select Organization
-                                    </option>
-                                    {organizations.map((org) => (
-                                        <option key={org.id} value={org.id}>
-                                            {org.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.organization_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.organization_id}
-                                    </p>
-                                )}
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Organization" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {organizations.map((org) => (
+                                            <SelectItem
+                                                key={org.id}
+                                                value={String(org.id)}
+                                            >
+                                                {org.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {renderError("organization_id")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Name{" "}
+                            {/* Name */}
+                            <div>
+                                <Label>
+                                    Name <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
-                                    type="name"
-                                    placeholder="Name"
                                     value={data.name}
                                     onChange={(e) =>
                                         setData("name", e.target.value)
                                     }
+                                    placeholder="Name"
                                 />
+                                {renderError("name")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Surename{" "}
-                                </Label>
+                            {/* Surename */}
+                            <div>
+                                <Label>Surname</Label>
                                 <Input
-                                    placeholder="Surename"
                                     value={data.surename}
                                     onChange={(e) =>
                                         setData("surename", e.target.value)
                                     }
+                                    placeholder="Surname"
                                 />
+                                {renderError("surename")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Country{" "}
-                                </Label>
-                                <Input
-                                    placeholder="Country"
-                                    value={data.country}
-                                    onChange={(e) =>
-                                        setData("country", e.target.value)
+                            {/* Country */}
+                            <div>
+                                <Label>Country</Label>
+                                <CountryDropdown
+                                    placeholder="Select country"
+                                    defaultValue={data.country}
+                                    onChange={(c) =>
+                                        setData("country", c.alpha3)
                                     }
+                                    slim={false}
                                 />
+                                {renderError("country")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Gender
+                            {/* Gender */}
+                            <div>
+                                <Label>
+                                    Gender{" "}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
                                     value={data.gender}
@@ -161,81 +169,79 @@ export default function Create({ clubs, organizations }: Props) {
                                     }
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Gender" />
+                                        <SelectValue placeholder="Select Gender" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Gender</SelectLabel>
-                                            <SelectItem value="male">
-                                                Male
-                                            </SelectItem>
-                                            <SelectItem value="female">
-                                                Female
-                                            </SelectItem>
-                                        </SelectGroup>
+                                        <SelectItem value="male">
+                                            Male
+                                        </SelectItem>
+                                        <SelectItem value="female">
+                                            Female
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
+                                {renderError("gender")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Email{" "}
-                                </Label>
+                            {/* Email */}
+                            <div>
+                                <Label>Email</Label>
                                 <Input
                                     type="email"
-                                    placeholder="Email"
                                     value={data.email}
                                     onChange={(e) =>
                                         setData("email", e.target.value)
                                     }
+                                    placeholder="Email"
                                 />
+                                {renderError("email")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Phone{" "}
-                                </Label>
+                            {/* Phone */}
+                            <div>
+                                <Label>Phone</Label>
                                 <Input
-                                    placeholder="Phone"
                                     value={data.phone}
                                     onChange={(e) =>
                                         setData("phone", e.target.value)
                                     }
+                                    placeholder="Phone"
                                 />
+                                {renderError("phone")}
                             </div>
 
-                            <div className="w-[50%] px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Type{" "}
-                                </Label>
+                            {/* Type */}
+                            <div>
+                                <Label>Type</Label>
                                 <Input
-                                    type="text"
-                                    placeholder="Type"
                                     value={data.type}
                                     onChange={(e) =>
                                         setData("type", e.target.value)
                                     }
+                                    placeholder="Type"
                                 />
+                                {renderError("type")}
                             </div>
 
-                            <div className="w-full px-2 mt-3">
-                                <Label className="block text-sm mb-1">
-                                    Files{" "}
-                                </Label>
+                            {/* File Upload */}
+                            <div className="col-span-2">
+                                <Label>Profile Image</Label>
                                 <Input
                                     type="file"
                                     onChange={(e) =>
                                         setData(
                                             "profile_image",
-                                            e.target.files?.[0] ?? null
+                                            e.target.files?.[0] || null
                                         )
                                     }
                                 />
+                                {renderError("profile_image")}
                             </div>
 
-                            <div className="w-full px-2 mt-3">
+                            {/* Submit */}
+                            <div className="col-span-2 pt-4">
                                 <Button type="submit" disabled={processing}>
-                                    Create
+                                    Create Supporter
                                 </Button>
                             </div>
                         </form>

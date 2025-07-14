@@ -19,34 +19,26 @@ class AttendanceController extends Controller
 
     public function index(Request $request)
     {
+        $organization_id = Auth::user()->userable_id;
+
         $date = $request->date ? Carbon::parse($request->date . '-01') : null;
 
-        $query = Student::with([
+        $students = Student::with([
             'attendances' => function ($q) use ($date) {
                 if ($date) {
                     $q->whereMonth('date', $date->month)
                         ->whereYear('date', $date->year);
                 }
             }
-        ]);
-
-        // Always apply auth-based filtering for organization user
-        if (Auth::user()->role === 'organization') {
-            $query->where('organization_id', Auth::user()->userable_id);
-        }
-
-        // Apply optional filters
-        $query
+        ])
+            ->where('organization_id', $organization_id)
             ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
-        ;
-
-        $students = $query->get();
+            ->get();
 
         $studentsWithAttendance = $students->map(function ($student) {
-            $records = $student->attendances->groupBy(
-                fn($a) =>
-                \Carbon\Carbon::parse($a->date)->format('Y-m-d')
-            )->map(fn($a) => $a->first()->status);
+            $records = $student->attendances->groupBy(function ($a) {
+                return Carbon::parse($a->date)->format('Y-m-d');
+            })->map(fn($a) => $a->first()->status);
 
             return [
                 'student' => [
@@ -57,11 +49,10 @@ class AttendanceController extends Controller
             ];
         });
 
-        return Inertia::render('Organization/Attendances/Index', [ // or Admin/ based on role
+        return Inertia::render('Organization/Attendances/Index', [
             'studentsWithAttendance' => $studentsWithAttendance,
-            'clubs' => Club::all(),
-
-            'filters' => $request->only('club_id', 'date'),
+            'clubs' => Club::where('organization_id', $organization_id)->get(),
+            'filters' => $request->only('club_id', 'date'), // removed 'organization_id'
         ]);
     }
 

@@ -36,7 +36,7 @@ class AttendanceController extends Controller
         // Map student + attendance into structured response
         $studentsWithAttendance = $students->map(function ($student) {
             $records = $student->attendances->groupBy(function ($a) {
-                return \Carbon\Carbon::parse($a->date)->format('Y-m-d');
+                return Carbon::parse($a->date)->format('Y-m-d');
             })->map(fn($a) => $a->first()->status);
 
             return [

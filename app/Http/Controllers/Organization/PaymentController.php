@@ -17,24 +17,18 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $status = $request->input('status');
-        $paymentMonth = $request->input('payment_month');
-
         $payments = Payment::with('student')
             ->whereHas('student', function ($query) use ($user) {
                 $query->where('organization_id', $user->userable_id);
             })
-            ->when($status, fn($q) => $q->where('status', $status))
-            ->when($paymentMonth, fn($q) => $q->where('payment_month', $paymentMonth))
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->payment_month, fn($q) => $q->where('payment_month', $request->payment_month))
             ->latest()
             ->get();
 
         return Inertia::render('Organization/Payments/Index', [
             'payments' => $payments,
-            'filters' => [
-                'status' => $status,
-                'payment_month' => $paymentMonth,
-            ],
+            'filters' => $request->only(['status', 'payment_month']),
         ]);
     }
 

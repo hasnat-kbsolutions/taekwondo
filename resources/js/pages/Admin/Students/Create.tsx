@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import { Head, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,6 @@ export default function Create({ clubs, organizations }: Props) {
         email: "",
         password: "",
         phone: "",
-
         code: "",
         surname: "",
         nationality: "",
@@ -47,25 +47,37 @@ export default function Create({ clubs, organizations }: Props) {
         postal_code: "",
         street: "",
         country: "",
-        status: false,
+        status: true,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route("admin.students.store"));
-    };
+
+        const handleSubmit = (e: React.FormEvent) => {
+            e.preventDefault();
+            post(route("admin.students.store"), {
+                forceFormData: true,
+            });
+        };
+
+     
+    
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
+    
 
     return (
         <AuthenticatedLayout header="Add Student">
             <Head title="Add Student" />
             <div className="container mx-auto py-10">
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Select Club
+                    {/* Required: Club */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Select Club <span className="text-red-500">*</span>
                         </Label>
                         <Select
-                            value={data.club_id || ""}
+                            value={data.club_id}
                             onValueChange={(value) => setData("club_id", value)}
                         >
                             <SelectTrigger className="w-full">
@@ -82,19 +94,16 @@ export default function Create({ clubs, organizations }: Props) {
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.club_id && (
-                            <p className="text-red-500 text-sm">
-                                {errors.club_id}
-                            </p>
-                        )}
+                        {renderError("club_id")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Organization
+                    {/* Required: Organization */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Organization <span className="text-red-500">*</span>
                         </Label>
                         <Select
-                            value={data.organization_id || ""}
+                            value={data.organization_id}
                             onValueChange={(value) =>
                                 setData("organization_id", value)
                             }
@@ -113,73 +122,64 @@ export default function Create({ clubs, organizations }: Props) {
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.organization_id && (
-                            <p className="text-red-500 text-sm">
-                                {errors.organization_id}
-                            </p>
-                        )}
+                        {renderError("organization_id")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Code </Label>
+                    {/* Optional: Code */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Code
+                            <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             placeholder="Code"
                             value={data.code}
                             onChange={(e) => setData("code", e.target.value)}
                         />
-                        {errors.code && (
-                            <p className="text-red-500 text-sm">
-                                {errors.code}
-                            </p>
-                        )}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Name </Label>
+                    {/* Required: Name */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Name <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             placeholder="Name"
                             value={data.name}
                             onChange={(e) => setData("name", e.target.value)}
                         />
-                        {errors.name && (
-                            <p className="text-red-500 text-sm">
-                                {errors.name}
-                            </p>
-                        )}
+                        {renderError("name")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Surname </Label>
-
+                    {/* Optional: Surname */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Surname</Label>
                         <Input
                             placeholder="Surname"
                             value={data.surname}
                             onChange={(e) => setData("surname", e.target.value)}
                         />
-                        {errors.surname && (
-                            <p className="text-red-500 text-sm">
-                                {errors.surname}
-                            </p>
-                        )}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Email </Label>
+                    {/* Required: Email */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Email <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             type="email"
                             placeholder="Email"
                             value={data.email}
                             onChange={(e) => setData("email", e.target.value)}
                         />
-                        {errors.email && (
-                            <p className="text-red-500 text-sm">
-                                {errors.email}
-                            </p>
-                        )}
+                        {renderError("email")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Password </Label>
+                    {/* Required: Password */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Password <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             type="password"
                             placeholder="Password"
@@ -188,62 +188,67 @@ export default function Create({ clubs, organizations }: Props) {
                                 setData("password", e.target.value)
                             }
                         />
-                        {errors.password && (
-                            <p className="text-red-500 text-sm">
-                                {errors.password}
-                            </p>
-                        )}
+                        {renderError("password")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Phone</Label>
+                    {/* Required: Phone */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Phone <span className="text-red-500">*</span>
+                        </Label>
                         <PhoneInput
                             defaultCountry="MY"
                             value={data.phone}
                             onChange={(val) => setData("phone", val)}
                             className="w-full"
                         />
-                        {errors.phone && (
-                            <p className="text-red-500 text-sm">
-                                {errors.phone}
-                            </p>
-                        )}
+                        {renderError("phone")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Nationality
+                    {/* Required: Nationality */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Nationality <span className="text-red-500">*</span>
                         </Label>
                         <CountryDropdown
                             placeholder="Select nationality"
-                            defaultValue={data.nationality || undefined}
+                            defaultValue={data.nationality}
                             onChange={(c) => setData("nationality", c.alpha3)}
                             slim={false}
                         />
-                        {errors.nationality && (
-                            <p className="text-red-500 text-sm">
-                                {errors.nationality}
-                            </p>
-                        )}
+                        {renderError("nationality")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Date </Label>
+                    {/* Required: DOB */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Date of Birth{" "}
+                            <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             type="date"
-                            placeholder="Date of Birth"
                             value={data.dob}
                             onChange={(e) => setData("dob", e.target.value)}
                         />
-                        {errors.dob && (
-                            <p className="text-red-500 text-sm">{errors.dob}</p>
-                        )}
+                        {renderError("dob")}
                     </div>
 
-                
+                    {/* Optional: Date of Deactivation/Death */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Date of Deactivation</Label>
+                        <Input
+                            type="date"
+                            value={data.dod}
+                            onChange={(e) => setData("dod", e.target.value)}
+                        />
+                        {renderError("dod")}
+                    </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Grade</Label>
+                    {/* Required: Grade */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Grade <span className="text-red-500">*</span>
+                        </Label>
                         <Select
                             value={data.grade || ""}
                             onValueChange={(value) => setData("grade", value)}
@@ -322,18 +327,16 @@ export default function Create({ clubs, organizations }: Props) {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-
-                        {errors.grade && (
-                            <p className="text-red-500 text-sm">
-                                {errors.grade}
-                            </p>
-                        )}
+                        {renderError("grade")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Gender</Label>
+                    {/* Required: Gender */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            Gender <span className="text-red-500">*</span>
+                        </Label>
                         <Select
-                            value={data.gender || ""}
+                            value={data.gender}
                             onValueChange={(value) => setData("gender", value)}
                         >
                             <SelectTrigger className="w-full">
@@ -344,123 +347,95 @@ export default function Create({ clubs, organizations }: Props) {
                                 <SelectItem value="female">Female</SelectItem>
                             </SelectContent>
                         </Select>
-                        {errors.gender && (
-                            <p className="text-red-500 text-sm">
-                                {errors.gender}
-                            </p>
-                        )}
+                        {renderError("gender")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Passport </Label>
+                    {/* Required: ID/Passport */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>
+                            ID/Passport <span className="text-red-500">*</span>
+                        </Label>
                         <Input
-                            placeholder="ID/Passport"
+                            placeholder="ID or Passport Number"
                             value={data.id_passport}
                             onChange={(e) =>
                                 setData("id_passport", e.target.value)
                             }
                         />
-                        {errors.id_passport && (
-                            <p className="text-red-500 text-sm">
-                                {errors.id_passport}
-                            </p>
-                        )}
+                        {renderError("id_passport")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Skype</Label>
+                    {/* Optional: Skype */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Skype</Label>
                         <Input
                             placeholder="Skype"
                             value={data.skype}
                             onChange={(e) => setData("skype", e.target.value)}
                         />
-                        {errors.skype && (
-                            <p className="text-red-500 text-sm">
-                                {errors.skype}
-                            </p>
-                        )}
+                        {renderError("skype")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Website</Label>
+                    {/* Optional: Website */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Website</Label>
                         <Input
                             placeholder="Website"
                             value={data.website}
                             onChange={(e) => setData("website", e.target.value)}
                         />
-                        {errors.website && (
-                            <p className="text-red-500 text-sm">
-                                {errors.website}
-                            </p>
-                        )}
+                        {renderError("website")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">City </Label>
+                    {/* Optional Address Fields */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>City</Label>
                         <Input
                             placeholder="City"
                             value={data.city}
                             onChange={(e) => setData("city", e.target.value)}
                         />
-                        {errors.city && (
-                            <p className="text-red-500 text-sm">
-                                {errors.city}
-                            </p>
-                        )}
+                        {renderError("city")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Postal Code{" "}
-                        </Label>
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Postal Code</Label>
                         <Input
-                            type="number"
                             placeholder="Postal Code"
                             value={data.postal_code}
                             onChange={(e) =>
                                 setData("postal_code", e.target.value)
                             }
                         />
-                        {errors.postal_code && (
-                            <p className="text-red-500 text-sm">
-                                {errors.postal_code}
-                            </p>
-                        )}
+                        {renderError("postal_code")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Street </Label>
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Street</Label>
                         <Input
                             placeholder="Street"
                             value={data.street}
                             onChange={(e) => setData("street", e.target.value)}
                         />
-                        {errors.street && (
-                            <p className="text-red-500 text-sm">
-                                {errors.street}
-                            </p>
-                        )}
+                        {renderError("street")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Country</Label>
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Country</Label>
                         <CountryDropdown
                             placeholder="Select country"
-                            defaultValue={data.country} // your default or empty
+                            defaultValue={data.country}
                             onChange={(c) => setData("country", c.alpha3)}
                             slim={false}
                         />
-                        {errors.country && (
-                            <p className="text-red-500 text-sm">
-                                {errors.country}
-                            </p>
-                        )}
+                        {renderError("country")}
                     </div>
 
-                    <div className="w-[25%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">Status </Label>
+                    {/* Optional: Status */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Status</Label>
                         <Select
-                            value={String(data.status ?? "true")} // Fallback to "true" if undefined
+                            value={String(data.status)}
                             onValueChange={(val) =>
                                 setData("status", val === "true")
                             }
@@ -473,18 +448,12 @@ export default function Create({ clubs, organizations }: Props) {
                                 <SelectItem value="false">Inactive</SelectItem>
                             </SelectContent>
                         </Select>
-
-                        {errors.status && (
-                            <p className="text-red-500 text-sm">
-                                {errors.status}
-                            </p>
-                        )}
+                        {renderError("status")}
                     </div>
 
-                    <div className="w-[100%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Upload profile Image
-                        </Label>
+                    {/* File Uploads */}
+                    <div className="w-full px-2 mt-3">
+                        <Label>Upload Profile Image</Label>
                         <Input
                             type="file"
                             onChange={(e) =>
@@ -494,17 +463,11 @@ export default function Create({ clubs, organizations }: Props) {
                                 )
                             }
                         />
-                        {errors.profile_image && (
-                            <p className="text-red-500 text-sm">
-                                {errors.profile_image}
-                            </p>
-                        )}
+                        {renderError("profile_image")}
                     </div>
 
-                    <div className="w-[100%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Upload ID/Passport
-                        </Label>
+                    <div className="w-full px-2 mt-3">
+                        <Label>Upload ID/Passport Image</Label>
                         <Input
                             type="file"
                             onChange={(e) =>
@@ -514,17 +477,11 @@ export default function Create({ clubs, organizations }: Props) {
                                 )
                             }
                         />
-                        {errors.id_passport_image && (
-                            <p className="text-red-500 text-sm">
-                                {errors.id_passport_image}
-                            </p>
-                        )}
+                        {renderError("id_passport_image")}
                     </div>
 
-                    <div className="w-[100%] px-2 mt-3">
-                        <Label className="block text-sm mb-1">
-                            Upload signature
-                        </Label>
+                    <div className="w-full px-2 mt-3">
+                        <Label>Upload Signature</Label>
                         <Input
                             type="file"
                             onChange={(e) =>
@@ -534,14 +491,10 @@ export default function Create({ clubs, organizations }: Props) {
                                 )
                             }
                         />
-                        {errors.signature_image && (
-                            <p className="text-red-500 text-sm">
-                                {errors.signature_image}
-                            </p>
-                        )}
+                        {renderError("signature_image")}
                     </div>
 
-                    <div className="w-full px-2 mt-3">
+                    <div className="w-full px-2 mt-5">
                         <Button type="submit" disabled={processing}>
                             Submit
                         </Button>

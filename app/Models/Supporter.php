@@ -24,4 +24,13 @@ class Supporter extends Model
         'status',
         'profile_image',
     ];
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+    public function club()
+    {
+        return $this->belongsTo(Club::class);
+    }
 }

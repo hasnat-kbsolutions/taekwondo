@@ -95,6 +95,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
 
+    Route::get('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'index'])->name('instructors.index');
+    Route::get('/instructors/create', [App\Http\Controllers\Admin\InstructorController::class, 'create'])->name('instructors.create');
+    Route::post('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'store'])->name('instructors.store');
+    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Admin\InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
+    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
     Route::get('/students/filter', [App\Http\Controllers\Admin\AttendanceController::class, 'filter'])->name('students.filter');
 });
@@ -132,7 +138,12 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/attendances/{attendance}', [App\Http\Controllers\Organization\AttendanceController::class, 'destroy'])->name('attendances.destroy');
     Route::post('/attendances/toggle', [App\Http\Controllers\Organization\AttendanceController::class, 'toggle'])->name('attendances.toggle');
 
-
+    Route::get('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'index'])->name('instructors.index');
+    Route::get('/instructors/create', [App\Http\Controllers\Organization\InstructorController::class, 'create'])->name('instructors.create');
+    Route::post('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'store'])->name('instructors.store');
+    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Organization\InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'update'])->name('instructors.update');
+    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
 });
 
@@ -162,7 +173,12 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::delete('/attendances/{attendance}', [App\Http\Controllers\Club\AttendanceController::class, 'destroy'])->name('attendances.destroy');
     Route::post('/attendances/toggle', [App\Http\Controllers\Club\AttendanceController::class, 'toggle'])->name('attendances.toggle');
 
-
+    Route::get('/instructors', [App\Http\Controllers\Club\InstructorController::class, 'index'])->name('instructors.index');
+    Route::get('/instructors/create', [App\Http\Controllers\Club\InstructorController::class, 'create'])->name('instructors.create');
+    Route::post('/instructors', [App\Http\Controllers\Club\InstructorController::class, 'store'])->name('instructors.store');
+    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Club\InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructors/{instructor}', [App\Http\Controllers\Club\InstructorController::class, 'update'])->name('instructors.update');
+    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Club\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
 });
 

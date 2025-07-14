@@ -4,7 +4,15 @@ import { Button } from "@/components/ui/button";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import { Eye } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Student {
     id: number;
@@ -60,32 +68,17 @@ const columns: ColumnDef<Organization>[] = [
         header: "Country",
         accessorKey: "country",
     },
-    {
-        header: "Website",
-        accessorKey: "website",
-        cell: ({ row }) =>
-            row.original.website ? (
-                <a
-                    href={row.original.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                >
-                    {row.original.website}
-                </a>
-            ) : (
-                "-"
-            ),
-    },
-  
+
     {
         header: "Students",
         cell: ({ row }) => (
             <Link
+                className="inline-flex items-center gap-1 text-blue-600 hover:underline"
                 href={route("admin.students.index", {
                     organization_id: row.original.id,
                 })}
             >
+                <Eye className="w-4 h-4" />
                 {row.original.students?.length ?? 0}
             </Link>
         ),
@@ -94,14 +87,17 @@ const columns: ColumnDef<Organization>[] = [
         header: "Supporters",
         cell: ({ row }) => (
             <Link
+                className="inline-flex items-center gap-1 text-blue-600 hover:underline"
                 href={route("admin.supporters.index", {
                     organization_id: row.original.id,
                 })}
             >
+                <Eye className="w-4 h-4" />
                 {row.original.supporters?.length ?? 0}
             </Link>
         ),
     },
+
     {
         header: "Status",
         accessorKey: "status",
@@ -110,9 +106,37 @@ const columns: ColumnDef<Organization>[] = [
     {
         header: "Actions",
         cell: ({ row }) => (
-            <Link href={route("admin.organizations.edit", row.original.id)}>
-                <Button size="sm">Edit</Button>
-            </Link>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "admin.organizations.edit",
+                                row.original.id
+                            )}
+                        >
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "admin.organizations.destroy",
+                                row.original.id
+                            )}
+                            method="delete"
+                            as="button"
+                        >
+                            Delete
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         ),
     },
 ];
@@ -125,14 +149,19 @@ export default function OrganizationIndex({
     return (
         <AuthenticatedLayout header="Ahli Gabungan">
             <Head title="Organizations" />
-            <div className="p-4 space-y-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Organizations</h1>
-                    <Link href={route("admin.organizations.create")}>
-                        <Button>Add Organization</Button>
-                    </Link>
-                </div>
-                <DataTable data={organizations} columns={columns} />
+            <div className="container mx-auto py-10">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Organizations</CardTitle>
+                        <Link href={route("admin.organizations.create")}>
+                            {" "}
+                            <Button>Add Supporter</Button>{" "}
+                        </Link>
+                    </CardHeader>
+                    <CardContent>
+                        <DataTable columns={columns} data={organizations} />
+                    </CardContent>
+                </Card>
             </div>
         </AuthenticatedLayout>
     );

@@ -45,10 +45,19 @@ export default function Edit({ payment, students }: Props) {
         payment_month: payment.payment_month || "",
     });
 
+    const handleChange = (field: keyof typeof data, value: string) => {
+        setData(field, value);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route("admin.payments.update", payment.id));
     };
+
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
 
     return (
         <AuthenticatedLayout header="Edit Payment">
@@ -59,174 +68,166 @@ export default function Edit({ payment, students }: Props) {
                         <CardTitle>Edit Payment</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form
-                            onSubmit={handleSubmit}
-                            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                        >
-                            {/* Student */}
-                            <div className="col-span-1">
-                                <Label>Student</Label>
-                                <Select
-                                    value={String(data.student_id)}
-                                    onValueChange={(value) =>
-                                        setData("student_id", parseInt(value))
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Student" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {students.map((s) => (
-                                            <SelectItem
-                                                key={s.id}
-                                                value={String(s.id)}
-                                            >
-                                                {s.name}
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-3 gap-4">
+                                {/* Student */}
+                                <div>
+                                    <Label>
+                                        Student
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={data.student_id.toString()}
+                                        onValueChange={(value) =>
+                                            handleChange("student_id", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Student" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {students.map((s) => (
+                                                <SelectItem
+                                                    key={s.id}
+                                                    value={String(s.id)}
+                                                >
+                                                    {s.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {renderError("student_id")}
+                                </div>
+
+                                {/* Amount */}
+                                <div>
+                                    <Label>
+                                        Amount
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        type="number"
+                                        value={data.amount}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "amount",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                    {renderError("amount")}
+                                </div>
+
+                                {/* Status */}
+                                <div>
+                                    <Label>
+                                        Status
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value) =>
+                                            handleChange("status", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="paid">
+                                                Paid
                                             </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.student_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.student_id}
-                                    </p>
-                                )}
+                                            <SelectItem value="unpaid">
+                                                Unpaid
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {renderError("status")}
+                                </div>
+
+                                {/* Method */}
+                                <div>
+                                    <Label>
+                                        Method
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={data.method}
+                                        onValueChange={(value) =>
+                                            handleChange("method", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Method" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="cash">
+                                                Cash
+                                            </SelectItem>
+                                            <SelectItem value="stripe">
+                                                Stripe
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {renderError("method")}
+                                </div>
+
+                                {/* Payment Month */}
+                                <div>
+                                    <Label>
+                                        Payment Month
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        type="month"
+                                        value={data.payment_month}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "payment_month",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                    {renderError("payment_month")}
+                                </div>
+
+                                {/* Pay At */}
+                                <div>
+                                    <Label>
+                                        Pay At
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        type="date"
+                                        value={data.pay_at}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "pay_at",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                    {renderError("pay_at")}
+                                </div>
+
+                                {/* Notes */}
+                                <div className="col-span-3">
+                                    <Label>Notes</Label>
+                                    <Input
+                                        value={data.notes}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "notes",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
                             </div>
 
-                            {/* Amount */}
-                            <div className="col-span-1">
-                                <Label>Amount</Label>
-                                <Input
-                                    type="number"
-                                    value={data.amount}
-                                    onChange={(e) =>
-                                        setData("amount", e.target.value)
-                                    }
-                                />
-                                {errors.amount && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.amount}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Status */}
-                            <div className="col-span-1">
-                                <Label>Status</Label>
-                                <Select
-                                    value={data.status}
-                                    onValueChange={(value) =>
-                                        setData(
-                                            "status",
-                                            value as "paid" | "unpaid"
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="paid">
-                                            Paid
-                                        </SelectItem>
-                                        <SelectItem value="unpaid">
-                                            Unpaid
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                {errors.status && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.status}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Method */}
-                            <div className="col-span-1">
-                                <Label>Method</Label>
-                                <Select
-                                    value={data.method}
-                                    onValueChange={(value) =>
-                                        setData(
-                                            "method",
-                                            value as "cash" | "stripe"
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Method" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="cash">
-                                            Cash
-                                        </SelectItem>
-                                        <SelectItem value="stripe">
-                                            Stripe
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                {errors.method && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.method}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Payment Month */}
-                            <div className="col-span-1">
-                                <Label>Payment Month</Label>
-                                <Input
-                                    type="month"
-                                    value={data.payment_month}
-                                    onChange={(e) =>
-                                        setData("payment_month", e.target.value)
-                                    }
-                                />
-                                {errors.payment_month && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.payment_month}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Pay At */}
-                            <div className="col-span-1">
-                                <Label>Pay At</Label>
-                                <Input
-                                    type="date"
-                                    value={data.pay_at}
-                                    onChange={(e) =>
-                                        setData("pay_at", e.target.value)
-                                    }
-                                />
-                                {errors.pay_at && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.pay_at}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Notes (full width) */}
-                            <div className="col-span-full">
-                                <Label>Notes</Label>
-                                <Input
-                                    type="text"
-                                    value={data.notes}
-                                    onChange={(e) =>
-                                        setData("notes", e.target.value)
-                                    }
-                                />
-                                {errors.notes && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.notes}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Submit Button */}
-                            <div className="col-span-full">
+                            <div className="pt-4">
                                 <Button type="submit" disabled={processing}>
-                                    Update
+                                    Save
                                 </Button>
                             </div>
                         </form>

@@ -2,14 +2,14 @@ import { PropsWithChildren, ReactNode } from "react";
 import {AppSidebar} from "@/components/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/sonner";
 import {
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbList, BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import AppearanceDropdown from "@/components/appearance-dropdown";
-
+import FlashToast from "@/components/flash-toast"; // 👈 import it
+import { Toaster } from "sonner";
 export default function AuthenticatedLayout({
     header,
     children
@@ -18,6 +18,8 @@ export default function AuthenticatedLayout({
 }>) {
     return (
         <>
+            <Toaster richColors position="top-right" />
+            <FlashToast />
             <SidebarProvider>
                 <AppSidebar />
 
@@ -47,7 +49,6 @@ export default function AuthenticatedLayout({
                     <main className="p-4 md:pt-0 h-full">{children}</main>
                 </SidebarInset>
             </SidebarProvider>
-            <Toaster position="top-right" richColors />
         </>
     );
 }

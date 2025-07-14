@@ -15,37 +15,67 @@ export type Supporter = {
     type: string;
     status: boolean;
 };
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { MoreHorizontal } from "lucide-react";
 
 export const columns: ColumnDef<Supporter>[] = [
-    { accessorKey: "id", header: "ID" },
+    {
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+    },
     { accessorKey: "name", header: "Name" },
     { accessorKey: "surename", header: "Surename" },
     { accessorKey: "gender", header: "Gender" },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
     { accessorKey: "type", header: "Type" },
-    { accessorKey: "status", header: "Status" },
+    // { accessorKey: "status", header: "Status" },
+
+  
 
     {
-        id: "actions",
         header: "Actions",
         cell: ({ row }) => (
-            <div className="flex space-x-2">
-                <Link href={route("admin.supporters.edit", row.original.id)}>
-                    <Button variant="outline" size="sm">
-                        Edit
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                </Link>
-                <Link
-                    href={route("admin.supporters.destroy", row.original.id)}
-                    method="delete"
-                    as="button"
-                >
-                    <Button variant="destructive" size="sm">
-                        Delete
-                    </Button>
-                </Link>
-            </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route("admin.supporters.edit", row.original.id)}
+                        >
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "admin.supporters.destroy",
+                                row.original.id
+                            )}
+                            method="delete"
+                            as="button"
+                        >
+                            Delete
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         ),
     },
 ];

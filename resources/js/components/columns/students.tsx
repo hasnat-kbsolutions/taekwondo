@@ -36,7 +36,10 @@ export type Student = {
 };
 
 export const columns: ColumnDef<Student>[] = [
-    { accessorKey: "id", header: "ID" },
+    {
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+    },
     {
         id: "profile_image",
         header: "Photo",

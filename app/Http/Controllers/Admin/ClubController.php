@@ -183,7 +183,7 @@ class ClubController extends Controller
 
 
 
-        return redirect()->route('admin.clubs.index')->with('success', 'Club created successfully');
+        return redirect()->route('admin.clubs.index')->with('success', 'Club updated successfully');
 
     }
 

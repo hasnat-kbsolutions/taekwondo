@@ -13,81 +13,141 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
         $students = Student::query()
+            ->with(['organization', 'club']) // eager load relations
             ->when(Auth::user()->role === 'organization', function ($query) {
                 $query->where('organization_id', Auth::user()->userable_id);
             })
-            ->when($request->organization_id, function ($query) use ($request) {
+            ->when($request->filled('organization_id') && $request->organization_id !== 'all', function ($query) use ($request) {
                 $query->where('organization_id', $request->organization_id);
             })
-            ->latest()->get();
+            ->when($request->filled('club_id') && $request->club_id !== 'all', function ($query) use ($request) {
+                $query->where('club_id', $request->club_id);
+            })
+            ->when($request->filled('nationality') && $request->nationality !== 'all', function ($query) use ($request) {
+                $query->where('nationality', $request->nationality);
+            })
+            ->when($request->filled('country') && $request->country !== 'all', function ($query) use ($request) {
+                $query->where('country', $request->country);
+            })
+            ->when($request->filled('status') && $request->status !== 'all', function ($query) use ($request) {
+                $query->where('status', $request->status === 'active' ? true : false);
+            })
+            ->latest()
+            ->get();
 
         return Inertia::render('Organization/Students/Index', [
             'students' => $students,
-            'organizationId' => $request->organization_id,
+            'organizations' => Organization::select('id', 'name')->get(),
+            'clubs' => Club::select('id', 'name')->get(),
+            'nationalities' => Student::select('nationality')->distinct()->pluck('nationality'),
+            'countries' => Student::select('country')->distinct()->pluck('country'),
+            'filters' => [
+                'organization_id' => $request->organization_id,
+                'club_id' => $request->club_id,
+                'nationality' => $request->nationality,
+                'country' => $request->country,
+                'status' => $request->status,
+            ],
         ]);
     }
 
 
     public function create()
     {
+        $user = Auth::user();
 
-        $clubs = Club::select('id', 'name')->get();
-        // $organizations = Organization::select('id', 'name')->get();
-
+        $clubs = Club::where('organization_id', $user->userable_id)
+            ->select('id', 'name')
+            ->get();
 
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
-            // 'organizations' => $organizations,
-
         ]);
     }
 
+
     public function store(Request $request)
     {
-        // Grab all incoming data
-        $data = $request->all();
-        $data['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        // Validate required fields
+        $validated = $request->validate([
+            'club_id' => 'required|integer',
+            'code' => 'required|string',
 
-        // Inject organization_id if the logged-in user is an organization
-        if (Auth::user()->role === 'organization') {
-            $data['organization_id'] = Auth::user()->userable_id;
-        }
+            // Required fields
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'password' => 'required|string|min:6',
+            'dob' => 'required|date',
+            'gender' => 'required|string',
+            'nationality' => 'required|string',
+            'grade' => 'required|string',
+            'id_passport' => 'required|string',
 
-        // Upload images if present
+            // Optional fields
+            'surname' => 'nullable|string',
+            'dod' => 'nullable|date',
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'skype' => 'nullable|string',
+            'website' => 'nullable|string',
+            'city' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'street' => 'nullable|string',
+            'country' => 'nullable|string',
+            'status' => 'required|boolean',
+        ]);
+
+        // Generate UID
+        $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+
+        // Upload files if present
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $data[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
+                $validated[$field] = asset("storage/" . $relativePath); // Full URL (uses ASSET_URL if set)
             }
         }
 
-        // Create student profile
-        $student = Student::create($data);
+        // Inject organization_id if the logged-in user is an organization
+        if (Auth::user()->role === 'organization') {
+            $validated['organization_id'] = Auth::user()->userable_id;
+        }
 
-        // Create user only if email is provided
-        if (!empty($data['email'])) {
+        // Create student
+        $student = Student::create($validated);
+
+        // Create linked user (if email provided)
+        if (!empty($validated['email'])) {
             $student->user()->create([
-                'name' => $data['name'] . ' ' . ($data['surname'] ?? ''),
-                'email' => $data['email'],
-                'password' => Hash::make($request->password),
+                'name' => trim($validated['name'] . ' ' . ($validated['surname'] ?? '')),
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
                 'role' => 'student',
             ]);
         }
 
         return redirect()->route('organization.students.index')->with('success', 'Student created successfully');
+
+
     }
 
     public function edit(Student $student)
     {
 
-        $clubs = Club::select('id', 'name')->get();
-        // $organizations = Organization::select('id', 'name')->get();
+        $user = Auth::user();
+
+        $clubs = Club::where('organization_id', $user->userable_id)
+            ->select('id', 'name')
+            ->get();
 
 
         return Inertia::render('Organization/Students/Edit', [
@@ -101,39 +161,36 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'club_id' => 'nullable|integer',
-            // 'organization_id' => 'nullable|integer',
+            'club_id' => 'required|integer',
+            'code' => 'required|string',
 
-            'uid' => 'nullable|string',
-            'code' => 'nullable|string',
+            // Required fields
             'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'dob' => 'required|date',
+            'gender' => 'required|string',
+            'nationality' => 'required|string',
+            'grade' => 'required|string',
+            'id_passport' => 'required|string',
+
+            // Password is optional
             'password' => 'nullable|string|min:6',
 
+            // Optional fields
             'surname' => 'nullable|string',
-            'nationality' => 'nullable|string',
-            'dob' => 'nullable|date',
             'dod' => 'nullable|date',
-            'grade' => 'nullable|string',
-            'gender' => 'nullable|string',
-            'id_passport' => 'nullable|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
             'skype' => 'nullable|string',
             'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'street' => 'nullable|string',
             'country' => 'nullable|string',
-            'status' => 'nullable|boolean',
+            'status' => 'required|boolean',
         ]);
-
-        // Inject organization_id if the logged-in user is an organization
-        if (Auth::user()->role === 'organization') {
-            $validated['organization_id'] = Auth::user()->userable_id;
-        }
 
         // Handle image uploads
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
@@ -143,7 +200,7 @@ class StudentController extends Controller
             }
         }
 
-        // Update the student
+        // Update the student record
         $student->update($validated);
 
         // Create or update user account
@@ -156,7 +213,7 @@ class StudentController extends Controller
                 'student_id' => $student->id,
             ];
 
-            // Only include password if present in the request
+            // Only include password if it's provided
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
@@ -167,14 +224,32 @@ class StudentController extends Controller
             );
         }
 
-        return redirect()->route('organization.students.index')->with('success', 'Student updated successfully');
+        return redirect()
+            ->route('organization.students.index')
+            ->with('success', 'Student updated successfully');
     }
 
     public function destroy(Student $student)
     {
+        // Delete related user if exists
+        if ($student->user) {
+            $student->user->delete();
+        }
+
+        if ($student->profile_image) {
+            Storage::disk('public')->delete($student->profile_image);
+        }
+        if ($student->id_passport_image) {
+            Storage::disk('public')->delete($student->id_passport_image);
+        }
+        if ($student->signature_image) {
+            Storage::disk('public')->delete($student->signature_image);
+        }
+
+        // Then delete the student
         $student->delete();
 
-        return redirect()->route('organization.students.index')->with('success', 'Student deleted');
+        return redirect()->route('organization.students.index')->with('success', 'Student and associated user deleted');
     }
 }
 

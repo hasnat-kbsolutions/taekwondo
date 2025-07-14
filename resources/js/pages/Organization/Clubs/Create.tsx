@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,36 +17,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 
+interface Organization {
+    id: number;
+    name: string;
+}
+
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm<{
-        name: string;
-        email: string;
-        password: string;
-        password_confirmation: string;
-        tax_number: string;
-        invoice_prefix: string;
-        phone: string;
-        skype: string;
-        notification_emails: string;
-        website: string;
-        logo: File | null;
-        status: boolean;
-        city: string;
-        country: string;
-        street: string;
-        postal_code: string;
-    }>({
+    const { data, setData, post, processing, errors } = useForm({
         name: "",
         email: "",
         password: "",
         password_confirmation: "",
+
         tax_number: "",
         invoice_prefix: "",
         phone: "",
         skype: "",
         notification_emails: "",
         website: "",
-        logo: null,
+        logo: null as File | null,
         status: false,
         city: "",
         country: "",
@@ -53,8 +45,15 @@ export default function Create() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("organization.clubs.store"));
+        post(route("organization.clubs.store"), {
+            forceFormData: true,
+        });
     };
+
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
 
     return (
         <AuthenticatedLayout header="Create Club">
@@ -62,44 +61,49 @@ export default function Create() {
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Create New Club</CardTitle>
+                        <CardTitle>Create Club</CardTitle>
+                        <p className="text-muted-foreground text-sm">
+                            Fields marked with * are required.
+                        </p>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <Label>Name</Label>
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Name <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
-                                    placeholder="Club Name"
                                     value={data.name}
                                     onChange={(e) =>
                                         setData("name", e.target.value)
                                     }
                                 />
-                                {errors.name && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.name}
-                                    </p>
-                                )}
+                                {renderError("name")}
                             </div>
 
-                            <div>
-                                <Label>Email</Label>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Email{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
-                                    placeholder="Email for login"
                                     type="email"
                                     value={data.email}
                                     onChange={(e) =>
                                         setData("email", e.target.value)
                                     }
                                 />
-                                {errors.email && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.email}
-                                    </p>
-                                )}
+                                {renderError("email")}
                             </div>
-     <div>
-                                <Label>Password</Label>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     type="password"
                                     value={data.password}
@@ -107,15 +111,14 @@ export default function Create() {
                                         setData("password", e.target.value)
                                     }
                                 />
-                                {errors.password && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.password}
-                                    </p>
-                                )}
+                                {renderError("password")}
                             </div>
 
-                            <div>
-                                <Label>Confirm Password</Label>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Confirm Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     type="password"
                                     value={data.password_confirmation}
@@ -126,126 +129,131 @@ export default function Create() {
                                         )
                                     }
                                 />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label>City</Label>
-                                    <Input
-                                        value={data.city}
-                                        onChange={(e) =>
-                                            setData("city", e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                       <Label className="block text-sm mb-1">Country</Label>
-                                                                                              <CountryDropdown
-                                                                                                  placeholder="Select country"
-                                                                                                  defaultValue={data.country} // your default or empty
-                                                                                                  onChange={(c) => setData("country", c.alpha3)}
-                                                                                                  slim={false}
-                                                                                              />
-                                                                                              {errors.country && (
-                                                                                                  <p className="text-red-500 text-sm">
-                                                                                                      {errors.country}
-                                                                                                  </p>
-                                                                                              )}
-                                </div>
-                                <div>
-                                    <Label>Street</Label>
-                                    <Input
-                                        value={data.street}
-                                        onChange={(e) =>
-                                            setData("street", e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Postal Code</Label>
-                                    <Input
-                                        value={data.postal_code}
-                                        onChange={(e) =>
-                                            setData(
-                                                "postal_code",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
+                                {renderError("password_confirmation")}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label>Phone</Label>
-                                    <Input
-                                        value={data.phone}
-                                        onChange={(e) =>
-                                            setData("phone", e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Skype</Label>
-                                    <Input
-                                        value={data.skype}
-                                        onChange={(e) =>
-                                            setData("skype", e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Tax Number</Label>
-                                    <Input
-                                        value={data.tax_number}
-                                        onChange={(e) =>
-                                            setData(
-                                                "tax_number",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Invoice Prefix</Label>
-                                    <Input
-                                        value={data.invoice_prefix}
-                                        onChange={(e) =>
-                                            setData(
-                                                "invoice_prefix",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Website</Label>
-                                    <Input
-                                        value={data.website}
-                                        onChange={(e) =>
-                                            setData("website", e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Notification Emails</Label>
-                                    <Input
-                                        placeholder="Comma-separated emails"
-                                        value={data.notification_emails}
-                                        onChange={(e) =>
-                                            setData(
-                                                "notification_emails",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Phone</Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData("phone", e.target.value)
+                                    }
+                                />
+                                {renderError("phone")}
                             </div>
 
-                            <div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Skype</Label>
+                                <Input
+                                    value={data.skype}
+                                    onChange={(e) =>
+                                        setData("skype", e.target.value)
+                                    }
+                                />
+                                {renderError("skype")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Notification Emails</Label>
+                                <Input
+                                    value={data.notification_emails}
+                                    onChange={(e) =>
+                                        setData(
+                                            "notification_emails",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {renderError("notification_emails")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Website</Label>
+                                <Input
+                                    value={data.website}
+                                    onChange={(e) =>
+                                        setData("website", e.target.value)
+                                    }
+                                />
+                                {renderError("website")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Tax Number</Label>
+                                <Input
+                                    value={data.tax_number}
+                                    onChange={(e) =>
+                                        setData("tax_number", e.target.value)
+                                    }
+                                />
+                                {renderError("tax_number")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Invoice Prefix</Label>
+                                <Input
+                                    value={data.invoice_prefix}
+                                    onChange={(e) =>
+                                        setData(
+                                            "invoice_prefix",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {renderError("invoice_prefix")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>City</Label>
+                                <Input
+                                    value={data.city}
+                                    onChange={(e) =>
+                                        setData("city", e.target.value)
+                                    }
+                                />
+                                {renderError("city")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Street</Label>
+                                <Input
+                                    value={data.street}
+                                    onChange={(e) =>
+                                        setData("street", e.target.value)
+                                    }
+                                />
+                                {renderError("street")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Postal Code</Label>
+                                <Input
+                                    value={data.postal_code}
+                                    onChange={(e) =>
+                                        setData("postal_code", e.target.value)
+                                    }
+                                />
+                                {renderError("postal_code")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Country</Label>
+                                <CountryDropdown
+                                    placeholder="Select country"
+                                    defaultValue={data.country || undefined}
+                                    onChange={(c) =>
+                                        setData("country", c?.alpha3 ?? "")
+                                    }
+                                    slim={false}
+                                />
+                                {renderError("country")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
                                 <Label>Logo</Label>
                                 <Input
                                     type="file"
-                                    accept="image/*"
                                     onChange={(e) =>
                                         setData(
                                             "logo",
@@ -253,38 +261,36 @@ export default function Create() {
                                         )
                                     }
                                 />
-                                {errors.logo && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.logo}
-                                    </p>
-                                )}
+                                {renderError("logo")}
                             </div>
 
-                            <div>
+                            <div className="w-[25%] px-2 mt-3">
                                 <Label>Status</Label>
                                 <Select
-                                    value={data.status.toString()}
-                                    onValueChange={(val) =>
-                                        setData("status", val === "true")
+                                    value={data.status ? "1" : "0"}
+                                    onValueChange={(value) =>
+                                        setData("status", value === "1")
                                     }
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Status" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="true">
+                                        <SelectItem value="1">
                                             Active
                                         </SelectItem>
-                                        <SelectItem value="false">
+                                        <SelectItem value="0">
                                             Inactive
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
-                            <Button type="submit" disabled={processing}>
-                                Create
-                            </Button>
+                            <div className="w-full px-2 mt-4">
+                                <Button type="submit" disabled={processing}>
+                                    Submit
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

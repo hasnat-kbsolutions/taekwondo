@@ -41,7 +41,7 @@ export default function Create() {
             <div className="p-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Add New Payment</CardTitle>
+                        <CardTitle>Add Payment</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">

@@ -46,8 +46,8 @@ interface Props {
 
 const columns: ColumnDef<Payment>[] = [
     {
-        header: "ID",
-        accessorKey: "id",
+        header: "#",
+        cell: ({ row }) => row.index + 1,
     },
     {
         header: "Student",
@@ -194,7 +194,10 @@ export default function PaymentIndex({ payments, filters }: Props) {
                     </div>
                     <div className="flex gap-2">
                         <Button onClick={applyFilters}>Apply</Button>
-                        <Button variant="outline" onClick={resetFilters}>
+                        <Button
+                            className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                            onClick={resetFilters}
+                        >
                             Reset
                         </Button>
                     </div>

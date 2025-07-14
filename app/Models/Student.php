@@ -33,7 +33,14 @@ class Student extends Model
         'country',
         'status',
     ];
-
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+    public function club()
+    {
+        return $this->belongsTo(Club::class);
+    }
     public function attendances()
     {
         return $this->hasMany(Attendance::class);

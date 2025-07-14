@@ -1,20 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-
 import { Head, router } from "@inertiajs/react";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import { toast } from "sonner";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import axios from "axios";
+import { Label } from "@/components/ui/label";
 
 import {
     Select,
@@ -24,7 +15,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
 import {
     Table,
     TableHeader,
@@ -33,6 +23,7 @@ import {
     TableBody,
     TableCell,
 } from "@/components/ui/table";
+import axios from "axios";
 
 type Student = {
     id: number;
@@ -41,7 +32,7 @@ type Student = {
 
 type AttendanceRecord = {
     student: Student;
-    records: Record<string, "present" | "absent" | undefined>; // e.g. { "2025-06-01": "present" }
+    records: Record<string, "present" | "absent" | undefined>;
 };
 
 type SelectOption = {
@@ -66,38 +57,38 @@ export default function Index({
     organizations,
     filters: defaultFilters,
 }: Props) {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = (new Date().getMonth() + 1)
+        .toString()
+        .padStart(2, "0");
+
+    const [year, setYear] = useState(
+        defaultFilters.date?.split("-")[0] || currentYear.toString()
+    );
+    const [month, setMonth] = useState(
+        defaultFilters.date?.split("-")[1] || currentMonth
+    );
     const [filters, setFilters] = useState(() => ({
         club_id: defaultFilters.club_id || "",
         organization_id: defaultFilters.organization_id || "",
-        date: defaultFilters.date || format(new Date(), "yyyy-MM"),
     }));
-
-    // Stable reference for comparison
-    const defaultFiltersRef = useRef(defaultFilters);
 
     useEffect(() => {
         const handler = setTimeout(() => {
-            const filtersChanged =
-                JSON.stringify(filters) !==
-                JSON.stringify(defaultFiltersRef.current);
+            const date = `${year}-${month}`;
+            const updated = { ...filters, date };
 
-            if (filtersChanged) {
-                router.get(route("admin.attendances.index"), filters, {
-                    preserveState: true,
-                    replace: true,
-                    only: ["studentsWithAttendance"],
-                    onFinish: () => console.log("Request completed"),
-                });
-            }
-        }, 500); // Delay in ms
+            router.get(route("admin.attendances.index"), updated, {
+                preserveState: true,
+                replace: true,
+                only: ["studentsWithAttendance"],
+            });
+        }, 300);
 
         return () => clearTimeout(handler);
-    }, [filters]);
+    }, [year, month, filters.club_id, filters.organization_id]);
 
-    const monthDate = filters.date
-        ? new Date(filters.date + "-01")
-        : new Date();
-
+    const monthDate = new Date(`${year}-${month}-01`);
     const days = eachDayOfInterval({
         start: startOfMonth(monthDate),
         end: endOfMonth(monthDate),
@@ -137,90 +128,127 @@ export default function Index({
         }
     };
 
+    const resetFilters = () => {
+        setYear(currentYear.toString());
+        setMonth(currentMonth);
+        setFilters({
+            club_id: "",
+            organization_id: "",
+        });
+    };
+
     return (
         <AuthenticatedLayout header="Attendances">
             <Head title="Attendances" />
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-5">
+                {/* Filters Card */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Filters</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-end gap-4 flex-wrap">
+                            {/* Club Filter */}
+                            <div className="flex flex-col w-[200px]">
+                                <Label className="text-sm mb-1">Club</Label>
+                                <Select
+                                    value={filters.club_id}
+                                    onValueChange={(value) =>
+                                        setFilters((prev) => ({
+                                            ...prev,
+                                            club_id: value,
+                                        }))
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Clubs" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All</SelectItem>
+                                        {clubs.map((club) => (
+                                            <SelectItem
+                                                key={club.id}
+                                                value={club.id.toString()}
+                                            >
+                                                {club.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Year Filter */}
+                            <div className="flex flex-col w-[200px]">
+                                <Label className="text-sm mb-1">Year</Label>
+                                <Select value={year} onValueChange={setYear}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Year" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Array.from({ length: 5 }, (_, i) =>
+                                            (currentYear - i).toString()
+                                        ).map((yr) => (
+                                            <SelectItem key={yr} value={yr}>
+                                                {yr}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Month Filter */}
+                            <div className="flex flex-col w-[200px]">
+                                <Label className="text-sm mb-1">Month</Label>
+                                <Select value={month} onValueChange={setMonth}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Month" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Array.from({ length: 12 }, (_, i) => {
+                                            const m = (i + 1)
+                                                .toString()
+                                                .padStart(2, "0");
+                                            return (
+                                                <SelectItem key={m} value={m}>
+                                                    {new Date(
+                                                        0,
+                                                        i
+                                                    ).toLocaleString(
+                                                        "default",
+                                                        {
+                                                            month: "long",
+                                                        }
+                                                    )}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Reset Button */}
+                            <div className="flex items-end">
+                                <Button
+                                    className="bg-primary text-black"
+                                    onClick={resetFilters}
+                                >
+                                    Reset Filters
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Attendance Table Section */}
+            <div className="container mx-auto">
                 <Card>
                     <CardHeader>
                         <CardTitle>Attendance List</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {/* Filters */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <Select
-                                value={filters.club_id}
-                                onValueChange={(value) =>
-                                    setFilters((prev) => ({
-                                        ...prev,
-                                        club_id: value,
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Clubs" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        {clubs.map((c: any) => (
-                                            <SelectItem
-                                                key={c.id}
-                                                value={String(c.id)}
-                                            >
-                                                {c.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-
-                            <Select
-                                value={filters.organization_id}
-                                onValueChange={(value) =>
-                                    setFilters((prev) => ({
-                                        ...prev,
-                                        organization_id: value,
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Organizations" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        {organizations.map((o: any) => (
-                                            <SelectItem
-                                                key={o.id}
-                                                value={String(o.id)}
-                                            >
-                                                {o.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-
-                            <div className="grid gap-2">
-                                <input
-                                    id="month-picker"
-                                    type="month"
-                                    value={filters.date}
-                                    onChange={(e) => {
-                                        setFilters((prev) => ({
-                                            ...prev,
-                                            date: e.target.value,
-                                        }));
-                                    }}
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Attendance Table */}
                         <div className="w-full overflow-x-auto">
                             <div className="min-w-[800px]">
-                                {" "}
-                                {/* minimum width to allow scrolling on small screens */}
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -237,7 +265,7 @@ export default function Index({
                                     </TableHeader>
                                     <TableBody>
                                         {attendanceData.map(
-                                            ({ student, records }: any) => (
+                                            ({ student, records }) => (
                                                 <TableRow key={student.id}>
                                                     <TableCell>
                                                         {student.name}
@@ -287,4 +315,5 @@ export default function Index({
             </div>
         </AuthenticatedLayout>
     );
+    
 }

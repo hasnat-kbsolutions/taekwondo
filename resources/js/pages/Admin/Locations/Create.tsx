@@ -26,7 +26,7 @@ export default function Create() {
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Create New Location</CardTitle>
+                        <CardTitle>Create Location</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form
