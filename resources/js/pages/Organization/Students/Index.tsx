@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import { DataTable } from "@/components/DataTable";
-import { columns, Student } from "@/components/columns/students";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
@@ -14,12 +13,15 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
-
-interface Organization {
-    id: number;
-    name: string;
-}
-interface Club {
+import { ColumnDef } from "@tanstack/react-table";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";interface Club {
     id: number;
     name: string;
 }
@@ -37,6 +39,133 @@ interface Props {
     };
 }
 
+export type Student = {
+    id: number;
+    uid: string;
+    code: string;
+    name: string;
+    surname: string;
+    nationality: string;
+    dob: string | null;
+    dod: string | null;
+    grade: string;
+    gender: string;
+    id_passport: string;
+    profile_image: string | null;
+    id_passport_image: string | null;
+    signature_image: string | null;
+    email: string;
+    phone: string;
+    skype: string;
+    website: string;
+    city: string;
+    postal_code: string;
+    street: string;
+    country: string;
+    status: boolean;
+};
+
+interface Props {
+    students: Student[];
+}
+
+// Define the columns inline here
+export const columns: ColumnDef<Student>[] = [
+    {
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+    },
+    {
+        id: "profile_image",
+        header: "Photo",
+        cell: ({ row }) =>
+            row.original.profile_image ? (
+                <img
+                    src={row.original.profile_image}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                />
+            ) : (
+                <span className="text-gray-400 italic">No image</span>
+            ),
+    },
+    // { accessorKey: "uid", header: "UID" },
+    { accessorKey: "code", header: "Code" },
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "surname", header: "Surname" },
+    // { accessorKey: "nationality", header: "Nationality" },
+    { accessorKey: "dob", header: "DOB" },
+    // { accessorKey: "dod", header: "DOD" },
+    // { accessorKey: "grade", header: "Grade" },
+    // { accessorKey: "gender", header: "Gender" },
+    { accessorKey: "id_passport", header: "ID/Passport" },
+    { accessorKey: "email", header: "Email" },
+    { accessorKey: "phone", header: "Phone" },
+    // { accessorKey: "skype", header: "Skype" },
+    // { accessorKey: "website", header: "Website" },
+    // { accessorKey: "city", header: "City" },
+    // { accessorKey: "postal_code", header: "Postal Code" },
+    // { accessorKey: "street", header: "Street" },
+    // { accessorKey: "country", header: "Country" },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+            <Badge variant={row.original.status ? "default" : "destructive"}>
+                {row.original.status ? "Active" : "Inactive"}
+            </Badge>
+        ),
+    },
+    // {
+    //     id: "profile_image",
+    //     header: "Profile Image",
+    //     cell: ({ row }) =>
+    //         row.original.profile_image ? (
+    //             <img
+    //                 src={`/storage/${row.original.profile_image}`}
+    //                 alt="profile"
+    //                 className="w-12 h-12 rounded-full object-cover"
+    //             />
+    //         ) : (
+    //             <span className="text-gray-400 italic">No image</span>
+    //         ),
+    // },
+    {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route("organization.students.edit", row.original.id)}
+                        >
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "organization.students.destroy",
+                                row.original.id
+                            )}
+                            method="delete"
+                            as="button"
+                        >
+                            Delete
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    },
+];
+
 export default function Index({
     students,
     clubs = [],
@@ -44,7 +173,6 @@ export default function Index({
     countries = [],
     filters,
 }: Props) {
- 
     const [clubId, setClubId] = useState(filters.club_id || "");
     const [nationality, setNationality] = useState(filters.nationality || "");
     const [country, setCountry] = useState(filters.country || "");
@@ -59,7 +187,6 @@ export default function Index({
         router.get(
             route("organization.students.index"),
             {
-              
                 club_id: params.club_id ?? (clubId || null),
                 nationality: params.nationality ?? (nationality || null),
                 country: params.country ?? (country || null),
@@ -92,16 +219,14 @@ export default function Index({
     return (
         <AuthenticatedLayout header="Students">
             <Head title="Students" />
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-10 space-y-6">
+                {/* Filters Card */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Filters</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-end gap-4 flex-wrap">
-                            {/* Organization Filter */}
-          
-
                             {/* Club Filter */}
                             <div className="flex flex-col w-[200px]">
                                 <Label className="text-sm mb-1">Club</Label>
@@ -197,8 +322,8 @@ export default function Index({
                                 </Select>
                             </div>
 
-                            {/* Reset */}
-                            <div className="flex items-end ">
+                            {/* Reset Button */}
+                            <div className="flex items-end">
                                 <Button
                                     className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
                                     onClick={resetFilters}
@@ -210,7 +335,7 @@ export default function Index({
                     </CardContent>
                 </Card>
 
-                {/* Table Section */}
+                {/* Students Table Card */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Students</CardTitle>
