@@ -129,6 +129,7 @@ export default function Dashboard({ attendance, year, payments }: Props) {
                         </tbody>
                     </table>
                 </div>
+                
                 <div className="mt-12">
                     <h2 className="text-lg font-semibold mb-4">
                         Payments for {selectedYear}

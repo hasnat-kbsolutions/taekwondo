@@ -104,16 +104,7 @@ export default function Edit({ clubs, organizations, student }: Props) {
                         {renderError("organization_id")}
                     </div>
 
-                    {/* Optional: Code */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Code</Label>
-                        <Input
-                            placeholder="Code"
-                            value={data.code}
-                            onChange={(e) => setData("code", e.target.value)}
-                        />
-                        {renderError("code")}
-                    </div>
+            
 
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">

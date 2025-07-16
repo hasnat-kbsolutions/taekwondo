@@ -30,7 +30,6 @@ export default function Create({ clubs, organizations }: Props) {
         email: "",
         password: "",
         phone: "",
-        code: "",
         surname: "",
         nationality: "",
         dob: "",
@@ -125,18 +124,7 @@ export default function Create({ clubs, organizations }: Props) {
                         {renderError("organization_id")}
                     </div>
 
-                    {/* Optional: Code */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>
-                            Code
-                            <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            placeholder="Code"
-                            value={data.code}
-                            onChange={(e) => setData("code", e.target.value)}
-                        />
-                    </div>
+           
 
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">

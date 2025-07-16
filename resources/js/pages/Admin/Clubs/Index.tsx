@@ -24,6 +24,12 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface User {
     id: number;
@@ -59,7 +65,11 @@ interface Props {
     };
 }
 
-const columns: ColumnDef<Club>[] = [
+const columns = (
+    onView: (instructor: Club) => void
+): ColumnDef<Club>[] => [
+
+    
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -128,14 +138,25 @@ const columns: ColumnDef<Club>[] = [
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onView(row.original)}>
+                        View
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href={route("admin.clubs.edit", row.original.id)}>
+                        <Link
+                            href={route(
+                                "admin.clubs.edit",
+                                row.original.id
+                            )}
+                        >
                             Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route("admin.clubs.destroy", row.original.id)}
+                            href={route(
+                                "admin.clubs.destroy",
+                                row.original.id
+                            )}
                             method="delete"
                             as="button"
                         >
@@ -183,7 +204,7 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
             }
         );
     };
-
+const [selectedClub, setSelectedClub] = useState<Club | null>(null);
     return (
         <AuthenticatedLayout header="Clubs">
             <Head title="Organizations" />
@@ -260,9 +281,103 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={clubs} />
+                        <DataTable
+                            columns={columns((clubs) => setSelectedClub(clubs))}
+                            data={clubs}
+                        />
                     </CardContent>
                 </Card>
+                {selectedClub && (
+                    <Dialog
+                        open={!!selectedClub}
+                        onOpenChange={(open) => {
+                            if (!open) setSelectedClub(null);
+                        }}
+                    >
+                        <DialogContent>
+                            <DialogTitle>Club Details</DialogTitle>
+                            <DialogDescription>
+                                Full club details
+                            </DialogDescription>
+
+                            <div className="relative grid grid-cols-2 gap-4 text-sm before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-px before:bg-gray-200">
+                                {/* Left Column */}
+                                <div className="space-y-2 pr-4">
+                                    <div>
+                                        <strong>Club Name:</strong>{" "}
+                                        {selectedClub.name}
+                                    </div>
+                                    <div>
+                                        <strong>City:</strong>{" "}
+                                        {selectedClub.city || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Country:</strong>{" "}
+                                        {selectedClub.country || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Phone:</strong>{" "}
+                                        {selectedClub.phone || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Tax Number:</strong>{" "}
+                                        {selectedClub.tax_number || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Invoice Prefix:</strong>{" "}
+                                        {selectedClub.invoice_prefix || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Organization:</strong>{" "}
+                                        {selectedClub.organization?.name || "-"}
+                                    </div>
+                                </div>
+
+                                {/* Right Column */}
+                                <div className="space-y-2 pl-4">
+                                    <div>
+                                        <strong>User Name:</strong>{" "}
+                                        {selectedClub.user?.name || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>User Email:</strong>{" "}
+                                        {selectedClub.user?.email || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Status:</strong>{" "}
+                                        <Badge
+                                            variant={
+                                                selectedClub.status
+                                                    ? "default"
+                                                    : "destructive"
+                                            }
+                                        >
+                                            {selectedClub.status
+                                                ? "Active"
+                                                : "Inactive"}
+                                        </Badge>
+                                    </div>
+                                    <div className="pt-2">
+                                        <strong>Club Logo:</strong>
+                                        <div className="mt-1">
+                                            {selectedClub.logo ? (
+                                                <img
+                                                    src={selectedClub.logo}
+                                                    alt="Club Logo"
+                                                    className="w-24 h-24 object-cover rounded"
+                                                />
+                                            ) : (
+                                                <span className="italic text-gray-500">
+                                                    No image
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
         </AuthenticatedLayout>
     );

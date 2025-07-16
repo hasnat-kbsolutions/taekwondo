@@ -149,9 +149,7 @@ class ClubController extends Controller
             $validated['logo'] = asset('storage/' . $relativePath);
         }
 
-
-
-        $club->update([
+        $updateData = [
             'organization_id' => $validated['organization_id'],
             'name' => $validated['name'],
             'country' => $validated['country'] ?? null,
@@ -165,8 +163,14 @@ class ClubController extends Controller
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
-            'logo' => $validated['logo'],
-        ]);
+        ];
+
+        // ✅ Only include logo if uploaded
+        if (isset($validated['logo'])) {
+            $updateData['logo'] = $validated['logo'];
+        }
+
+        $club->update($updateData);
 
         if ($club->user) {
             $updateData = [
@@ -180,8 +184,6 @@ class ClubController extends Controller
 
             $club->user->update($updateData);
         }
-
-
 
         return redirect()->route('admin.clubs.index')->with('success', 'Club updated successfully');
 

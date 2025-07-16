@@ -170,7 +170,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         },
     ],
 
-    student: [{ title: "Dashboard", url: "/student/dashboard", icon: Home }],
+    student: [
+        { title: "Dashboard", url: "/student/dashboard", icon: Home },
+        { title: "Payment", url: "/student/payments", icon: Home },
+        { title: "Attendence", url: "/student/attendances", icon: Home },
+    ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

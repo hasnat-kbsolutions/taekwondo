@@ -73,7 +73,6 @@ class StudentController extends Controller
         $validated = $request->validate([
             'club_id' => 'required|integer',
             'organization_id' => 'required|integer',
-            'code' => 'required|string',
 
             // Required fields
             'name' => 'required|string',
@@ -106,6 +105,7 @@ class StudentController extends Controller
 
         // Generate UID
         $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        $validated['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
         // Upload files if present
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
@@ -151,7 +151,6 @@ class StudentController extends Controller
         $validated = $request->validate([
             'club_id' => 'required|integer',
             'organization_id' => 'required|integer',
-            'code' => 'required|string',
 
             // Required fields
             'name' => 'required|string',
@@ -180,12 +179,14 @@ class StudentController extends Controller
             'country' => 'nullable|string',
             'status' => 'required|boolean',
         ]);
-
         // Handle image uploads
         foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
                 $validated[$field] = "/storage/" . $relativePath;
+            } else {
+                // Remove from validated to prevent overwriting existing image with null
+                unset($validated[$field]);
             }
         }
 

@@ -54,7 +54,6 @@ class StudentController extends Controller
     {
         // Validate required fields
         $validated = $request->validate([
-            'code' => 'nullable|string',
 
             // Required fields
             'name' => 'required|string',
@@ -85,6 +84,7 @@ class StudentController extends Controller
 
 
         $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        $validated['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
 
         // Inject organization_id if the logged-in user is an organization
@@ -133,7 +133,6 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'code' => 'nullable|string',
 
             // Required fields
             'name' => 'required|string',
@@ -168,6 +167,9 @@ class StudentController extends Controller
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
                 $validated[$field] = "/storage/" . $relativePath;
+            } else {
+                // Remove from validated to prevent overwriting existing image with null
+                unset($validated[$field]);
             }
         }
 

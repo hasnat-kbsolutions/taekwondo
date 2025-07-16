@@ -13,7 +13,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 interface Props {
     supporters: Supporter[];
     organizations: { id: number; name: string }[];
@@ -38,6 +44,10 @@ export default function Index({
     const [clubId, setClubId] = useState(filters.club_id || "");
     const [gender, setGender] = useState(filters.gender || "");
     const [status, setStatus] = useState(filters.status || "");
+const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(
+    null
+);
+
 
     const handleFilterChange = ({
         organization_id,
@@ -103,7 +113,6 @@ export default function Index({
                                             gender,
                                             status,
                                         });
-                                        
                                     }}
                                 >
                                     <SelectTrigger>
@@ -243,9 +252,105 @@ export default function Index({
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={supporters} />
+                        <DataTable
+                            columns={columns((supporter) =>
+                                setSelectedSupporter(supporter)
+                            )}
+                            data={supporters}
+                        />
                     </CardContent>
                 </Card>
+                {selectedSupporter && (
+                    <Dialog
+                        open={!!selectedSupporter}
+                        onOpenChange={(open) => {
+                            if (!open) setSelectedSupporter(null);
+                        }}
+                    >
+                        <DialogContent>
+                            <DialogTitle>Supporter Details</DialogTitle>
+                            <DialogDescription>
+                                Full supporter details
+                            </DialogDescription>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <strong>Name:</strong>{" "}
+                                    {selectedSupporter.name}{" "}
+                                    {selectedSupporter.surename}
+                                </div>
+                                <div>
+                                    <strong>Email:</strong>{" "}
+                                    {selectedSupporter.email}
+                                </div>
+                                <div>
+                                    <strong>Phone:</strong>{" "}
+                                    {selectedSupporter.phone}
+                                </div>
+                                <div>
+                                    <strong>Gender:</strong>{" "}
+                                    {selectedSupporter.gender}
+                                </div>
+                                <div>
+                                    <strong>Country:</strong>{" "}
+                                    {selectedSupporter.country}
+                                </div>
+                                <div>
+                                    <strong>Type:</strong>{" "}
+                                    {selectedSupporter.type}
+                                </div>
+                                <div>
+                                    <strong>Status:</strong>
+                                    <Badge
+                                        variant={
+                                            selectedSupporter.status
+                                                ? "default"
+                                                : "destructive"
+                                        }
+                                    >
+                                        {selectedSupporter.status
+                                            ? "Active"
+                                            : "Inactive"}
+                                    </Badge>
+                                </div>
+
+                                {/* Profile Image */}
+                                <div className="col-span-2">
+                                    <strong>Profile Image:</strong>
+                                    <div className="mt-1">
+                                        {selectedSupporter.profile_image ? (
+                                            <img
+                                                src={
+                                                    selectedSupporter.profile_image
+                                                }
+                                                alt="Profile"
+                                                className="w-24 h-24 rounded object-cover"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display =
+                                                        "none";
+                                                    const fallback =
+                                                        document.createElement(
+                                                            "span"
+                                                        );
+                                                    fallback.className =
+                                                        "italic text-gray-500";
+                                                    fallback.textContent =
+                                                        "No image";
+                                                    e.currentTarget.parentNode?.appendChild(
+                                                        fallback
+                                                    );
+                                                }}
+                                            />
+                                        ) : (
+                                            <span className="italic text-gray-500">
+                                                No image
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
         </AuthenticatedLayout>
     );

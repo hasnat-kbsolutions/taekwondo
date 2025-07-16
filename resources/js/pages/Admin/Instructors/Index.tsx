@@ -22,7 +22,12 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 interface Organization {
     id: number;
     name: string;
@@ -56,7 +61,10 @@ interface Props {
     };
 }
 
-const columns: ColumnDef<Instructor>[] = [
+
+const columns = (
+    onView: (instructor: Instructor) => void
+): ColumnDef<Instructor>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -112,6 +120,9 @@ const columns: ColumnDef<Instructor>[] = [
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onView(row.original)}>
+                        View
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
                             href={route(
@@ -152,6 +163,9 @@ export default function Index({
     );
     const [clubId, setClubId] = useState(filters.club_id || "");
 
+const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(
+    null
+);
     const handleFilterChange = (extraParams = {}) => {
         router.get(
             route("admin.instructors.index"),
@@ -265,9 +279,91 @@ export default function Index({
                     </CardHeader>
 
                     <CardContent>
-                        <DataTable columns={columns} data={instructors} />
+                        <DataTable
+                            columns={columns((instructor) =>
+                                setSelectedInstructor(instructor)
+                            )}
+                            data={instructors}
+                        />
                     </CardContent>
                 </Card>
+                {selectedInstructor && (
+                    <Dialog
+                        open={!!selectedInstructor}
+                        onOpenChange={(open) => {
+                            if (!open) setSelectedInstructor(null);
+                        }}
+                    >
+                        <DialogContent>
+                            <DialogTitle>Instructor Details</DialogTitle>
+                            <DialogDescription>
+                                Full instructor details
+                            </DialogDescription>
+
+                            <div className="relative grid grid-cols-2 gap-4 text-sm before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-px before:bg-gray-200">
+                                {/* Left column */}
+                                <div className="space-y-2 pr-4">
+                                    <div>
+                                        <strong>Name:</strong>{" "}
+                                        {selectedInstructor.name}
+                                    </div>
+                                    <div>
+                                        <strong>Email:</strong>{" "}
+                                        {selectedInstructor.email}
+                                    </div>
+                                    <div>
+                                        <strong>IC Number:</strong>{" "}
+                                        {selectedInstructor.ic_number}
+                                    </div>
+                                    <div>
+                                        <strong>Mobile:</strong>{" "}
+                                        {selectedInstructor.mobile}
+                                    </div>
+                                    <div>
+                                        <strong>Grade:</strong>{" "}
+                                        {selectedInstructor.grade}
+                                    </div>
+                                    <div>
+                                        <strong>Organization:</strong>{" "}
+                                        {selectedInstructor.organization
+                                            ?.name || "-"}
+                                    </div>
+                                    <div>
+                                        <strong>Club:</strong>{" "}
+                                        {selectedInstructor.club?.name || "-"}
+                                    </div>
+                                </div>
+
+                                {/* Right column */}
+                                <div className="space-y-2 pl-4">
+                                    <div>
+                                        <strong>Address:</strong>{" "}
+                                        {selectedInstructor.address}
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <strong>Profile Image:</strong>
+                                        <div className="mt-1">
+                                            {selectedInstructor.profile_picture ? (
+                                                <img
+                                                    src={
+                                                        selectedInstructor.profile_picture
+                                                    }
+                                                    alt="Profile"
+                                                    className="w-24 h-24 rounded object-cover"
+                                                />
+                                            ) : (
+                                                <span className="italic text-gray-500">
+                                                    No image
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
         </AuthenticatedLayout>
     );

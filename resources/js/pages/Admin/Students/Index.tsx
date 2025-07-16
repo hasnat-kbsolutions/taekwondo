@@ -14,8 +14,16 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 interface Organization {
+    
     id: number;
     name: string;
 }
@@ -54,6 +62,7 @@ export default function Index({
     const [nationality, setNationality] = useState(filters.nationality || "");
     const [country, setCountry] = useState(filters.country || "");
     const [status, setStatus] = useState(filters.status || "");
+const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
     const handleFilterChange = (params: {
         organization_id?: string;
@@ -257,9 +266,164 @@ export default function Index({
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={students} />
+                        <DataTable
+                            columns={columns((student) =>
+                                setSelectedStudent(student)
+                            )}
+                            data={students}
+                        />
                     </CardContent>
                 </Card>
+                {/* View Student Modal */}
+                {selectedStudent && (
+                    <Dialog
+                        open={!!selectedStudent}
+                        onOpenChange={(open) => {
+                            if (!open) setSelectedStudent(null);
+                        }}
+                    >
+                        <DialogContent>
+                            <DialogTitle>Student Details</DialogTitle>
+                            <DialogDescription>
+                                Full student details
+                            </DialogDescription>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <strong>Code:</strong>{" "}
+                                    {selectedStudent.code}
+                                </div>
+                                <div>
+                                    <strong>Name:</strong>{" "}
+                                    {selectedStudent.name}{" "}
+                                    {selectedStudent.surname}
+                                </div>
+                                <div>
+                                    <strong>Email:</strong>{" "}
+                                    {selectedStudent.email}
+                                </div>
+                                <div>
+                                    <strong>Phone:</strong>{" "}
+                                    {selectedStudent.phone}
+                                </div>
+                                <div>
+                                    <strong>Gender:</strong>{" "}
+                                    {selectedStudent.gender}
+                                </div>
+                                <div>
+                                    <strong>Nationality:</strong>{" "}
+                                    {selectedStudent.nationality}
+                                </div>
+                                <div>
+                                    <strong>Country:</strong>{" "}
+                                    {selectedStudent.country}
+                                </div>
+                                <div>
+                                    <strong>DOB:</strong> {selectedStudent.dob}
+                                </div>
+                                <div>
+                                    <strong>DOD:</strong>{" "}
+                                    {selectedStudent.dod || "N/A"}
+                                </div>
+                                <div>
+                                    <strong>Grade:</strong>{" "}
+                                    {selectedStudent.grade}
+                                </div>
+                                <div>
+                                    <strong>ID/Passport:</strong>{" "}
+                                    {selectedStudent.id_passport}
+                                </div>
+                                <div>
+                                    <strong>Skype:</strong>{" "}
+                                    {selectedStudent.skype}
+                                </div>
+                                <div>
+                                    <strong>Website:</strong>{" "}
+                                    {selectedStudent.website}
+                                </div>
+                                <div>
+                                    <strong>Address:</strong>{" "}
+                                    {selectedStudent.street},{" "}
+                                    {selectedStudent.city},{" "}
+                                    {selectedStudent.postal_code}
+                                </div>
+                                <div>
+                                    <strong>Status:</strong>{" "}
+                                    <Badge
+                                        variant={
+                                            selectedStudent.status
+                                                ? "default"
+                                                : "destructive"
+                                        }
+                                    >
+                                        {selectedStudent.status
+                                            ? "Active"
+                                            : "Inactive"}
+                                    </Badge>
+                                </div>
+
+                                {/* Profile Image */}
+                                <div className="col-span-2">
+                                    <strong>Profile Image:</strong>
+                                    <div className="mt-1">
+                                        {selectedStudent.profile_image ? (
+                                            <img
+                                                src={
+                                                    selectedStudent.profile_image
+                                                }
+                                                alt="Profile"
+                                                className="w-24 h-24 rounded object-cover"
+                                            />
+                                        ) : (
+                                            <span className="italic text-gray-500">
+                                                No image
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* ID Passport Image */}
+                                <div className="col-span-2">
+                                    <strong>ID/Passport Image:</strong>
+                                    <div className="mt-1">
+                                        {selectedStudent.id_passport_image ? (
+                                            <img
+                                                src={
+                                                    selectedStudent.id_passport_image
+                                                }
+                                                alt="ID"
+                                                className="w-24 h-24 rounded object-cover"
+                                            />
+                                        ) : (
+                                            <span className="italic text-gray-500">
+                                                No image
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Signature Image */}
+                                <div className="col-span-2">
+                                    <strong>Signature Image:</strong>
+                                    <div className="mt-1">
+                                        {selectedStudent.signature_image ? (
+                                            <img
+                                                src={
+                                                    selectedStudent.signature_image
+                                                }
+                                                alt="Signature"
+                                                className="w-24 h-24 rounded object-cover"
+                                            />
+                                        ) : (
+                                            <span className="italic text-gray-500">
+                                                No image
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
         </AuthenticatedLayout>
     );

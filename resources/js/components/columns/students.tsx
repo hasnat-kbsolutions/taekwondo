@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/react";
@@ -9,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
+
 export type Student = {
     id: number;
     uid: string;
@@ -35,7 +38,9 @@ export type Student = {
     status: boolean;
 };
 
-export const columns: ColumnDef<Student>[] = [
+export const columns = (
+    onView: (student: Student) => void
+): ColumnDef<Student>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -73,35 +78,43 @@ export const columns: ColumnDef<Student>[] = [
     {
         id: "actions",
         header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route("admin.students.edit", row.original.id)}
-                        >
-                            Edit
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "admin.students.destroy",
-                                row.original.id
-                            )}
-                            method="delete"
-                            as="button"
-                        >
-                            Delete
-                        </Link>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
+        cell: ({ row }) => {
+            const student = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onView(student)}>
+                            View
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("admin.students.edit", student.id)}
+                            >
+                                Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "admin.students.destroy",
+                                    student.id
+                                )}
+                                method="delete"
+                                as="button"
+                            >
+                                Delete
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                
+            );
+        },
     },
 ];
