@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
-
+use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\RedirectBasedOnRole;
 class AuthenticatedSessionController extends Controller
 {
     /**
@@ -33,16 +33,10 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        $role = auth()->user()->role;
+        $role = Auth::user()->role;
 
-        return match ($role) {
-            'admin' => redirect()->intended(route('admin.dashboard')),
-            'organization' => redirect()->intended(route('organization.dashboard')),
-            'club' => redirect()->intended(route('club.dashboard')),
-            'student' => redirect()->intended(route('student.dashboard')),
-            'guardian' => redirect()->intended(route('guardian.dashboard')),
-            default => abort(403, 'Unknown role.'),
-        };
+        // Use middleware logic directly
+        return app(RedirectBasedOnRole::class)->handle($request, fn() => null);
     }
 
 

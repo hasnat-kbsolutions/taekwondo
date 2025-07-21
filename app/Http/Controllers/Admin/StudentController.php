@@ -12,7 +12,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-
+use App\Exports\StudentExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 class StudentController extends Controller
 {
     public function index(Request $request)
@@ -236,12 +240,18 @@ class StudentController extends Controller
         if ($student->signature_image) {
             Storage::disk('public')->delete($student->signature_image);
         }
-    
+
         // Then delete the student
         $student->delete();
-    
+
         return redirect()->route('admin.students.index')->with('success', 'Student and associated user deleted');
     }
-    
+
+
+    public function export()
+    {
+        return Excel::download(new StudentExport, 'students.xlsx');
+    }
+
 }
 

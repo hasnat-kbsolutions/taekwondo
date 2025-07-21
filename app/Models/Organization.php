@@ -23,9 +23,17 @@ class Organization extends Model
 
 
 
+    public function instructors()
+    {
+        return $this->hasMany(\App\Models\Instructor::class);
+    }
     public function students()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(\App\Models\Student::class);
+    }
+    public function clubs()
+    {
+        return $this->hasMany(\App\Models\Club::class);
     }
 
     public function supporters()
@@ -35,10 +43,5 @@ class Organization extends Model
     public function user()
     {
         return $this->morphOne(User::class, 'userable');
-    }
-
-    public function clubs()
-    {
-        return $this->hasMany(Club::class);
     }
 }

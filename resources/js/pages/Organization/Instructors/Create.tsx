@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { Checkbox } from "@/components/ui/checkbox";
+import { router } from "@inertiajs/react";
 
 interface Organization {
     id: number;
@@ -25,11 +27,19 @@ interface Club {
     name: string;
 }
 
-interface Props {
-    clubs: Club[];
+interface Student {
+    id: number;
+    name: string;
+    surname?: string;
 }
 
-export default function Create({ clubs }: Props) {
+interface Props {
+    clubs: Club[];
+    students: Student[];
+    selected_club_id?: number;
+}
+
+export default function Create({ clubs, students, selected_club_id }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: "",
         ic_number: "",
@@ -38,8 +48,20 @@ export default function Create({ clubs }: Props) {
         mobile: "",
         grade: "",
         profile_picture: null as File | null,
-        club_id: "",
+        club_id: selected_club_id ? String(selected_club_id) : "",
+        student_ids: [] as number[],
+        password: "",
     });
+    React.useEffect(() => {
+        if (data.club_id) {
+            router.visit(route("organization.instructors.create"), {
+                data: { club_id: data.club_id },
+                preserveState: true,
+                replace: true,
+            });
+        }
+        // eslint-disable-next-line
+    }, [data.club_id]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -180,6 +202,62 @@ export default function Create({ clubs }: Props) {
                                     }
                                 />
                                 {renderError("profile_picture")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                />
+                                {renderError("password")}
+                            </div>
+
+                            {/* Students Checkbox List */}
+                            <div className="w-full px-2 mt-3">
+                                <Label>Assign Students</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
+                                    {students.map((student) => (
+                                        <label
+                                            key={student.id}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <Checkbox
+                                                checked={data.student_ids.includes(
+                                                    student.id
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setData("student_ids", [
+                                                            ...data.student_ids,
+                                                            student.id,
+                                                        ]);
+                                                    } else {
+                                                        setData(
+                                                            "student_ids",
+                                                            data.student_ids.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    student.id
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            <span>
+                                                {student.name}{" "}
+                                                {student.surname || ""}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {renderError("student_ids")}
                             </div>
 
                             <div className="w-full px-2 mt-6">

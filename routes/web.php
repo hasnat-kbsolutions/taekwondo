@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
-
+use App\Exports\StudentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/', function () {
     return redirect('/login');
-});
+})->middleware('redirect.role');
 
 
 Route::get('/storage-link', function () {
@@ -20,6 +21,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
 
 
     Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
@@ -102,7 +105,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
-    Route::get('/students/filter', [App\Http\Controllers\Admin\AttendanceController::class, 'filter'])->name('students.filter');
+    Route::get('/filter', [App\Http\Controllers\Admin\AttendanceController::class, 'filter'])->name('students.filter');
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'organizationsReport'])->name('admin.reports');
 });
 
 // Organization routes
@@ -196,6 +200,14 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 // Guardian routes
 Route::middleware(['auth', 'role:guardian'])->prefix('guardian')->name('guardian.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Guardian\DashboardController::class, 'index'])->name('dashboard');
+});
+
+// Instructor routes
+Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('instructor.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Instructor\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/students', [App\Http\Controllers\Instructor\StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/{id}/edit', [App\Http\Controllers\Instructor\StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{id}', [App\Http\Controllers\Instructor\StudentController::class, 'update'])->name('students.update');
 });
 
 require __DIR__ . '/auth.php';

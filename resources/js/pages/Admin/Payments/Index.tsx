@@ -15,7 +15,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { MoreHorizontal, Eye } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -46,69 +54,6 @@ interface Props {
     };
 }
 
-const columns: ColumnDef<Payment>[] = [
-    {
-        header: "#",
-        cell: ({ row }) => row.index + 1,
-    },
-    {
-        header: "Student",
-        cell: ({ row }) => row.original.student?.name || "-",
-    },
-    { header: "Amount", accessorKey: "amount" },
-    {
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge
-                variant={
-                    row.original.status === "paid" ||
-                    row.original.status === "success"
-                        ? "default"
-                        : "destructive"
-                }
-            >
-                {row.original.status}
-            </Badge>
-        ),
-    },
-    { header: "Method", accessorKey: "method" },
-    { header: "Payment Month", accessorKey: "payment_month" },
-    { header: "Pay At", accessorKey: "pay_at" },
-    {
-        header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route("admin.payments.edit", row.original.id)}
-                        >
-                            Edit
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "admin.payments.destroy",
-                                row.original.id
-                            )}
-                            method="delete"
-                            as="button"
-                        >
-                            Delete
-                        </Link>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
-
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
 
@@ -127,18 +72,24 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-
 export default function PaymentIndex({ payments, filters }: Props) {
     const [status, setStatus] = useState(filters.status || "");
-
     const [selectedYear, setSelectedYear] = useState(
         filters.payment_month?.split("-")[0] || currentYear.toString()
     );
     const [selectedMonth, setSelectedMonth] = useState(
         filters.payment_month?.split("-")[1] || ""
     );
-    
-    
+
+    const [selectedPayment, setSelectedPayment] = useState<Payment | null>(
+        null
+    );
+    const [open, setOpen] = useState(false);
+
+    const openModal = (payment: Payment) => {
+        setSelectedPayment(payment);
+        setOpen(true);
+    };
 
     const handleFilterChange = ({
         year,
@@ -150,7 +101,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
         status: string;
     }) => {
         const paymentMonth = year && month ? `${year}-${month}` : "";
-
         router.get(
             route("admin.payments.index"),
             {
@@ -164,8 +114,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
             }
         );
     };
-    
-    
+
     const [initialLoad, setInitialLoad] = useState(true);
 
     useEffect(() => {
@@ -173,7 +122,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
             setInitialLoad(false);
             return;
         }
-
         handleFilterChange({
             year: selectedYear,
             month: selectedMonth,
@@ -195,20 +143,89 @@ export default function PaymentIndex({ payments, filters }: Props) {
             }
         );
     };
-    
+
+    const columns: ColumnDef<Payment>[] = [
+        {
+            header: "#",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            header: "Student",
+            cell: ({ row }) => row.original.student?.name || "-",
+        },
+        { header: "Amount", accessorKey: "amount" },
+        {
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge
+                    variant={
+                        row.original.status === "paid" ||
+                        row.original.status === "success"
+                            ? "default"
+                            : "destructive"
+                    }
+                >
+                    {row.original.status}
+                </Badge>
+            ),
+        },
+        { header: "Method", accessorKey: "method" },
+        { header: "Payment Month", accessorKey: "payment_month" },
+        { header: "Pay At", accessorKey: "pay_at" },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() => openModal(row.original)}
+                        >
+                            View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "admin.payments.edit",
+                                    row.original.id
+                                )}
+                            >
+                                Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "admin.payments.destroy",
+                                    row.original.id
+                                )}
+                                method="delete"
+                                as="button"
+                            >
+                                Delete
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
 
     return (
         <AuthenticatedLayout header="Payments">
             <Head title="Payments" />
             <div className="container mx-auto py-10 space-y-6">
-                {/* Filters Card */}
+                {/* Filters */}
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
+                    <CardHeader>
                         <CardTitle>Filters</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-end gap-4 flex-wrap">
-                            {/* Year Filter */}
                             <div className="flex flex-col w-[160px]">
                                 <Label className="text-sm mb-1">Year</Label>
                                 <Select
@@ -228,7 +245,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 </Select>
                             </div>
 
-                            {/* Month Filter */}
                             <div className="flex flex-col w-[160px]">
                                 <Label className="text-sm mb-1">Month</Label>
                                 <Select
@@ -256,7 +272,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 </Select>
                             </div>
 
-                            {/* Status Filter */}
                             <div className="flex flex-col w-[160px]">
                                 <Label className="text-sm mb-1">Status</Label>
                                 <Select
@@ -280,12 +295,8 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 </Select>
                             </div>
 
-                            {/* Reset Button */}
                             <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
-                                    onClick={resetFilters}
-                                >
+                                <Button onClick={resetFilters}>
                                     Reset Filters
                                 </Button>
                             </div>
@@ -305,8 +316,58 @@ export default function PaymentIndex({ payments, filters }: Props) {
                         <DataTable data={payments} columns={columns} />
                     </CardContent>
                 </Card>
+
+                {/* Modal */}
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Payment</DialogTitle>
+                            <DialogDescription>
+                                Update payment details like amount and status.
+                            </DialogDescription>
+                        </DialogHeader>
+                        {selectedPayment && (
+                            <div className="space-y-2 text-sm">
+                                <p>
+                                    <strong>Student:</strong>{" "}
+                                    {selectedPayment.student?.name}
+                                </p>
+                                <p>
+                                    <strong>Amount:</strong> RM{" "}
+                                    {selectedPayment.amount}
+                                </p>
+                                <p>
+                                    <strong>Status:</strong>{" "}
+                                    {selectedPayment.status}
+                                </p>
+                                <p>
+                                    <strong>Method:</strong>{" "}
+                                    {selectedPayment.method}
+                                </p>
+                                <p>
+                                    <strong>Payment Month:</strong>{" "}
+                                    {selectedPayment.payment_month}
+                                </p>
+                                <p>
+                                    <strong>Pay At:</strong>{" "}
+                                    {selectedPayment.pay_at}
+                                </p>
+                                {selectedPayment.notes && (
+                                    <p>
+                                        <strong>Notes:</strong>{" "}
+                                        {selectedPayment.notes}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                        <DialogFooter>
+                            <Button onClick={() => setOpen(false)}>
+                                Close
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );
-    
 }

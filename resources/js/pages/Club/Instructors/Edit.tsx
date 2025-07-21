@@ -12,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Instructor {
     id: number;
@@ -24,11 +25,23 @@ interface Instructor {
     profile_picture: string | null;
 }
 
-interface Props {
-    instructor: Instructor;
+interface Student {
+    id: number;
+    name: string;
+    surname?: string;
 }
 
-export default function Edit({ instructor }: Props) {
+interface Props {
+    instructor: Instructor;
+    students: Student[];
+    selected_student_ids: number[];
+}
+
+export default function Edit({
+    instructor,
+    students,
+    selected_student_ids,
+}: Props) {
     const { data, setData, post, processing, errors } = useForm({
         _method: "put", // Spoof the PUT method
         name: instructor.name || "",
@@ -38,14 +51,15 @@ export default function Edit({ instructor }: Props) {
         mobile: instructor.mobile || "",
         grade: instructor.grade || "",
         profile_picture: null as File | null,
+        student_ids: selected_student_ids
+            ? Array.from(selected_student_ids)
+            : [],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route("club.instructors.update", instructor.id));
     };
-
-    
 
     const renderError = (field: keyof typeof errors) =>
         errors[field] && (
@@ -137,7 +151,6 @@ export default function Edit({ instructor }: Props) {
                                 {renderError("grade")}
                             </div>
 
-
                             {/* Profile Picture */}
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Profile Picture</Label>
@@ -152,6 +165,47 @@ export default function Edit({ instructor }: Props) {
                                     }
                                 />
                                 {renderError("profile_picture")}
+                            </div>
+
+                            {/* Students Checkbox List */}
+                            <div className="w-full px-2 mt-3">
+                                <Label>Assign Students</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
+                                    {students.map((student) => (
+                                        <label
+                                            key={student.id}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <Checkbox
+                                                checked={data.student_ids.includes(
+                                                    student.id
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setData("student_ids", [
+                                                            ...data.student_ids,
+                                                            student.id,
+                                                        ]);
+                                                    } else {
+                                                        setData(
+                                                            "student_ids",
+                                                            data.student_ids.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    student.id
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            <span>
+                                                {student.name}{" "}
+                                                {student.surname || ""}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {renderError("student_ids")}
                             </div>
 
                             <div className="w-full px-2 mt-6">

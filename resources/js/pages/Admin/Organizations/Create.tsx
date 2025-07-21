@@ -31,7 +31,9 @@ export default function Create() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("admin.organizations.store"));
+        post(route("admin.organizations.store"), {
+            forceFormData: true,
+        });
     };
 
     const renderError = (field: keyof typeof errors) =>

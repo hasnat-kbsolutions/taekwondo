@@ -110,9 +110,9 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         //     ],
         // },
         {
-            title: "Reporting",
-            url: "#",
-            icon: Home,
+            title: "Reports",
+            url: "/admin/reports",
+            icon: SquareTerminal,
         },
     ],
 
@@ -174,6 +174,15 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         { title: "Dashboard", url: "/student/dashboard", icon: Home },
         { title: "Payment", url: "/student/payments", icon: Home },
         { title: "Attendence", url: "/student/attendances", icon: Home },
+    ],
+
+    instructor: [
+        { title: "Dashboard", url: "/instructor/dashboard", icon: Home },
+        {
+            title: "Students",
+            url: "/instructor/students",
+            icon: SquareTerminal,
+        },
     ],
 };
 

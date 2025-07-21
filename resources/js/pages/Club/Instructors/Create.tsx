@@ -14,8 +14,19 @@ import {
 } from "@/components/ui/select";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import { Checkbox } from "@/components/ui/checkbox";
 
-export default function Create() {
+interface Student {
+    id: number;
+    name: string;
+    surname?: string;
+}
+
+interface Props {
+    students: Student[];
+}
+
+export default function Create({ students }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: "",
         ic_number: "",
@@ -24,6 +35,8 @@ export default function Create() {
         mobile: "",
         grade: "",
         profile_picture: null as File | null,
+        student_ids: [] as number[],
+        password: "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -140,6 +153,62 @@ export default function Create() {
                                     }
                                 />
                                 {renderError("profile_picture")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                />
+                                {renderError("password")}
+                            </div>
+
+                            {/* Students Checkbox List */}
+                            <div className="w-full px-2 mt-3">
+                                <Label>Assign Students</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
+                                    {students.map((student) => (
+                                        <label
+                                            key={student.id}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <Checkbox
+                                                checked={data.student_ids.includes(
+                                                    student.id
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setData("student_ids", [
+                                                            ...data.student_ids,
+                                                            student.id,
+                                                        ]);
+                                                    } else {
+                                                        setData(
+                                                            "student_ids",
+                                                            data.student_ids.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    student.id
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            <span>
+                                                {student.name}{" "}
+                                                {student.surname || ""}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {renderError("student_ids")}
                             </div>
 
                             <div className="w-full px-2 mt-6">

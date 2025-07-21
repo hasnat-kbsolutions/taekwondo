@@ -55,4 +55,8 @@ class Student extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function instructors()
+    {
+        return $this->belongsToMany(\App\Models\Instructor::class, 'instructor_student');
+    }
 }

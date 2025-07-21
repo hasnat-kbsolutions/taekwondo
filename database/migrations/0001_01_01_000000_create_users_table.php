@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
 
-            $table->enum('role', ['admin', 'organization', 'club', 'student', 'guardian'])->default('student');
+            $table->enum('role', ['admin', 'organization', 'club', 'student', 'guardian','instructor'])->default('student');
 
             // Polymorphic relation
             $table->nullableMorphs('userable'); // userable_id + userable_type

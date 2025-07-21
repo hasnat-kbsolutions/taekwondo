@@ -27,4 +27,9 @@ class Instructor extends Model
     {
         return $this->belongsTo(Club::class);
     }
+
+    public function students()
+    {
+        return $this->belongsToMany(\App\Models\Student::class, 'instructor_student');
+    }
 }

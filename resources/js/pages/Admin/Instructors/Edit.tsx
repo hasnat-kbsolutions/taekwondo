@@ -12,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Organization {
     id: number;
@@ -36,13 +37,27 @@ interface Instructor {
     club_id: number | string;
 }
 
+interface Student {
+    id: number;
+    name: string;
+    surname?: string;
+}
+
 interface Props {
     instructor: Instructor;
     organizations: Organization[];
     clubs: Club[];
+    students: Student[];
+    selected_student_ids: number[];
 }
 
-export default function Edit({ instructor, organizations, clubs }: Props) {
+export default function Edit({
+    instructor,
+    organizations,
+    clubs,
+    students,
+    selected_student_ids,
+}: Props) {
     const { data, setData, post, processing, errors } = useForm({
         _method: "put",
         name: instructor.name || "",
@@ -54,6 +69,9 @@ export default function Edit({ instructor, organizations, clubs }: Props) {
         organization_id: String(instructor.organization_id || ""),
         club_id: String(instructor.club_id || ""),
         profile_picture: null as File | null,
+        student_ids: selected_student_ids
+            ? Array.from(selected_student_ids)
+            : [],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -225,6 +243,29 @@ export default function Edit({ instructor, organizations, clubs }: Props) {
                                     }
                                 />
                                 {renderError("profile_picture")}
+                            </div>
+
+                            {/* Students Checkbox List */}
+                            <div className="w-full px-2 mt-3">
+                                <Label>Assign Students</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
+                                    {students.map(student => (
+                                        <label key={student.id} className="flex items-center gap-2 cursor-pointer">
+                                            <Checkbox
+                                                checked={data.student_ids.includes(student.id)}
+                                                onCheckedChange={checked => {
+                                                    if (checked) {
+                                                        setData("student_ids", [...data.student_ids, student.id]);
+                                                    } else {
+                                                        setData("student_ids", data.student_ids.filter(id => id !== student.id));
+                                                    }
+                                                }}
+                                            />
+                                            <span>{student.name} {student.surname || ""}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {renderError("student_ids")}
                             </div>
 
                             <div className="w-full px-2 mt-6">

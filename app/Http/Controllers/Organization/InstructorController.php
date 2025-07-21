@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class InstructorController extends Controller
 {
@@ -36,14 +39,20 @@ class InstructorController extends Controller
     }
 
 
-    public function create()
+    public function create(Request $request)
     {
+        $orgId = Auth::user()->userable_id;
+        $clubId = $request->input('club_id');
+        $students = collect();
+        if ($clubId) {
+            $students = Student::where('organization_id', $orgId)
+                ->where('club_id', $clubId)
+                ->get();
+        }
         return Inertia::render('Organization/Instructors/Create', [
-            'clubs' => Club::select('id', 'name')
-                ->when(Auth::user()->role === 'organization', function ($query) {
-                    $query->where('organization_id', Auth::user()->userable_id);
-                })
-                ->get(),
+            'clubs' => Club::where('organization_id', $orgId)->get(),
+            'students' => $students,
+            'selected_club_id' => $clubId,
         ]);
     }
 
@@ -52,39 +61,56 @@ class InstructorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'ic_number' => 'nullable|string|max:255',
-            'email' => 'required|email|unique:instructors,email',
+            'email' => 'required|email|unique:instructors,email|unique:users,email',
             'address' => 'nullable|string',
             'mobile' => 'nullable|string|max:255',
             'grade' => 'nullable|string|max:255',
             'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'club_id' => 'nullable|exists:clubs,id',
+            'student_ids' => 'array',
+            'student_ids.*' => 'exists:students,id',
+            'password' => 'required|string|min:6',
         ]);
-
-        // Force organization_id if user is organization
         if (Auth::user()->role === 'organization') {
             $validated['organization_id'] = Auth::user()->userable_id;
         }
-
         if ($request->hasFile('profile_picture')) {
             $path = $request->file('profile_picture')->store('instructors', 'public');
             $validated['profile_picture'] = '/storage/' . $path;
         }
-
-        Instructor::create($validated);
-
+        $instructor = Instructor::create($validated);
+        if ($request->has('student_ids')) {
+            $instructor->students()->sync($request->student_ids);
+        }
+        // Create user for instructor
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'instructor',
+            'userable_type' => Instructor::class,
+            'userable_id' => $instructor->id,
+        ]);
         return redirect()->route('organization.instructors.index')
             ->with('success', 'Instructor created successfully');
     }
 
-    public function edit(Instructor $instructor)
+    public function edit(Instructor $instructor, Request $request)
     {
+        $orgId = Auth::user()->userable_id;
+        $clubId = $request->input('club_id', $instructor->club_id);
+        $students = collect();
+        if ($clubId) {
+            $students = Student::where('organization_id', $orgId)
+                ->where('club_id', $clubId)
+                ->get();
+        }
         return Inertia::render('Organization/Instructors/Edit', [
-            'instructor' => $instructor,
-            'clubs' => Club::select('id', 'name')
-                ->when(Auth::user()->role === 'organization', function ($query) {
-                    $query->where('organization_id', Auth::user()->userable_id);
-                })
-                ->get(),
+            'instructor' => $instructor->load('students'),
+            'clubs' => Club::where('organization_id', $orgId)->get(),
+            'students' => $students,
+            'selected_student_ids' => $instructor->students->pluck('id'),
+            'selected_club_id' => $clubId,
         ]);
     }
 
@@ -99,26 +125,24 @@ class InstructorController extends Controller
             'grade' => 'nullable|string|max:255',
             'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'club_id' => 'nullable|exists:clubs,id',
+            'student_ids' => 'array',
+            'student_ids.*' => 'exists:students,id',
         ]);
-
-        // Force organization_id if user is organization
         if (Auth::user()->role === 'organization') {
             $validated['organization_id'] = Auth::user()->userable_id;
         }
-
         if ($request->hasFile('profile_picture')) {
-            // Delete old picture
             if ($instructor->profile_picture) {
                 $oldPath = str_replace('/storage/', '', parse_url($instructor->profile_picture, PHP_URL_PATH));
                 Storage::disk('public')->delete($oldPath);
             }
-
             $path = $request->file('profile_picture')->store('instructors', 'public');
             $validated['profile_picture'] = '/storage/' . $path;
         }
-
         $instructor->update($validated);
-
+        if ($request->has('student_ids')) {
+            $instructor->students()->sync($request->student_ids);
+        }
         return redirect()->route('organization.instructors.index')
             ->with('success', 'Instructor updated successfully');
     }

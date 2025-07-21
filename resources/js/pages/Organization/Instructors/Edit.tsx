@@ -1,5 +1,5 @@
 import React from "react";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, router } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Organization {
     id: number;
@@ -35,23 +36,56 @@ interface Instructor {
     club_id: number | string;
 }
 
+interface Student {
+    id: number;
+    name: string;
+    surname?: string;
+}
+
 interface Props {
     instructor: Instructor;
     clubs: Club[];
+    students: Student[];
+    selected_student_ids: number[];
+    selected_club_id?: number;
 }
 
-export default function Edit({ instructor, clubs }: Props) {
+export default function Edit({
+    instructor,
+    clubs,
+    students,
+    selected_student_ids,
+    selected_club_id,
+}: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        _method: "put", // Spoof the PUT method
+        _method: "put",
         name: instructor.name || "",
         ic_number: instructor.ic_number || "",
         email: instructor.email || "",
         address: instructor.address || "",
         mobile: instructor.mobile || "",
         grade: instructor.grade || "",
-        club_id: String(instructor.club_id || ""),
+        club_id: selected_club_id
+            ? String(selected_club_id)
+            : String(instructor.club_id || ""),
         profile_picture: null as File | null,
+        student_ids: selected_student_ids
+            ? Array.from(selected_student_ids)
+            : [],
     });
+    React.useEffect(() => {
+        if (data.club_id) {
+            router.visit(
+                route("organization.instructors.edit", instructor.id),
+                {
+                    data: { club_id: data.club_id },
+                    preserveState: true,
+                    replace: true,
+                }
+            );
+        }
+        // eslint-disable-next-line
+    }, [data.club_id]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -189,6 +223,47 @@ export default function Edit({ instructor, clubs }: Props) {
                                     }
                                 />
                                 {renderError("profile_picture")}
+                            </div>
+
+                            {/* Students Checkbox List */}
+                            <div className="w-full px-2 mt-3">
+                                <Label>Assign Students</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
+                                    {students.map((student) => (
+                                        <label
+                                            key={student.id}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <Checkbox
+                                                checked={data.student_ids.includes(
+                                                    student.id
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setData("student_ids", [
+                                                            ...data.student_ids,
+                                                            student.id,
+                                                        ]);
+                                                    } else {
+                                                        setData(
+                                                            "student_ids",
+                                                            data.student_ids.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    student.id
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            <span>
+                                                {student.name}{" "}
+                                                {student.surname || ""}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {renderError("student_ids")}
                             </div>
 
                             <div className="w-full px-2 mt-6">
