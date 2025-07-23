@@ -54,8 +54,12 @@ interface Props {
     };
 }
 
+// Add "All" option to years
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+const years = [
+    "All",
+    ...Array.from({ length: 5 }, (_, i) => (currentYear - i).toString()),
+];
 
 const months = [
     { label: "January", value: "01" },
@@ -100,7 +104,10 @@ export default function PaymentIndex({ payments, filters }: Props) {
         month: string;
         status: string;
     }) => {
-        const paymentMonth = year && month ? `${year}-${month}` : "";
+        // Ensure a valid payment_month format (default to "01" if no month selected, clear if year is "All")
+        const paymentMonth =
+            year === "All" ? "" : month ? `${year}-${month}` : `${year}-01`; // Default to January if no month
+        console.log("Filter Values:", { year, month, status, paymentMonth }); // Debug log
         router.get(
             route("admin.payments.index"),
             {
@@ -209,6 +216,15 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 Delete
                             </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("admin.payments.invoice", {
+                                    payment: row.original.id,
+                                })}
+                            >
+                                Invoice
+                            </Link>
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -226,24 +242,28 @@ export default function PaymentIndex({ payments, filters }: Props) {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-end gap-4 flex-wrap">
-                            <div className="flex flex-col w-[160px]">
-                                <Label className="text-sm mb-1">Year</Label>
-                                <Select
-                                    value={selectedYear}
-                                    onValueChange={setSelectedYear}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Year" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {years.map((year) => (
-                                            <SelectItem key={year} value={year}>
-                                                {year}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                           <div className="flex flex-col w-[160px]">
+                                                <Label className="text-sm mb-1">Year</Label>
+                                                <Select
+                                                    value={selectedYear}
+                                                    onValueChange={(value) => {
+                                                        setSelectedYear(value);
+                                                        if (value === "All")
+                                                            setSelectedMonth(""); // Clear month if "All" is selected
+                                                    }}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Year" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {years.map((year) => (
+                                                            <SelectItem key={year} value={year}>
+                                                                {year}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
 
                             <div className="flex flex-col w-[160px]">
                                 <Label className="text-sm mb-1">Month</Label>

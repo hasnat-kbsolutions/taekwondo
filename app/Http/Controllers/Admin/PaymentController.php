@@ -12,15 +12,36 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $payments = Payment::with('student')
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->payment_month, fn($q) => $q->where('payment_month', $request->payment_month))
-            ->latest()
-            ->get();
+        $query = Payment::with(['student.club', 'student.organization']);
+
+        // Filter by status
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by payment_month (support year-only or full YYYY-MM)
+        if ($request->payment_month) {
+            $paymentMonth = $request->payment_month;
+            if (strlen($paymentMonth) === 4) { // Year only (e.g., "2025")
+                $query->where('payment_month', 'LIKE', "$paymentMonth-%");
+            } elseif (strlen($paymentMonth) === 7) { // Full YYYY-MM (e.g., "2025-07")
+                $query->where('payment_month', $paymentMonth);
+            }
+        }
+
+        $payments = $query->latest()->get();
 
         return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
             'filters' => $request->only(['status', 'payment_month']),
+        ]);
+    }
+
+    public function invoice(Payment $payment)
+    {
+        $payment->load(['student.club', 'student.organization']);
+        return Inertia::render('Admin/Payments/Invoice', [
+            'payment' => $payment,
         ]);
     }
 
@@ -37,20 +58,31 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'amount' => 'required|numeric',
-            'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:pending,paid,failed,refunded',
-            'payment_month' => 'required|date_format:Y-m',
+            'amount' => 'required|numeric|min:0',
+            'status' => 'required|in:paid,unpaid',
+            'method' => 'required|in:cash,stripe',
+            'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
-            'transaction_id' => 'nullable|string|max:255',
         ]);
 
-        Payment::create($request->all());
+        // Combine current year with selected month for "YYYY-MM" format
+        $year = now()->year;
+        $payment_month = $year . '-' . $validated['payment_month'];
 
-        return redirect()->route('admin.payments.index')->with('success', 'Payment created successfully');
+        Payment::create([
+            'student_id' => $validated['student_id'],
+            'amount' => $validated['amount'],
+            'status' => $validated['status'],
+            'method' => $validated['method'],
+            'payment_month' => $payment_month,
+            'pay_at' => $validated['pay_at'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->route('admin.payments.index')->with('success', 'Payment added successfully.');
     }
 
     public function edit(Payment $payment)
@@ -63,18 +95,29 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'amount' => 'required|numeric',
-            'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:pending,paid,failed,refunded',
-            'payment_month' => 'required|date_format:Y-m',
-            'pay_at' => 'nullable|date',
+            'amount' => 'required|numeric|min:0',
+            'status' => 'required|in:paid,unpaid',
+            'method' => 'required|in:cash,stripe',
+            'payment_month' => 'required|string|size:2',
+            'pay_at' => 'required|date',
             'notes' => 'nullable|string',
-            'transaction_id' => 'nullable|string|max:255',
         ]);
 
-        $payment->update($request->all());
+        // Combine current year with selected month for "YYYY-MM" format
+        $year = now()->year;
+        $payment_month = $year . '-' . $validated['payment_month'];
+
+        $payment->update([
+            'student_id' => $validated['student_id'],
+            'amount' => $validated['amount'],
+            'status' => $validated['status'],
+            'method' => $validated['method'],
+            'payment_month' => $payment_month,
+            'pay_at' => $validated['pay_at'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         return redirect()->route('admin.payments.index')->with('success', 'Payment updated successfully');
     }

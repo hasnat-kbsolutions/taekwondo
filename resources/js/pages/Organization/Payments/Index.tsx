@@ -86,7 +86,10 @@ const columns: ColumnDef<Payment>[] = [
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route("organization.payments.edit", row.original.id)}
+                            href={route(
+                                "organization.payments.edit",
+                                row.original.id
+                            )}
                         >
                             Edit
                         </Link>
@@ -103,6 +106,15 @@ const columns: ColumnDef<Payment>[] = [
                             Delete
                         </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route("organization.payments.invoice", {
+                                payment: row.original.id,
+                            })}
+                        >
+                            Invoice
+                        </Link>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         ),
@@ -110,7 +122,10 @@ const columns: ColumnDef<Payment>[] = [
 ];
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+const years = [
+    "All",
+    ...Array.from({ length: 5 }, (_, i) => (currentYear - i).toString()),
+];
 
 const months = [
     { label: "January", value: "01" },
@@ -127,7 +142,6 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-
 export default function PaymentIndex({ payments, filters }: Props) {
     const [status, setStatus] = useState(filters.status || "");
 
@@ -137,7 +151,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
     const [selectedMonth, setSelectedMonth] = useState(
         filters.payment_month?.split("-")[1] || ""
     );
-    
 
     const handleFilterChange = ({
         year,
@@ -148,7 +161,8 @@ export default function PaymentIndex({ payments, filters }: Props) {
         month: string;
         status: string;
     }) => {
-        const paymentMonth = year && month ? `${year}-${month}` : "";
+        const paymentMonth =
+            year === "All" ? "" : month ? `${year}-${month}` : `${year}-01`; // Default to January if no month
 
         router.get(
             route("organization.payments.index"),
@@ -163,7 +177,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
             }
         );
     };
-    
+
     const [initialLoad, setInitialLoad] = useState(true);
 
     useEffect(() => {
@@ -178,7 +192,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
             status: status,
         });
     }, [selectedYear, selectedMonth, status]);
-    
 
     const resetFilters = () => {
         setStatus("");
@@ -194,7 +207,6 @@ export default function PaymentIndex({ payments, filters }: Props) {
             }
         );
     };
-    
 
     return (
         <AuthenticatedLayout header="Payments">
@@ -212,7 +224,11 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 <Label className="text-sm mb-1">Year</Label>
                                 <Select
                                     value={selectedYear}
-                                    onValueChange={setSelectedYear}
+                                    onValueChange={(value) => {
+                                        setSelectedYear(value);
+                                        if (value === "All")
+                                            setSelectedMonth(""); // Clear month if "All" is selected
+                                    }}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Year" />
@@ -307,5 +323,4 @@ export default function PaymentIndex({ payments, filters }: Props) {
             </div>
         </AuthenticatedLayout>
     );
-    
 }

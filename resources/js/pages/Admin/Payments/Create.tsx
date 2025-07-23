@@ -12,6 +12,15 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button as ShadButton } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 export default function Create() {
     const { students, errors } = usePage().props as any;
@@ -148,19 +157,47 @@ export default function Create() {
 
                                 <div>
                                     <Label>
-                                        Payment Month
+                                        Month
                                         <span className="text-red-500">*</span>
                                     </Label>
-                                    <Input
-                                        type="month"
+                                    <Select
                                         value={form.payment_month}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "payment_month",
-                                                e.target.value
-                                            )
+                                        onValueChange={(value) =>
+                                            handleChange("payment_month", value)
                                         }
-                                    />
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Month" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {[
+                                                "01",
+                                                "02",
+                                                "03",
+                                                "04",
+                                                "05",
+                                                "06",
+                                                "07",
+                                                "08",
+                                                "09",
+                                                "10",
+                                                "11",
+                                                "12",
+                                            ].map((m) => (
+                                                <SelectItem key={m} value={m}>
+                                                    {new Date(
+                                                        0,
+                                                        parseInt(m) - 1
+                                                    ).toLocaleString(
+                                                        "default",
+                                                        {
+                                                            month: "long",
+                                                        }
+                                                    )}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     {renderError("payment_month")}
                                 </div>
 
@@ -169,16 +206,48 @@ export default function Create() {
                                         Pay At
                                         <span className="text-red-500">*</span>
                                     </Label>
-                                    <Input
-                                        type="date"
-                                        value={form.pay_at}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "pay_at",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <ShadButton
+                                                variant={"outline"}
+                                                className={
+                                                    "w-full justify-start text-left font-normal " +
+                                                    (!form.pay_at &&
+                                                        "text-muted-foreground")
+                                                }
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {form.pay_at
+                                                    ? format(
+                                                          new Date(form.pay_at),
+                                                          "PPP"
+                                                      )
+                                                    : "Pick a date"}
+                                            </ShadButton>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={
+                                                    form.pay_at
+                                                        ? new Date(form.pay_at)
+                                                        : undefined
+                                                }
+                                                onSelect={(date) =>
+                                                    handleChange(
+                                                        "pay_at",
+                                                        date
+                                                            ? format(
+                                                                  date,
+                                                                  "yyyy-MM-dd"
+                                                              )
+                                                            : ""
+                                                    )
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                     {renderError("pay_at")}
                                 </div>
 

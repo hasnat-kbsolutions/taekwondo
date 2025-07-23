@@ -9,6 +9,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
@@ -42,7 +50,10 @@ export default function Edit({ payment, students }: Props) {
         status: payment.status || "unpaid",
         method: payment.method || "cash",
         pay_at: payment.pay_at || "",
-        payment_month: payment.payment_month || "",
+        payment_month:
+            payment.payment_month.length === 2
+                ? payment.payment_month
+                : payment.payment_month.split("-")[1] || "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -174,14 +185,45 @@ export default function Edit({ payment, students }: Props) {
 
                             {/* Payment Month */}
                             <div className="col-span-1">
-                                <Label>Payment Month</Label>
-                                <Input
-                                    type="month"
+                                <Label>
+                                    Month
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
                                     value={data.payment_month}
-                                    onChange={(e) =>
-                                        setData("payment_month", e.target.value)
+                                    onValueChange={(value) =>
+                                        setData("payment_month", value)
                                     }
-                                />
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select Month" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {[
+                                            "01",
+                                            "02",
+                                            "03",
+                                            "04",
+                                            "05",
+                                            "06",
+                                            "07",
+                                            "08",
+                                            "09",
+                                            "10",
+                                            "11",
+                                            "12",
+                                        ].map((m) => (
+                                            <SelectItem key={m} value={m}>
+                                                {new Date(
+                                                    0,
+                                                    parseInt(m) - 1
+                                                ).toLocaleString("default", {
+                                                    month: "long",
+                                                })}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 {errors.payment_month && (
                                     <p className="text-red-500 text-sm">
                                         {errors.payment_month}
@@ -191,14 +233,52 @@ export default function Edit({ payment, students }: Props) {
 
                             {/* Pay At */}
                             <div className="col-span-1">
-                                <Label>Pay At</Label>
-                                <Input
-                                    type="date"
-                                    value={data.pay_at}
-                                    onChange={(e) =>
-                                        setData("pay_at", e.target.value)
-                                    }
-                                />
+                                <Label>
+                                    Pay At
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={
+                                                "w-full justify-start text-left font-normal " +
+                                                (!data.pay_at &&
+                                                    "text-muted-foreground")
+                                            }
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {data.pay_at
+                                                ? format(
+                                                      new Date(data.pay_at),
+                                                      "PPP"
+                                                  )
+                                                : "Pick a date"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={
+                                                data.pay_at
+                                                    ? new Date(data.pay_at)
+                                                    : undefined
+                                            }
+                                            onSelect={(date) =>
+                                                setData(
+                                                    "pay_at",
+                                                    date
+                                                        ? format(
+                                                              date,
+                                                              "yyyy-MM-dd"
+                                                          )
+                                                        : ""
+                                                )
+                                            }
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                                 {errors.pay_at && (
                                     <p className="text-red-500 text-sm">
                                         {errors.pay_at}

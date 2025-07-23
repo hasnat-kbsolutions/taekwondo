@@ -20,6 +20,7 @@ class AttendanceController extends Controller
     {
         $date = $request->date ? Carbon::parse($request->date . '-01') : null;
 
+
         $query = Student::with([
             'attendances' => function ($q) use ($date) {
                 if ($date) {

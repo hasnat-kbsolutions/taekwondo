@@ -9,6 +9,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
@@ -42,7 +50,10 @@ export default function Edit({ payment, students }: Props) {
         status: payment.status || "unpaid",
         method: payment.method || "cash",
         pay_at: payment.pay_at || "",
-        payment_month: payment.payment_month || "",
+        payment_month:
+            payment.payment_month.length === 2
+                ? payment.payment_month
+                : payment.payment_month.split("-")[1] || "",
     });
 
     const handleChange = (field: keyof typeof data, value: string) => {
@@ -72,164 +83,236 @@ export default function Edit({ payment, students }: Props) {
                             <div className="grid grid-cols-3 gap-4">
                                 {/* Student */}
                                 <div>
-                                    <Label>
-                                        Student
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={data.student_id.toString()}
-                                        onValueChange={(value) =>
-                                            handleChange("student_id", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Student" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {students.map((s) => (
-                                                <SelectItem
-                                                    key={s.id}
-                                                    value={String(s.id)}
+                                    <div>
+                                        <Label>
+                                            Month
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Select
+                                            value={data.payment_month}
+                                            onValueChange={(value) =>
+                                                handleChange(
+                                                    "payment_month",
+                                                    value
+                                                )
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Month" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {[
+                                                    "01",
+                                                    "02",
+                                                    "03",
+                                                    "04",
+                                                    "05",
+                                                    "06",
+                                                    "07",
+                                                    "08",
+                                                    "09",
+                                                    "10",
+                                                    "11",
+                                                    "12",
+                                                ].map((m) => (
+                                                    <SelectItem
+                                                        key={m}
+                                                        value={m}
+                                                    >
+                                                        {new Date(
+                                                            0,
+                                                            parseInt(m) - 1
+                                                        ).toLocaleString(
+                                                            "default",
+                                                            { month: "long" }
+                                                        )}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {renderError("payment_month")}
+                                    </div>
+
+                                    <div>
+                                        <Label>
+                                            Pay At
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={
+                                                        "w-full justify-start text-left font-normal " +
+                                                        (!data.pay_at &&
+                                                            "text-muted-foreground")
+                                                    }
                                                 >
-                                                    {s.name}
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {data.pay_at
+                                                        ? format(
+                                                              new Date(
+                                                                  data.pay_at
+                                                              ),
+                                                              "PPP"
+                                                          )
+                                                        : "Pick a date"}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={
+                                                        data.pay_at
+                                                            ? new Date(
+                                                                  data.pay_at
+                                                              )
+                                                            : undefined
+                                                    }
+                                                    onSelect={(date) =>
+                                                        handleChange(
+                                                            "pay_at",
+                                                            date
+                                                                ? format(
+                                                                      date,
+                                                                      "yyyy-MM-dd"
+                                                                  )
+                                                                : ""
+                                                        )
+                                                    }
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        {renderError("pay_at")}
+                                    </div>
+
+                                    {/* Status */}
+                                    <div>
+                                        <Label>
+                                            Status
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Select
+                                            value={data.status}
+                                            onValueChange={(value) =>
+                                                handleChange("status", value)
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="paid">
+                                                    Paid
                                                 </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("student_id")}
+                                                <SelectItem value="unpaid">
+                                                    Unpaid
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {renderError("status")}
+                                    </div>
+
+                                    {/* Method */}
+                                    <div>
+                                        <Label>
+                                            Method
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Select
+                                            value={data.method}
+                                            onValueChange={(value) =>
+                                                handleChange("method", value)
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Method" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="cash">
+                                                    Cash
+                                                </SelectItem>
+                                                <SelectItem value="stripe">
+                                                    Stripe
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {renderError("method")}
+                                    </div>
+
+                                    {/* Payment Month */}
+                                    <div>
+                                        <Label>
+                                            Payment Month
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Input
+                                            type="month"
+                                            value={data.payment_month}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "payment_month",
+                                                    e.target.value
+                                                )
+                                            }
+                                        />
+                                        {renderError("payment_month")}
+                                    </div>
+
+                                    {/* Pay At */}
+                                    <div>
+                                        <Label>
+                                            Pay At
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Input
+                                            type="date"
+                                            value={data.pay_at}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "pay_at",
+                                                    e.target.value
+                                                )
+                                            }
+                                        />
+                                        {renderError("pay_at")}
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div className="col-span-3">
+                                        <Label>Notes</Label>
+                                        <Input
+                                            value={data.notes}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "notes",
+                                                    e.target.value
+                                                )
+                                            }
+                                        />
+                                    </div>
                                 </div>
 
-                                {/* Amount */}
-                                <div>
-                                    <Label>
-                                        Amount
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        type="number"
-                                        value={data.amount}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "amount",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    {renderError("amount")}
+                                <div className="pt-4">
+                                    <Button type="submit" disabled={processing}>
+                                        Save
+                                    </Button>
                                 </div>
-
-                                {/* Status */}
-                                <div>
-                                    <Label>
-                                        Status
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={data.status}
-                                        onValueChange={(value) =>
-                                            handleChange("status", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="paid">
-                                                Paid
-                                            </SelectItem>
-                                            <SelectItem value="unpaid">
-                                                Unpaid
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("status")}
-                                </div>
-
-                                {/* Method */}
-                                <div>
-                                    <Label>
-                                        Method
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={data.method}
-                                        onValueChange={(value) =>
-                                            handleChange("method", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Method" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="cash">
-                                                Cash
-                                            </SelectItem>
-                                            <SelectItem value="stripe">
-                                                Stripe
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("method")}
-                                </div>
-
-                                {/* Payment Month */}
-                                <div>
-                                    <Label>
-                                        Payment Month
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        type="month"
-                                        value={data.payment_month}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "payment_month",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    {renderError("payment_month")}
-                                </div>
-
-                                {/* Pay At */}
-                                <div>
-                                    <Label>
-                                        Pay At
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        type="date"
-                                        value={data.pay_at}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "pay_at",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    {renderError("pay_at")}
-                                </div>
-
-                                {/* Notes */}
-                                <div className="col-span-3">
-                                    <Label>Notes</Label>
-                                    <Input
-                                        value={data.notes}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "notes",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-4">
-                                <Button type="submit" disabled={processing}>
-                                    Save
-                                </Button>
-                            </div>
+                            </div>{" "}
+                            {/* Close grid container */}
                         </form>
                     </CardContent>
                 </Card>

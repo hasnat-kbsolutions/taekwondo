@@ -16,26 +16,33 @@ class PaymentController extends Controller
         if ($user->role !== 'club') {
             abort(403, 'Unauthorized');
         }
-    
-        $status = $request->input('status');
-        $paymentMonth = $request->input('payment_month');
-    
-        $payments = Payment::with('student')
+
+        $query = Payment::with('student')
             ->whereHas('student', function ($query) use ($user) {
                 $query->where('organization_id', $user->userable->organization_id)
-                      ->where('club_id', $user->userable_id);
-            })
-            ->when($status, fn($q) => $q->where('status', $status))
-            ->when($paymentMonth, fn($q) => $q->where('payment_month', $paymentMonth))
-            ->latest()
-            ->get();
-    
+                    ->where('club_id', $user->userable_id);
+            });
+
+        // Filter by status
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by payment_month (support year-only or full YYYY-MM)
+        if ($request->payment_month) {
+            $paymentMonth = $request->payment_month;
+            if (strlen($paymentMonth) === 4) { // Year only (e.g., "2025")
+                $query->where('payment_month', 'LIKE', "$paymentMonth-%");
+            } elseif (strlen($paymentMonth) === 7) { // Full YYYY-MM (e.g., "2025-07")
+                $query->where('payment_month', $paymentMonth);
+            }
+        }
+
+        $payments = $query->latest()->get();
+
         return Inertia::render('Club/Payments/Index', [
             'payments' => $payments,
-            'filters' => [
-                'status' => $status,
-                'payment_month' => $paymentMonth,
-            ],
+            'filters' => $request->only(['status', 'payment_month']),
         ]);
     }
 
@@ -55,17 +62,20 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:pending,paid,failed,refunded',
-            'payment_month' => 'required|date_format:Y-m',
-            'pay_at' => 'nullable|date',
+            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'payment_month' => 'required|string|size:2',
+            'pay_at' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
-        Payment::create($request->all());
+        $year = now()->year;
+        $validated['payment_month'] = $year . '-' . $validated['payment_month'];
+
+        Payment::create($validated);
 
         return redirect()->route('club.payments.index')->with('success', 'Payment created successfully');
     }
@@ -89,30 +99,34 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:pending,paid,failed,refunded',
-            'payment_month' => 'required|date_format:Y-m',
-            'pay_at' => 'nullable|date',
+            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'payment_month' => 'required|string|size:2',
+            'pay_at' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
-        $payment->update($request->all());
+        $year = now()->year;
+        $validated['payment_month'] = $year . '-' . $validated['payment_month'];
+
+        $payment->update($validated);
 
         return redirect()->route('club.payments.index')->with('success', 'Payment updated successfully');
     }
 
-    public function destroy(Payment $payment)
+
+    public function invoice(Payment $payment)
     {
         $user = Auth::user();
         if ($user->role !== 'club') {
             abort(403, 'Unauthorized');
         }
-
-        $payment->delete();
-
-        return redirect()->route('club.payments.index')->with('success', 'Payment deleted successfully');
+        $payment->load(['student.club', 'student.organization']);
+        return Inertia::render('Club/Payments/Invoice', [
+            'payment' => $payment,
+        ]);
     }
 }
