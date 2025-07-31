@@ -199,7 +199,7 @@ export default function Index({ clubs, filters }: Props) {
 
                             <div className="flex items-end">
                                 <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
                                     onClick={resetFilters}
                                 >
                                     Reset Filters

@@ -44,10 +44,8 @@ export default function Index({
     const [clubId, setClubId] = useState(filters.club_id || "");
     const [gender, setGender] = useState(filters.gender || "");
     const [status, setStatus] = useState(filters.status || "");
-const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(
-    null
-);
-
+    const [selectedSupporter, setSelectedSupporter] =
+        useState<Supporter | null>(null);
 
     const handleFilterChange = ({
         organization_id,
@@ -233,7 +231,7 @@ const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(
                             {/* Reset */}
                             <div className="flex items-end">
                                 <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-foreground text-background"
                                     onClick={resetFilters}
                                 >
                                     Reset Filters
@@ -267,63 +265,17 @@ const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(
                             if (!open) setSelectedSupporter(null);
                         }}
                     >
-                        <DialogContent>
-                            <DialogTitle>Supporter Details</DialogTitle>
-                            <DialogDescription>
-                                Full supporter details
-                            </DialogDescription>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <strong>Name:</strong>{" "}
-                                    {selectedSupporter.name}{" "}
-                                    {selectedSupporter.surename}
-                                </div>
-                                <div>
-                                    <strong>Email:</strong>{" "}
-                                    {selectedSupporter.email}
-                                </div>
-                                <div>
-                                    <strong>Phone:</strong>{" "}
-                                    {selectedSupporter.phone}
-                                </div>
-                                <div>
-                                    <strong>Gender:</strong>{" "}
-                                    {selectedSupporter.gender}
-                                </div>
-                                <div>
-                                    <strong>Country:</strong>{" "}
-                                    {selectedSupporter.country}
-                                </div>
-                                <div>
-                                    <strong>Type:</strong>{" "}
-                                    {selectedSupporter.type}
-                                </div>
-                                <div>
-                                    <strong>Status:</strong>
-                                    <Badge
-                                        variant={
-                                            selectedSupporter.status
-                                                ? "default"
-                                                : "destructive"
-                                        }
-                                    >
-                                        {selectedSupporter.status
-                                            ? "Active"
-                                            : "Inactive"}
-                                    </Badge>
-                                </div>
-
+                        <DialogContent className="w-96">
+                            <div className="grid justify-center">
                                 {/* Profile Image */}
-                                <div className="col-span-2">
-                                    <strong>Profile Image:</strong>
-                                    <div className="mt-1">
+                                <div className="grid justify-center">
+                                    <div className="mt-1   bg-foreground  rounded-full w-28 h-28 flex justify-center items-center ">
                                         {selectedSupporter.profile_image ? (
                                             <img
                                                 src={
-                                                    selectedSupporter.profile_image
-                                                }
+                                                    selectedSupporter.profile_image                                                }
                                                 alt="Profile"
-                                                className="w-24 h-24 rounded object-cover"
+                                                className="w-28 h-28 rounded-full object-cover"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display =
                                                         "none";
@@ -341,11 +293,76 @@ const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(
                                                 }}
                                             />
                                         ) : (
-                                            <span className="italic text-gray-500">
+                                            <span className="italic text-muted-foreground">
                                                 No image
                                             </span>
                                         )}
                                     </div>
+                                </div>
+                                <div className="flex justify-start mt-4 mb-4 ">
+                                    <div className="block">
+                                        <DialogTitle>
+                                            Supporter Details
+                                        </DialogTitle>
+                                        <DialogDescription className="text-xs text-center">
+                                            Full supporter details
+                                        </DialogDescription>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4 text-sm">
+                                <div className="flex justify-between">
+                                    <p className="text-foreground  font-medium">
+                                        Name:
+                                    </p>{" "}
+                                    {selectedSupporter.name}{" "}
+                                    {selectedSupporter.surename}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className="text-foreground   font-medium">
+                                        Email:
+                                    </p>{" "}
+                                    {selectedSupporter.email}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className="text-foreground  font-medium">
+                                        Phone :
+                                    </p>{" "}
+                                    {selectedSupporter.phone}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className="text-foreground  font-medium">
+                                        Gender:
+                                    </p>{" "}
+                                    {selectedSupporter.gender}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className=" text-foreground  font-medium">
+                                        Country:
+                                    </p>{" "}
+                                    {selectedSupporter.country}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className="text-foreground  font-medium">
+                                        Type :
+                                    </p>{" "}
+                                    {selectedSupporter.type}
+                                </div>
+                                <div className="flex justify-between">
+                                    <p className="text-foreground font-medium">
+                                        Status :
+                                    </p>
+                                    <Badge
+                                        variant={
+                                            selectedSupporter.status
+                                                ? "default"
+                                                : "destructive"
+                                        }
+                                    >
+                                        {selectedSupporter.status
+                                            ? "Active"
+                                            : "Inactive"}
+                                    </Badge>
                                 </div>
                             </div>
                         </DialogContent>

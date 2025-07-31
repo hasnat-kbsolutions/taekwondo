@@ -61,7 +61,6 @@ interface Props {
     };
 }
 
-
 const columns = (
     onView: (instructor: Instructor) => void
 ): ColumnDef<Instructor>[] => [
@@ -163,9 +162,8 @@ export default function Index({
     );
     const [clubId, setClubId] = useState(filters.club_id || "");
 
-const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(
-    null
-);
+    const [selectedInstructor, setSelectedInstructor] =
+        useState<Instructor | null>(null);
     const handleFilterChange = (extraParams = {}) => {
         router.get(
             route("admin.instructors.index"),
@@ -258,7 +256,7 @@ const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(
 
                             <div className="flex items-end">
                                 <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
                                     onClick={resetFilters}
                                 >
                                     Reset Filters
@@ -294,72 +292,91 @@ const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(
                             if (!open) setSelectedInstructor(null);
                         }}
                     >
-                        <DialogContent>
-                            <DialogTitle>Instructor Details</DialogTitle>
-                            <DialogDescription>
-                                Full instructor details
-                            </DialogDescription>
-
-                            <div className="relative grid grid-cols-2 gap-4 text-sm before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-px before:bg-gray-200">
-                                {/* Left column */}
-                                <div className="space-y-2 pr-4">
-                                    <div>
-                                        <strong>Name:</strong>{" "}
-                                        {selectedInstructor.name}
-                                    </div>
-                                    <div>
-                                        <strong>Email:</strong>{" "}
-                                        {selectedInstructor.email}
-                                    </div>
-                                    <div>
-                                        <strong>IC Number:</strong>{" "}
-                                        {selectedInstructor.ic_number}
-                                    </div>
-                                    <div>
-                                        <strong>Mobile:</strong>{" "}
-                                        {selectedInstructor.mobile}
-                                    </div>
-                                    <div>
-                                        <strong>Grade:</strong>{" "}
-                                        {selectedInstructor.grade}
-                                    </div>
-                                    <div>
-                                        <strong>Organization:</strong>{" "}
-                                        {selectedInstructor.organization
-                                            ?.name || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Club:</strong>{" "}
-                                        {selectedInstructor.club?.name || "-"}
-                                    </div>
+                        <DialogContent className="shadow-2xl p-10 max-w-xl ">
+                            <div className="flex justify-between">
+                                {/* Header: Title and Description */}
+                                <div className="text-left mb-8">
+                                    <DialogTitle className="text-3xl font-bold text-foreground">
+                                        Instructor Details
+                                    </DialogTitle>
+                                    <DialogDescription className="text-sm text-foreground mt-1">
+                                        Comprehensive information about the
+                                        instructor
+                                    </DialogDescription>
                                 </div>
 
-                                {/* Right column */}
-                                <div className="space-y-2 pl-4">
-                                    <div>
-                                        <strong>Address:</strong>{" "}
-                                        {selectedInstructor.address}
-                                    </div>
-
-                                    <div className="pt-2">
-                                        <strong>Profile Image:</strong>
-                                        <div className="mt-1">
-                                            {selectedInstructor.profile_picture ? (
-                                                <img
-                                                    src={
-                                                        selectedInstructor.profile_picture
-                                                    }
-                                                    alt="Profile"
-                                                    className="w-24 h-24 rounded object-cover"
-                                                />
-                                            ) : (
-                                                <span className="italic text-gray-500">
-                                                    No image
-                                                </span>
-                                            )}
-                                        </div>
+                                {/* Profile Image Centered */}
+                                <div className="flex justify-center mb-6">
+                                    <div className="flex flex-col items-center gap-2">
+                                        {selectedInstructor.profile_picture ? (
+                                            <img
+                                                src={
+                                                    selectedInstructor.profile_picture
+                                                }
+                                                alt="Profile"
+                                                className="w-24 h-24 rounded-full object-cover border boredr-gray-200 border-foreground shadow-md hover:shadow-lg transition duration-200"
+                                            />
+                                        ) : (
+                                            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-foreground  text-gray-400  text-sm italic border border-foreground ">
+                                                No Image
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+                            </div>
+                            {/* Details Grid */}
+                            <div className="space-y-3">
+                                {[
+                                    {
+                                        label: "Name",
+                                        value: selectedInstructor.name,
+                                    },
+                                    {
+                                        label: "Email",
+                                        value: selectedInstructor.email,
+                                    },
+                                    {
+                                        label: "IC Number",
+                                        value: selectedInstructor.ic_number,
+                                    },
+                                    {
+                                        label: "Mobile",
+                                        value: selectedInstructor.mobile,
+                                    },
+                                    {
+                                        label: "Grade",
+                                        value: selectedInstructor.grade,
+                                    },
+                                    {
+                                        label: "Organization",
+                                        value:
+                                            selectedInstructor.organization
+                                                ?.name || "-",
+                                    },
+                                    {
+                                        label: "Club",
+                                        value:
+                                            selectedInstructor.club?.name ||
+                                            "-",
+                                    },
+                                    {
+                                        label: "Address",
+                                        value:
+                                            selectedInstructor.address || "-",
+                                    },
+                                ].map((item, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex justify-between text-foreground text-sm  "
+                                    >
+                                        <span className="font-medium  text-base text-foreground">
+                                            {item.label}:
+                                        </span>
+                                        <span className="text-right text-foreground max-w-[60%] break-words">
+                                            {item.value}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </DialogContent>
                     </Dialog>

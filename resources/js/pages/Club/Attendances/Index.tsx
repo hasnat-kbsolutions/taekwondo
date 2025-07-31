@@ -192,7 +192,7 @@ export default function Index({
                             {/* Reset Button */}
                             <div className="flex items-end">
                                 <Button
-                                    className="bg-primary text-black"
+                                    className="bg-primary text-background"
                                     onClick={resetFilters}
                                 >
                                     Reset Filters

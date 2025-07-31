@@ -65,11 +65,7 @@ interface Props {
     };
 }
 
-const columns = (
-    onView: (instructor: Club) => void
-): ColumnDef<Club>[] => [
-
-    
+const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -142,21 +138,13 @@ const columns = (
                         View
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "admin.clubs.edit",
-                                row.original.id
-                            )}
-                        >
+                        <Link href={route("admin.clubs.edit", row.original.id)}>
                             Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route(
-                                "admin.clubs.destroy",
-                                row.original.id
-                            )}
+                            href={route("admin.clubs.destroy", row.original.id)}
                             method="delete"
                             as="button"
                         >
@@ -170,7 +158,6 @@ const columns = (
 ];
 
 export default function Index({ clubs, organizations = [], filters }: Props) {
-
     const [organizationId, setOrganizationId] = useState(
         filters.organization_id || ""
     );
@@ -204,7 +191,7 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
             }
         );
     };
-const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+    const [selectedClub, setSelectedClub] = useState<Club | null>(null);
     return (
         <AuthenticatedLayout header="Clubs">
             <Head title="Organizations" />
@@ -261,7 +248,7 @@ const [selectedClub, setSelectedClub] = useState<Club | null>(null);
 
                             <div className="flex items-end">
                                 <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-black"
+                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-white dark:text-black"
                                     onClick={resetFilters}
                                 >
                                     Reset Filters
@@ -294,85 +281,104 @@ const [selectedClub, setSelectedClub] = useState<Club | null>(null);
                             if (!open) setSelectedClub(null);
                         }}
                     >
-                        <DialogContent>
-                            <DialogTitle>Club Details</DialogTitle>
-                            <DialogDescription>
-                                Full club details
-                            </DialogDescription>
-
-                            <div className="relative grid grid-cols-2 gap-4 text-sm before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-px before:bg-gray-200">
-                                {/* Left Column */}
-                                <div className="space-y-2 pr-4">
-                                    <div>
-                                        <strong>Club Name:</strong>{" "}
-                                        {selectedClub.name}
-                                    </div>
-                                    <div>
-                                        <strong>City:</strong>{" "}
-                                        {selectedClub.city || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Country:</strong>{" "}
-                                        {selectedClub.country || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Phone:</strong>{" "}
-                                        {selectedClub.phone || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Tax Number:</strong>{" "}
-                                        {selectedClub.tax_number || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Invoice Prefix:</strong>{" "}
-                                        {selectedClub.invoice_prefix || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Organization:</strong>{" "}
-                                        {selectedClub.organization?.name || "-"}
+                        <DialogContent className="w-full h-auto">
+                            <div className=" flex justify-between items-center ">
+                                <div className="block">
+                                    <DialogTitle className="text-3xl text-foreground  text-left">
+                                        Club Details
+                                    </DialogTitle>
+                                    <DialogDescription className="text-gray-200 text-foreground ml-2">
+                                        Full club details
+                                    </DialogDescription>
+                                </div>
+                                <div className="block">
+                                    <div className="mt-1 justify-center flex  bg-foreground  w-24 h-24 border rounded-full text-center items-center">
+                                        {selectedClub.logo ? (
+                                            <img
+                                                src={selectedClub.logo}
+                                                alt="Club Logo"
+                                                className="w-24 h-24 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <span className="italic text-muted-foreground ">
+                                                No image
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Right Column */}
-                                <div className="space-y-2 pl-4">
-                                    <div>
-                                        <strong>User Name:</strong>{" "}
-                                        {selectedClub.user?.name || "-"}
+                            <div className="space-y-3 text-sm">
+                                {[
+                                    {
+                                        label: "Club Name",
+                                        value: selectedClub.name,
+                                    },
+                                    {
+                                        label: "City",
+                                        value: selectedClub.city || "-",
+                                    },
+                                    {
+                                        label: "Country",
+                                        value: selectedClub.country || "-",
+                                    },
+                                    {
+                                        label: "Phone",
+                                        value: selectedClub.phone || "-",
+                                    },
+                                    {
+                                        label: "Tax Number",
+                                        value: selectedClub.tax_number || "-",
+                                    },
+                                    {
+                                        label: "Invoice Prefix",
+                                        value:
+                                            selectedClub.invoice_prefix || "-",
+                                    },
+                                    {
+                                        label: "Organization",
+                                        value:
+                                            selectedClub.organization?.name ||
+                                            "-",
+                                    },
+                                    {
+                                        label: "User Name",
+                                        value: selectedClub.user?.name || "-",
+                                    },
+                                    {
+                                        label: "User Email",
+                                        value: selectedClub.user?.email || "-",
+                                    },
+                                ].map((item, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex justify-between"
+                                    >
+                                        <span className="text-foreground  text-base font-semibold">
+                                            {item.label}:
+                                        </span>
+                                        <span className="text-foreground text-sm text-right max-w-[60%] break-words">
+                                            {item.value}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <strong>User Email:</strong>{" "}
-                                        {selectedClub.user?.email || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Status:</strong>{" "}
-                                        <Badge
-                                            variant={
-                                                selectedClub.status
-                                                    ? "default"
-                                                    : "destructive"
-                                            }
-                                        >
-                                            {selectedClub.status
-                                                ? "Active"
-                                                : "Inactive"}
-                                        </Badge>
-                                    </div>
-                                    <div className="pt-2">
-                                        <strong>Club Logo:</strong>
-                                        <div className="mt-1">
-                                            {selectedClub.logo ? (
-                                                <img
-                                                    src={selectedClub.logo}
-                                                    alt="Club Logo"
-                                                    className="w-24 h-24 object-cover rounded"
-                                                />
-                                            ) : (
-                                                <span className="italic text-gray-500">
-                                                    No image
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
+                                ))}
+
+                                {/* Status badge row */}
+                                <div className="flex justify-between items-center">
+                                    <span className="text-foreground text-base font-semibold">
+                                        Status:
+                                    </span>
+                                    <span
+                                        className={`px-2 py-1 rounded-full text-sm font-medium ${
+                                            selectedClub.status
+                                                ? "bg-green-600 text-white"
+                                                : "bg-red-600 text-white"
+                                        }`}
+                                    >
+                                        {selectedClub.status
+                                            ? "Active"
+                                            : "Inactive"}
+                                    </span>
                                 </div>
                             </div>
                         </DialogContent>

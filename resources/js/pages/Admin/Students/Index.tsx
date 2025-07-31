@@ -152,9 +152,9 @@ export default function Index({
     return (
         <AuthenticatedLayout header="Students">
             <Head title="Students" />
-            <div className="container mx-auto py-10">
+            <div className="container-fluid py-10 w-full">
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
+                    <CardHeader className="flex  flex-row items-center justify-between">
                         <CardTitle>Import / Export Students</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -331,71 +331,159 @@ export default function Index({
                         }}
                     >
                         <DialogContent>
-                            <DialogTitle>Student Details</DialogTitle>
-                            <DialogDescription>
-                                Full student details
-                            </DialogDescription>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <strong>Code:</strong>{" "}
+                            <div className="flex justify-start ">
+                                <p className="text-xs">Code - </p>{" "}
+                                <p className="text-xs ml-1">
+                                    {" "}
                                     {selectedStudent.code}
+                                </p>
+                            </div>
+                            {/* Profile Image */}
+                            <div className="flex justify-between items-center">
+                                <div className="col-span-2">
+                                    <div className="mt-1 bg-foreground w-28 h-28 rounded-full flex justify-center items-center">
+                                        {selectedStudent.profile_image ? (
+                                            <img
+                                                src={
+                                                    selectedStudent.profile_image
+                                                }
+                                                alt="Profile"
+                                                className=" w-28 h-28 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="italic text-muted-foreground">
+                                                No image
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div>
-                                    <strong>Name:</strong>{" "}
-                                    {selectedStudent.name}{" "}
-                                    {selectedStudent.surname}
+                                {/*student details */}
+                                <div className="block">
+                                    <DialogTitle>Student Details</DialogTitle>
+                                    <DialogDescription>
+                                        Full student details
+                                    </DialogDescription>
                                 </div>
-                                <div>
-                                    <strong>Email:</strong>{" "}
-                                    {selectedStudent.email}
+                            </div>
+                            <div className="grid justify-between grid-cols-2  gap-3  text-sm">
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Name :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {selectedStudent.name}{" "}
+                                        {selectedStudent.surname}{" "}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Phone:</strong>{" "}
-                                    {selectedStudent.phone}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Email :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.email}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Gender:</strong>{" "}
-                                    {selectedStudent.gender}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Phone :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.phone}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Nationality:</strong>{" "}
-                                    {selectedStudent.nationality}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Gender :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.gender}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Country:</strong>{" "}
-                                    {selectedStudent.country}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="dark:text-white text-blacktext-base font-bold">
+                                        Nationality :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.nationality}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>DOB:</strong> {selectedStudent.dob}
+                                 <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        ID/Passport :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.id_passport}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>DOD:</strong>{" "}
-                                    {selectedStudent.dod || "N/A"}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Country :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.country}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Grade:</strong>{" "}
-                                    {selectedStudent.grade}
+                             
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Grade :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.grade}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>ID/Passport:</strong>{" "}
-                                    {selectedStudent.id_passport}
+                                   <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        DOD :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.dod || "N/A"}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Skype:</strong>{" "}
-                                    {selectedStudent.skype}
+                               
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foregroundtext-base font-bold">
+                                        Skype :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.skype}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Website:</strong>{" "}
-                                    {selectedStudent.website}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Website :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.website}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Address:</strong>{" "}
-                                    {selectedStudent.street},{" "}
-                                    {selectedStudent.city},{" "}
-                                    {selectedStudent.postal_code}
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        Address :
+                                    </p>{" "}
+                                    <p className="text-foreground text-sm">
+                                        {" "}
+                                        {selectedStudent.street},{" "}
+                                        {selectedStudent.city},{" "}
+                                        {selectedStudent.postal_code}{" "}
+                                    </p>
                                 </div>
-                                <div>
-                                    <strong>Status:</strong>{" "}
+                                m.
+                                <div className="flex justify-start gap-3 items-center">
+                                    <p className="text-foreground text-base font-bold">
+                                        {" "}
+                                        Status:
+                                    </p>{" "}
                                     <Badge
                                         variant={
                                             selectedStudent.status
@@ -408,31 +496,12 @@ export default function Index({
                                             : "Inactive"}
                                     </Badge>
                                 </div>
-
-                                {/* Profile Image */}
-                                <div className="col-span-2">
-                                    <strong>Profile Image:</strong>
-                                    <div className="mt-1">
-                                        {selectedStudent.profile_image ? (
-                                            <img
-                                                src={
-                                                    selectedStudent.profile_image
-                                                }
-                                                alt="Profile"
-                                                className="w-24 h-24 rounded object-cover"
-                                            />
-                                        ) : (
-                                            <span className="italic text-gray-500">
-                                                No image
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
+                            </div>
+                            <div className="flex justify-between items-center ">
                                 {/* ID Passport Image */}
                                 <div className="col-span-2">
-                                    <strong>ID/Passport Image:</strong>
-                                    <div className="mt-1">
+                                    <strong>ID/Passport Image</strong>
+                                    <div className="mt-1 bg-foreground  rounded-md w-32 h-32 flex justify-center items-center  ">
                                         {selectedStudent.id_passport_image ? (
                                             <img
                                                 src={
@@ -442,7 +511,7 @@ export default function Index({
                                                 className="w-24 h-24 rounded object-cover"
                                             />
                                         ) : (
-                                            <span className="italic text-gray-500">
+                                            <span className="italic text-muted-foreground">
                                                 No image
                                             </span>
                                         )}
@@ -451,8 +520,8 @@ export default function Index({
 
                                 {/* Signature Image */}
                                 <div className="col-span-2">
-                                    <strong>Signature Image:</strong>
-                                    <div className="mt-1">
+                                    <strong>Signature Image</strong>
+                                    <div className="mt-1  bg-foreground text-foreground rounded-md w-32 h-32 flex justify-center items-center ">
                                         {selectedStudent.signature_image ? (
                                             <img
                                                 src={
@@ -462,7 +531,7 @@ export default function Index({
                                                 className="w-24 h-24 rounded object-cover"
                                             />
                                         ) : (
-                                            <span className="italic text-gray-500">
+                                            <span className="italic text-muted-foreground">
                                                 No image
                                             </span>
                                         )}

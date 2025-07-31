@@ -339,41 +339,41 @@ export default function PaymentIndex({ payments, filters }: Props) {
 
                 {/* Modal */}
                 <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogContent>
+                    <DialogContent className="w-full">
                         <DialogHeader>
-                            <DialogTitle>Edit Payment</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="text-3xl text-foreground">Edit Payment</DialogTitle>
+                            <DialogDescription className="text-muted-foreground">
                                 Update payment details like amount and status.
                             </DialogDescription>
                         </DialogHeader>
                         {selectedPayment && (
-                            <div className="space-y-2 text-sm">
-                                <p>
+                            <div className="space-y-2 text-sm ">
+                                <p className="flex justify-between">
                                     <strong>Student:</strong>{" "}
                                     {selectedPayment.student?.name}
                                 </p>
-                                <p>
+                                <p  className="flex justify-between">
                                     <strong>Amount:</strong> RM{" "}
                                     {selectedPayment.amount}
                                 </p>
-                                <p>
+                                <p  className="flex justify-between">
                                     <strong>Status:</strong>{" "}
                                     {selectedPayment.status}
                                 </p>
-                                <p>
+                                <p  className="flex justify-between">
                                     <strong>Method:</strong>{" "}
                                     {selectedPayment.method}
                                 </p>
-                                <p>
+                                <p className="flex justify-between">
                                     <strong>Payment Month:</strong>{" "}
                                     {selectedPayment.payment_month}
                                 </p>
-                                <p>
+                                <p  className="flex justify-between">
                                     <strong>Pay At:</strong>{" "}
                                     {selectedPayment.pay_at}
                                 </p>
                                 {selectedPayment.notes && (
-                                    <p>
+                                    <p  className="flex justify-between">
                                         <strong>Notes:</strong>{" "}
                                         {selectedPayment.notes}
                                     </p>

@@ -182,114 +182,91 @@ export default function Index({ organizations, student, supporter }: Props) {
 
                 {/* View Dialog */}
                 {selectedOrganization && (
-                    <Dialog
-                        open={!!selectedOrganization}
-                        onOpenChange={(open) => {
-                            if (!open) setSelectedOrganization(null);
-                        }}
-                    >
-                        <DialogContent>
-                            <DialogTitle>Organization Details</DialogTitle>
-                            <DialogDescription>
-                                Full organization details
-                            </DialogDescription>
+                 <Dialog
+  open={!!selectedOrganization}
+  onOpenChange={(open) => {
+    if (!open) setSelectedOrganization(null);
+  }}
+>
+  <DialogContent className="bg-background text-foreground ">
+    <DialogTitle className="text-2xl text-foreground">Organization Details</DialogTitle>
+    <DialogDescription className="text-foreground">Full organization details</DialogDescription>
 
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                {/* Left Column */}
-                                <div className="space-y-2 pr-4">
-                                    <div>
-                                        <strong>Name:</strong>{" "}
-                                        {selectedOrganization.name}
-                                    </div>
-                                    <div>
-                                        <strong>Email:</strong>{" "}
-                                        {selectedOrganization.email || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Phone:</strong>{" "}
-                                        {selectedOrganization.phone || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>City:</strong>{" "}
-                                        {selectedOrganization.city || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Country:</strong>{" "}
-                                        {selectedOrganization.country || "-"}
-                                    </div>
-                                    <div>
-                                        <strong>Website:</strong>{" "}
-                                        {selectedOrganization.website ? (
-                                            <a
-                                                href={
-                                                    selectedOrganization.website
-                                                }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 underline"
-                                            >
-                                                {selectedOrganization.website}
-                                            </a>
-                                        ) : (
-                                            "-"
-                                        )}
-                                    </div>
-                                    <div>
-                                        <strong>Status:</strong>{" "}
-                                        <Badge
-                                            variant={
-                                                selectedOrganization.status
-                                                    ? "default"
-                                                    : "destructive"
-                                            }
-                                        >
-                                            {selectedOrganization.status
-                                                ? "Active"
-                                                : "Inactive"}
-                                        </Badge>
-                                    </div>
-                                </div>
+    <div className="grid grid-cols-1 gap-5 mt-4">
+      {/* Left Column */}
+      <div className="space-y-3 ">
+        {[
+          { label: "Name", value: selectedOrganization.name },
+          { label: "Email", value: selectedOrganization.email || "-" },
+          { label: "Phone", value: selectedOrganization.phone || "-" },
+          { label: "City", value: selectedOrganization.city || "-" },
+          { label: "Country", value: selectedOrganization.country || "-" },
+          {
+            label: "Website",
+            value: selectedOrganization.website ? (
+              <a
+                href={selectedOrganization.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                {selectedOrganization.website}
+              </a>
+            ) : (
+              "-"
+            ),
+          },
+        ].map((item, i) => (
+          <div key={i} className="flex justify-between gap-2 items-start text-foreground">
+            <p className="text-sm font-medium text-foreground min-w-[80px]">
+              {item.label}:
+            </p>
+            <p className="text-sm">{item.value}</p>
+          </div>
+        ))}
 
-                                {/* Right Column */}
-                                <div className="space-y-2 pl-4">
-                                    <div>
-                                        <strong>Students:</strong>
-                                        <ul className="list-disc ml-4">
-                                            {selectedOrganization.students
-                                                .length > 0 ? (
-                                                selectedOrganization.students.map(
-                                                    (s) => (
-                                                        <li key={s.id}>
-                                                            {s.name}
-                                                        </li>
-                                                    )
-                                                )
-                                            ) : (
-                                                <li>-</li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <strong>Supporters:</strong>
-                                        <ul className="list-disc ml-4">
-                                            {selectedOrganization.supporters
-                                                .length > 0 ? (
-                                                selectedOrganization.supporters.map(
-                                                    (s) => (
-                                                        <li key={s.id}>
-                                                            {s.name}
-                                                        </li>
-                                                    )
-                                                )
-                                            ) : (
-                                                <li>-</li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+        <div className="flex justify-between gap-2 items-center">
+          <p className="text-sm font-medium text-foreground">Status :</p>
+          <Badge
+            variant={selectedOrganization.status ? "default" : "destructive"}
+          >
+            {selectedOrganization.status ? "Active" : "Inactive"}
+          </Badge>
+        </div>
+      </div>
+
+      
+      <div className=" grid-cols-2 grid justify-between items-center overflow-y-scroll h-[20vh]">
+        <div>
+          <p className="text-2xl font-semibold mb-1">Students </p>
+          <ul className="list-disc ml-5 space-y-1 text-sm">
+            {selectedOrganization.students?.length > 0 ? (
+              selectedOrganization.students.map((s) => (
+                <li key={s.id}>{s.name}</li>
+              ))
+            ) : (
+              <li>-</li>
+            )}
+          </ul>
+        </div>
+
+        <div className="text-center">
+          <p className="text-2xl font-semibold mb-1 mr-4">Supporters</p>
+          <ul className="list-disc ml-16 space-y-1 text-sm  text-left">
+            {selectedOrganization.supporters?.length > 0 ? (
+              selectedOrganization.supporters.map((s) => (
+                <li key={s.id}>{s.name}</li>
+              ))
+            ) : (
+              <li>-</li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
+
                 )}
             </div>
         </AuthenticatedLayout>
