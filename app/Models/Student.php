@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Student extends Model
 {
+
     protected $fillable = [
         'club_id',
         'organization_id',
-
         'uid',
         'code',
         'name',
@@ -33,6 +33,12 @@ class Student extends Model
         'country',
         'status',
     ];
+
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class);
+    }
+
     public function organization()
     {
         return $this->belongsTo(Organization::class);
@@ -58,5 +64,37 @@ class Student extends Model
     public function instructors()
     {
         return $this->belongsToMany(\App\Models\Instructor::class, 'instructor_student');
+    }
+
+    /**
+     * Get ratings given by this student
+     */
+    public function ratingsGiven()
+    {
+        return $this->morphMany(Rating::class, 'rater');
+    }
+
+    /**
+     * Get ratings received by this student
+     */
+    public function ratingsReceived()
+    {
+        return $this->morphMany(Rating::class, 'rated');
+    }
+
+    /**
+     * Get average rating received by this student
+     */
+    public function getAverageRatingAttribute()
+    {
+        return Rating::getAverageRating($this->id, 'App\Models\Student');
+    }
+
+    /**
+     * Get total ratings received by this student
+     */
+    public function getTotalRatingsAttribute()
+    {
+        return Rating::getTotalRatings($this->id, 'App\Models\Student');
     }
 }

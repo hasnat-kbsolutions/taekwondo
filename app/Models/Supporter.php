@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Supporter extends Model
 {
+
+
+
+
+    public function certifications()
+    {
+        return $this->morphMany(Certification::class, 'certifiable');
+    }
     protected $casts = [
         'status' => 'boolean',
     ];

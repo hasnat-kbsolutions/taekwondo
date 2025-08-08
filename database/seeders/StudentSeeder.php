@@ -2,59 +2,120 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Student;
 use App\Models\Club;
 use App\Models\Organization;
-
-use Faker\Factory as Faker;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 
 class StudentSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $faker = Faker::create();
+        $clubs = Club::all();
+        $organizations = Organization::all();
 
-        $clubIds = Club::pluck('id')->toArray();
-        $organizationIds = Organization::pluck('id')->toArray();
+        // Check if we have clubs and organizations
+        if ($clubs->count() === 0 || $organizations->count() === 0) {
+            $this->command->info('Skipping StudentSeeder: No clubs or organizations found.');
+            return;
+        }
 
-        foreach (range(1, end: 1) as $index) {
-            $student = Student::create([
-                'club_id' => $faker->randomElement($clubIds),
-                'organization_id' => $faker->randomElement($organizationIds),
-                'uid' => Str::uuid(),
-                'code' => strtoupper(Str::random(6)),
-                'name' => $faker->firstName,
-                'surname' => $faker->lastName,
-                'nationality' => $faker->country,
-                'dob' => $faker->date(),
-                'dod' => rand(0, 10) > 8 ? $faker->date() : null,
-                'grade' => $faker->randomElement(['A', 'B', 'C', 'D']),
-                'gender' => $faker->randomElement(['male', 'female', 'other']),
-                'id_passport' => $faker->boolean(50) ? strtoupper(Str::random(9)) : null,
+        $students = [
+            [
+                'uid' => 'STU001',
+                'code' => 'S001',
+                'name' => 'Ahmad',
+                'surname' => 'Hassan',
+                'nationality' => 'Malaysian',
+                'dob' => '2005-03-15',
+                'dod' => null,
+                'grade' => 'Red Belt',
+                'gender' => 'Male',
+                'id_passport' => 'A12345678',
                 'profile_image' => null,
                 'id_passport_image' => null,
                 'signature_image' => null,
-                'email' => $faker->unique()->safeEmail,
-                'phone' => $faker->phoneNumber,
-                'skype' => $faker->userName,
-                'website' => $faker->url,
-                'city' => $faker->city,
-                'postal_code' => $faker->postcode,
-                'street' => $faker->streetAddress,
-                'country' => $faker->country,
-                'status' => $faker->boolean(80),
-            ]);
-            $student->user()->create([
-                'name' => 'Student User',
-                'email' => 'student@app.test',
-                'password' => Hash::make('password'),
-                'role' => 'student',
-                'userable_type' => Student::class,
-                'userable_id' => $student->id,
-            ]);
+                'email' => 'ahmad.hassan@email.com',
+                'phone' => '+6012-345-6789',
+                'skype' => null,
+                'website' => null,
+                'city' => 'Kuala Lumpur',
+                'postal_code' => '55100',
+                'street' => '123 Jalan Bukit Bintang',
+                'country' => 'Malaysia',
+                'status' => true,
+            ],
+            [
+                'uid' => 'STU002',
+                'code' => 'S002',
+                'name' => 'Siti',
+                'surname' => 'Aminah',
+                'nationality' => 'Malaysian',
+                'dob' => '2006-07-22',
+                'dod' => null,
+                'grade' => 'Blue Belt',
+                'gender' => 'Female',
+                'id_passport' => 'B87654321',
+                'profile_image' => null,
+                'id_passport_image' => null,
+                'signature_image' => null,
+                'email' => 'siti.aminah@email.com',
+                'phone' => '+6012-987-6543',
+                'skype' => null,
+                'website' => null,
+                'city' => 'Shah Alam',
+                'postal_code' => '40100',
+                'street' => '456 Jalan Subang',
+                'country' => 'Malaysia',
+                'status' => true,
+            ],
+            [
+                'uid' => 'STU003',
+                'code' => 'S003',
+                'name' => 'Raj',
+                'surname' => 'Kumar',
+                'nationality' => 'Malaysian',
+                'dob' => '2004-11-08',
+                'dod' => null,
+                'grade' => 'Black Belt 1st Dan',
+                'gender' => 'Male',
+                'id_passport' => 'C11223344',
+                'profile_image' => null,
+                'id_passport_image' => null,
+                'signature_image' => null,
+                'email' => 'raj.kumar@email.com',
+                'phone' => '+6012-555-1234',
+                'skype' => null,
+                'website' => null,
+                'city' => 'George Town',
+                'postal_code' => '10250',
+                'street' => '789 Jalan Gurney',
+                'country' => 'Malaysia',
+                'status' => true,
+            ],
+        ];
+
+        $createdCount = 0;
+        foreach ($students as $index => $studentData) {
+            // Check if student already exists
+            $existingStudent = Student::where('uid', $studentData['uid'])->first();
+
+            if ($existingStudent) {
+                $this->command->info("Student with UID {$studentData['uid']} already exists, skipping...");
+                continue;
+            }
+
+            // Add club and organization IDs
+            $studentData['club_id'] = $clubs[$index % $clubs->count()]->id;
+            $studentData['organization_id'] = $organizations[$index % $organizations->count()]->id;
+
+            Student::create($studentData);
+            $createdCount++;
         }
+
+        $this->command->info("Created {$createdCount} new students successfully.");
     }
 }

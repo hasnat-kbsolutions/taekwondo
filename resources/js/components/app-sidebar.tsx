@@ -90,6 +90,13 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             items: [{ title: "Payments", url: "/admin/payments" }],
         },
         {
+            title: "Certifications",
+            url: "/admin/certifications",
+            icon: SquareTerminal,
+            isActive: false,
+            items: [{ title: "Certifications", url: "/admin/certifications" }],
+        },
+        {
             title: "Online Exams",
             url: "#",
             icon: SquareTerminal,
@@ -143,6 +150,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/organization/instructors",
             icon: SquareTerminal,
         },
+        {
+            title: "Certifications",
+            url: "/organization/certifications",
+            icon: SquareTerminal,
+        },
     ],
 
     club: [
@@ -168,12 +180,32 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/club/instructors",
             icon: SquareTerminal,
         },
+        {
+            title: "Certifications",
+            url: "/club/certifications",
+            icon: SquareTerminal,
+        },
     ],
 
     student: [
         { title: "Dashboard", url: "/student/dashboard", icon: Home },
         { title: "Payment", url: "/student/payments", icon: Home },
         { title: "Attendence", url: "/student/attendances", icon: Home },
+        {
+            title: "Certifications",
+            url: "/student/certifications",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Profile",
+            url: "/student/profile",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Ratings",
+            url: "/student/ratings",
+            icon: SquareTerminal,
+        },
     ],
 
     instructor: [
@@ -181,6 +213,16 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Students",
             url: "/instructor/students",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Profile",
+            url: "/instructor/profile",
+            icon: SquareTerminal,
+        },
+        {
+            title: "Ratings",
+            url: "/instructor/ratings",
             icon: SquareTerminal,
         },
     ],

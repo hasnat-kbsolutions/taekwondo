@@ -2,42 +2,55 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Club;
-use Faker\Factory as Faker;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Organization;
+use Illuminate\Database\Seeder;
+
 class ClubSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $faker = Faker::create();
+        $organizations = Organization::all();
 
-        foreach (range(1, 1) as $i) {
-            $club = Club::create([
-                'name' => $faker->company,
-                'organization_id' => 1,
-                'country' => $faker->country,
-                'city' => $faker->city,
-                'street' => $faker->streetAddress,
-                'postal_code' => $faker->postcode,
-                'tax_number' => $faker->numerify('TAX###'),
-                'invoice_prefix' => strtoupper($faker->lexify('INV??')),
-                'phone' => $faker->phoneNumber,
-                'skype' => $faker->userName,
-                'notification_emails' => $faker->safeEmail,
-                'website' => $faker->url,
-                'logo' => null,
-                'status' => $faker->boolean(90),
-            ]);
+        $clubs = [
+            [
+                'name' => 'KL Taekwon-Do Center',
+                'phone' => '+603-1234-1111',
+                'street' => '123 Jalan Bukit Bintang',
+                'city' => 'Kuala Lumpur',
+                'postal_code' => '55100',
+                'country' => 'Malaysia',
+                'website' => 'https://www.kltkd.com',
+                'status' => true,
+            ],
+            [
+                'name' => 'Shah Alam Martial Arts Club',
+                'phone' => '+603-9876-2222',
+                'street' => '456 Jalan Subang',
+                'city' => 'Shah Alam',
+                'postal_code' => '40100',
+                'country' => 'Malaysia',
+                'website' => 'https://www.samartialarts.com',
+                'status' => true,
+            ],
+            [
+                'name' => 'Penang Combat Academy',
+                'phone' => '+604-1111-3333',
+                'street' => '789 Jalan Gurney',
+                'city' => 'George Town',
+                'postal_code' => '10250',
+                'country' => 'Malaysia',
+                'website' => 'https://www.penangcombat.com',
+                'status' => true,
+            ],
+        ];
 
-            $club->user()->create([
-                'name' => 'Club User',
-                'email' => 'club@app.test',
-                'password' => Hash::make('password'),
-                'role' => 'club',
-                'userable_type' => Club::class,
-                'userable_id' => $club->id,
-            ]);
+        foreach ($clubs as $index => $club) {
+            $club['organization_id'] = $organizations[$index % $organizations->count()]->id;
+            Club::create($club);
         }
     }
 }

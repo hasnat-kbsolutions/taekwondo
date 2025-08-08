@@ -23,6 +23,15 @@ Route::get('/storage-link', function () {
 
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Certificate CRUD routes
+    Route::get('/certifications', [\App\Http\Controllers\Admin\CertificationController::class, 'index'])->name('certifications.index');
+    Route::get('/certifications/create', [\App\Http\Controllers\Admin\CertificationController::class, 'create'])->name('certifications.create');
+    Route::post('/certifications', [\App\Http\Controllers\Admin\CertificationController::class, 'store'])->name('certifications.store');
+    Route::get('/certifications/{certification}/edit', [\App\Http\Controllers\Admin\CertificationController::class, 'edit'])->name('certifications.edit');
+    Route::put('/certifications/{certification}', [\App\Http\Controllers\Admin\CertificationController::class, 'update'])->name('certifications.update');
+    Route::delete('/certifications/{certification}', [App\Http\Controllers\Admin\CertificationController::class, 'destroy'])->name('certifications.destroy');
+
+
 
 
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
@@ -156,6 +165,15 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
+    Route::get('/certifications', [\App\Http\Controllers\Organization\CertificationController::class, 'index'])->name('certifications.index');
+    Route::get('/certifications/create', [\App\Http\Controllers\Organization\CertificationController::class, 'create'])->name('certifications.create');
+    Route::post('/certifications', [\App\Http\Controllers\Organization\CertificationController::class, 'store'])->name('certifications.store');
+    Route::get('/certifications/{certification}/edit', [\App\Http\Controllers\Organization\CertificationController::class, 'edit'])->name('certifications.edit');
+    Route::put('/certifications/{certification}', [\App\Http\Controllers\Organization\CertificationController::class, 'update'])->name('certifications.update');
+    Route::delete('/certifications/{certification}', [App\Http\Controllers\Organization\CertificationController::class, 'destroy'])->name('certifications.destroy');
+
+
+
 });
 
 // Club routes
@@ -192,6 +210,15 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Club\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Club\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
+    Route::get('/certifications', [\App\Http\Controllers\Club\CertificationController::class, 'index'])->name('certifications.index');
+    Route::get('/certifications/create', [\App\Http\Controllers\Club\CertificationController::class, 'create'])->name('certifications.create');
+    Route::post('/certifications', [\App\Http\Controllers\Club\CertificationController::class, 'store'])->name('certifications.store');
+    Route::get('/certifications/{certification}/edit', [\App\Http\Controllers\Club\CertificationController::class, 'edit'])->name('certifications.edit');
+    Route::put('/certifications/{certification}', [\App\Http\Controllers\Club\CertificationController::class, 'update'])->name('certifications.update');
+    Route::delete('/certifications/{certification}', [App\Http\Controllers\Club\CertificationController::class, 'destroy'])->name('certifications.destroy');
+
+
+
 });
 
 // Student routes
@@ -200,6 +227,11 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('/certifications', [App\Http\Controllers\Student\CertificationController::class, 'index'])->name('certifications.index');
+    Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/student/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showStudent'])->name('profile.show-student');
+    Route::get('/profile/instructor/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
 
 
 
@@ -216,6 +248,17 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('/students', [App\Http\Controllers\Instructor\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/{id}/edit', [App\Http\Controllers\Instructor\StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [App\Http\Controllers\Instructor\StudentController::class, 'update'])->name('students.update');
+    Route::get('/profile', [App\Http\Controllers\Instructor\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/instructor/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
+    Route::get('/profile/student/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showStudent'])->name('profile.show-student');
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
+});
+
+// Rating routes (accessible by all authenticated users)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/ratings', [App\Http\Controllers\RatingController::class, 'store'])->name('ratings.store');
+    Route::put('/ratings/{rating}', [App\Http\Controllers\RatingController::class, 'update'])->name('ratings.update');
+    Route::delete('/ratings/{rating}', [App\Http\Controllers\RatingController::class, 'destroy'])->name('ratings.destroy');
 });
 
 require __DIR__ . '/auth.php';
