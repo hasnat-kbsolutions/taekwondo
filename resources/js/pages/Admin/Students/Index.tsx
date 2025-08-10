@@ -27,6 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { PageProps } from "@/types";
 import { route } from "ziggy-js";
+import RatingStars from "@/components/RatingStars";
 
 interface Organization {
     id: number;
@@ -330,214 +331,200 @@ export default function Index({
                             if (!open) setSelectedStudent(null);
                         }}
                     >
-                        <DialogContent>
-                            <div className="flex justify-start ">
-                                <p className="text-xs">Code - </p>{" "}
-                                <p className="text-xs ml-1">
-                                    {" "}
-                                    {selectedStudent.code}
-                                </p>
-                            </div>
-                            {/* Profile Image */}
-                            <div className="flex justify-between items-center">
-                                <div className="col-span-2">
-                                    <div className="mt-1 bg-foreground w-28 h-28 rounded-full flex justify-center items-center">
-                                        {selectedStudent.profile_image ? (
-                                            <img
-                                                src={
-                                                    selectedStudent.profile_image
-                                                }
-                                                alt="Profile"
-                                                className=" w-28 h-28 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <span className="italic text-muted-foreground">
-                                                No image
-                                            </span>
-                                        )}
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Student Details</DialogTitle>
+                                <DialogDescription>
+                                    View detailed information about the student.
+                                </DialogDescription>
+                            </DialogHeader>
+                            {selectedStudent && (
+                                <div className="space-y-6">
+                                    {/* Profile Image Section */}
+                                    <div className="flex justify-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            {selectedStudent.profile_image ? (
+                                                <img
+                                                    src={
+                                                        selectedStudent.profile_image
+                                                    }
+                                                    alt="Profile"
+                                                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
+                                                />
+                                            ) : (
+                                                <div className="w-32 h-32 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
+                                                    No Image
+                                                </div>
+                                            )}
+                                            <div className="text-center">
+                                                <h3 className="font-semibold text-lg">
+                                                    {selectedStudent.name}{" "}
+                                                    {selectedStudent.surname}
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {selectedStudent.code}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                {/*student details */}
-                                <div className="block">
-                                    <DialogTitle>Student Details</DialogTitle>
-                                    <DialogDescription>
-                                        Full student details
-                                    </DialogDescription>
-                                </div>
-                            </div>
-                            <div className="grid justify-between grid-cols-2  gap-3  text-sm">
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Name :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {selectedStudent.name}{" "}
-                                        {selectedStudent.surname}{" "}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Email :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.email}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Phone :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.phone}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Gender :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.gender}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="dark:text-white text-blacktext-base font-bold">
-                                        Nationality :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.nationality}
-                                    </p>
-                                </div>
-                                 <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        ID/Passport :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.id_passport}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Country :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.country}
-                                    </p>
-                                </div>
-                             
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Grade :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.grade}
-                                    </p>
-                                </div>
-                                   <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        DOD :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.dod || "N/A"}
-                                    </p>
-                                </div>
-                               
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foregroundtext-base font-bold">
-                                        Skype :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.skype}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Website :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.website}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        Address :
-                                    </p>{" "}
-                                    <p className="text-foreground text-sm">
-                                        {" "}
-                                        {selectedStudent.street},{" "}
-                                        {selectedStudent.city},{" "}
-                                        {selectedStudent.postal_code}{" "}
-                                    </p>
-                                </div>
-                                m.
-                                <div className="flex justify-start gap-3 items-center">
-                                    <p className="text-foreground text-base font-bold">
-                                        {" "}
-                                        Status:
-                                    </p>{" "}
-                                    <Badge
-                                        variant={
-                                            selectedStudent.status
-                                                ? "default"
-                                                : "destructive"
-                                        }
-                                    >
-                                        {selectedStudent.status
-                                            ? "Active"
-                                            : "Inactive"}
-                                    </Badge>
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center ">
-                                {/* ID Passport Image */}
-                                <div className="col-span-2">
-                                    <strong>ID/Passport Image</strong>
-                                    <div className="mt-1 bg-foreground  rounded-md w-32 h-32 flex justify-center items-center  ">
-                                        {selectedStudent.id_passport_image ? (
-                                            <img
-                                                src={
-                                                    selectedStudent.id_passport_image
-                                                }
-                                                alt="ID"
-                                                className="w-24 h-24 rounded object-cover"
-                                            />
-                                        ) : (
-                                            <span className="italic text-muted-foreground">
-                                                No image
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {/* Signature Image */}
-                                <div className="col-span-2">
-                                    <strong>Signature Image</strong>
-                                    <div className="mt-1  bg-foreground text-foreground rounded-md w-32 h-32 flex justify-center items-center ">
-                                        {selectedStudent.signature_image ? (
-                                            <img
-                                                src={
-                                                    selectedStudent.signature_image
-                                                }
-                                                alt="Signature"
-                                                className="w-24 h-24 rounded object-cover"
-                                            />
-                                        ) : (
-                                            <span className="italic text-muted-foreground">
-                                                No image
-                                            </span>
-                                        )}
+                                    {/* Details Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            {
+                                                label: "UID",
+                                                value: selectedStudent.uid,
+                                            },
+                                            {
+                                                label: "Email",
+                                                value: selectedStudent.email,
+                                            },
+                                            {
+                                                label: "Phone",
+                                                value: selectedStudent.phone,
+                                            },
+                                            {
+                                                label: "Grade",
+                                                value: selectedStudent.grade,
+                                            },
+                                            {
+                                                label: "Gender",
+                                                value: selectedStudent.gender,
+                                            },
+                                            {
+                                                label: "Nationality",
+                                                value: selectedStudent.nationality,
+                                            },
+                                            {
+                                                label: "Date of Birth",
+                                                value: selectedStudent.dob
+                                                    ? new Date(
+                                                          selectedStudent.dob
+                                                      ).toLocaleDateString()
+                                                    : "Not specified",
+                                            },
+                                            {
+                                                label: "ID/Passport",
+                                                value: selectedStudent.id_passport,
+                                            },
+                                            {
+                                                label: "City",
+                                                value:
+                                                    selectedStudent.city ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Country",
+                                                value:
+                                                    selectedStudent.country ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Status",
+                                                value: selectedStudent.status
+                                                    ? "Active"
+                                                    : "Inactive",
+                                            },
+                                            {
+                                                label: "Rating",
+                                                value: (
+                                                    <div className="flex items-center gap-2">
+                                                        <RatingStars
+                                                            rating={
+                                                                typeof selectedStudent.average_rating ===
+                                                                "number"
+                                                                    ? Math.round(
+                                                                          selectedStudent.average_rating
+                                                                      )
+                                                                    : 0
+                                                            }
+                                                            readonly
+                                                            size="sm"
+                                                        />
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {typeof selectedStudent.average_rating ===
+                                                            "number"
+                                                                ? selectedStudent.average_rating.toFixed(
+                                                                      1
+                                                                  )
+                                                                : "0.0"}{" "}
+                                                            (
+                                                            {
+                                                                selectedStudent.total_ratings
+                                                            }{" "}
+                                                            ratings)
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            },
+                                        ].map((item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="space-y-1"
+                                            >
+                                                <Label className="text-sm font-medium text-muted-foreground">
+                                                    {item.label}
+                                                </Label>
+                                                <div className="text-sm">
+                                                    {item.value}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Attachments Section */}
+                                    <div className="border-t pt-6">
+                                        <h4 className="font-semibold mb-4">
+                                            Attachments
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            {/* ID/Passport Image */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm font-medium text-muted-foreground">
+                                                    ID/Passport Image
+                                                </Label>
+                                                <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
+                                                    {selectedStudent.id_passport_image ? (
+                                                        <img
+                                                            src={
+                                                                selectedStudent.id_passport_image
+                                                            }
+                                                            alt="ID/Passport"
+                                                            className="max-w-full max-h-48 object-contain rounded"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">
+                                                            No ID/Passport image
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Signature Image */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm font-medium text-muted-foreground">
+                                                    Signature Image
+                                                </Label>
+                                                <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
+                                                    {selectedStudent.signature_image ? (
+                                                        <img
+                                                            src={
+                                                                selectedStudent.signature_image
+                                                            }
+                                                            alt="Signature"
+                                                            className="max-w-full max-h-48 object-contain rounded"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">
+                                                            No signature image
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </DialogContent>
                     </Dialog>
                 )}

@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class RatingController extends Controller
@@ -101,42 +102,56 @@ class RatingController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'rated_id' => 'required|integer',
-            'rated_type' => 'required|in:App\Models\Student,App\Models\Instructor',
-            'rating' => 'required|integer|between:1,5',
-            'comment' => 'nullable|string|max:1000',
-        ]);
+        Log::info('Rating store request data:', $request->all());
+
+        try {
+            $request->validate([
+                'rated_id' => 'required',
+                'rated_type' => 'required|in:App\Models\Student,App\Models\Instructor',
+                'rating' => 'required|integer|between:1,5',
+                'comment' => 'nullable|string|max:1000',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed:', $e->errors());
+            return back()->withErrors(['error' => 'Please fill all required fields correctly.']);
+        }
 
         $user = Auth::user();
         $userable = $user->userable;
 
+        // Convert rated_id to integer
+        $ratedId = (int) $request->rated_id;
+
         // Check if user has already rated this entity
         $existingRating = Rating::where('rater_id', $userable->id)
             ->where('rater_type', get_class($userable))
-            ->where('rated_id', $request->rated_id)
+            ->where('rated_id', $ratedId)
             ->where('rated_type', $request->rated_type)
             ->first();
 
         if ($existingRating) {
-            return back()->withErrors(['rating' => 'You have already rated this person.']);
+            return back()->withErrors(['error' => 'You have already rated this person.']);
         }
 
         // Prevent self-rating
-        if ($userable->id == $request->rated_id && get_class($userable) == $request->rated_type) {
-            return back()->withErrors(['rating' => 'You cannot rate yourself.']);
+        if ($userable->id == $ratedId && get_class($userable) == $request->rated_type) {
+            return back()->withErrors(['error' => 'You cannot rate yourself.']);
         }
 
-        Rating::create([
-            'rater_id' => $userable->id,
-            'rater_type' => get_class($userable),
-            'rated_id' => $request->rated_id,
-            'rated_type' => $request->rated_type,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
+        try {
+            Rating::create([
+                'rater_id' => $userable->id,
+                'rater_type' => get_class($userable),
+                'rated_id' => $ratedId,
+                'rated_type' => $request->rated_type,
+                'rating' => $request->rating,
+                'comment' => $request->comment,
+            ]);
 
-        return back()->with('success', 'Rating submitted successfully.');
+            return back()->with('success', 'Rating submitted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to submit rating. Please try again.']);
+        }
     }
 
     /**
@@ -144,25 +159,33 @@ class RatingController extends Controller
      */
     public function update(Request $request, Rating $rating)
     {
-        $request->validate([
-            'rating' => 'required|integer|between:1,5',
-            'comment' => 'nullable|string|max:1000',
-        ]);
+        try {
+            $request->validate([
+                'rating' => 'required|integer|between:1,5',
+                'comment' => 'nullable|string|max:1000',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors(['error' => 'Please fill all required fields correctly.']);
+        }
 
         $user = Auth::user();
         $userable = $user->userable;
 
         // Check if user owns this rating
         if ($rating->rater_id !== $userable->id || $rating->rater_type !== get_class($userable)) {
-            abort(403, 'Unauthorized.');
+            return back()->withErrors(['error' => 'Unauthorized to update this rating.']);
         }
 
-        $rating->update([
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
+        try {
+            $rating->update([
+                'rating' => $request->rating,
+                'comment' => $request->comment,
+            ]);
 
-        return back()->with('success', 'Rating updated successfully.');
+            return back()->with('success', 'Rating updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to update rating. Please try again.']);
+        }
     }
 
     /**
@@ -175,12 +198,15 @@ class RatingController extends Controller
 
         // Check if user owns this rating
         if ($rating->rater_id !== $userable->id || $rating->rater_type !== get_class($userable)) {
-            abort(403, 'Unauthorized.');
+            return back()->withErrors(['error' => 'Unauthorized to delete this rating.']);
         }
 
-        $rating->delete();
-
-        return back()->with('success', 'Rating deleted successfully.');
+        try {
+            $rating->delete();
+            return back()->with('success', 'Rating deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete rating. Please try again.']);
+        }
     }
 
     /**

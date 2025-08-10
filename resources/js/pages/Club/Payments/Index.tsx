@@ -15,7 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, FileText } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -86,12 +86,9 @@ const columns: ColumnDef<Payment>[] = [
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route(
-                                "club.payments.edit",
-                                row.original.id
-                            )}
+                            href={route("club.payments.edit", row.original.id)}
                         >
-                            Edit
+                            <Edit className="w-4 h-4 mr-2" /> Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -103,7 +100,7 @@ const columns: ColumnDef<Payment>[] = [
                             method="delete"
                             as="button"
                         >
-                            Delete
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -112,7 +109,7 @@ const columns: ColumnDef<Payment>[] = [
                                 payment: row.original.id,
                             })}
                         >
-                            Invoice
+                            <FileText className="w-4 h-4 mr-2" /> Invoice
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>

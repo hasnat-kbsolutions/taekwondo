@@ -8,7 +8,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Edit } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
 interface Props {
@@ -90,6 +90,7 @@ export default function Index({ students }: Props) {
                                                                 student.id
                                                             )}
                                                         >
+                                                            <Edit className="w-4 h-4 mr-2" />{" "}
                                                             Edit
                                                         </Link>
                                                     </DropdownMenuItem>

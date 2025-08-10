@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 
 export default function FlashToast() {
     const { props } = usePage<{
@@ -18,15 +17,11 @@ export default function FlashToast() {
             toast.success(props.flash.success);
         }
         if (props.flash?.error) {
-            if (Array.isArray(props.flash.error)) {
-                props.flash.error.forEach((err) => {
-                    toast.error(err);
-                });
-            } else {
-                toast.error(props.flash.error);
-            }
+            const errors = Array.isArray(props.flash.error)
+                ? props.flash.error
+                : [props.flash.error];
+            errors.forEach((err) => toast.error(err));
         }
-        // Show import logs as toasts
         if (props.flash?.import_log) {
             props.flash.import_log.forEach((log: any) => {
                 if (log.status === "success") {
@@ -47,5 +42,5 @@ export default function FlashToast() {
         }
     }, [props.flash?.success, props.flash?.error, props.flash?.import_log]);
 
-    return null; // No UI to render
+    return null;
 }

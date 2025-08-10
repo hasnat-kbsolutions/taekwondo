@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, router } from "@inertiajs/react";
+
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,23 +73,25 @@ const InstructorProfile: React.FC<Props> = ({
         comment: "",
     });
 
-    const handleSubmitRating = (e: React.FormEvent) => {
+    const handleSubmitRating = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!selectedStudent || rating === 0) return;
 
-        post(route("ratings.store"), {
-            data: {
+        router.post(
+            route("ratings.store"),
+            {
                 rated_id: selectedStudent,
                 rated_type: "App\\Models\\Student",
                 rating,
                 comment,
             },
-            onSuccess: () => {
-                setSelectedStudent("");
-                setRating(0);
-                setComment("");
-            },
-        });
+            {
+                onSuccess: () => {
+                    setSelectedStudent("");
+                    setRating(0);
+                    setComment("");
+                },
+            }
+        );
     };
 
     return (
@@ -298,6 +301,7 @@ const InstructorProfile: React.FC<Props> = ({
                                     onSubmit={handleSubmitRating}
                                     className="space-y-4"
                                 >
+                             
                                     <div>
                                         <Label htmlFor="student">
                                             Select Student
@@ -322,6 +326,11 @@ const InstructorProfile: React.FC<Props> = ({
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {errors.rated_id && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.rated_id}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -331,6 +340,11 @@ const InstructorProfile: React.FC<Props> = ({
                                             onRatingChange={setRating}
                                             size="md"
                                         />
+                                        {errors.rating && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.rating}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -346,6 +360,11 @@ const InstructorProfile: React.FC<Props> = ({
                                             placeholder="Share your experience..."
                                             rows={3}
                                         />
+                                        {errors.comment && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.comment}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <Button

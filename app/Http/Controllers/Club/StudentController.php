@@ -27,7 +27,27 @@ class StudentController extends Controller
             ->when($request->organization_id, function ($query) use ($request) {
                 $query->where('organization_id', $request->organization_id);
             })
-            ->latest()->get();
+            ->latest()->get()
+            ->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'uid' => $student->uid,
+                    'code' => $student->code,
+                    'name' => $student->name,
+                    'surname' => $student->surname,
+                    'email' => $student->email,
+                    'phone' => $student->phone,
+                    'grade' => $student->grade,
+                    'gender' => $student->gender,
+                    'nationality' => $student->nationality,
+                    'country' => $student->country,
+                    'status' => $student->status,
+                    'organization' => $student->organization,
+                    'club' => $student->club,
+                    'average_rating' => $student->average_rating,
+                    'total_ratings' => $student->total_ratings,
+                ];
+            });
 
         return Inertia::render('Club/Students/Index', [
             'students' => $students,
@@ -120,12 +140,12 @@ class StudentController extends Controller
     public function edit(Student $student)
     {
 
- 
+
 
 
         return Inertia::render('Club/Students/Edit', [
             'student' => $student,
-       
+
 
         ]);
     }

@@ -8,9 +8,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
+import RatingStars from "@/components/RatingStars";
 
 export type Student = {
     id: number;
@@ -36,6 +36,8 @@ export type Student = {
     street: string;
     country: string;
     status: boolean;
+    average_rating: number;
+    total_ratings: number;
 };
 
 export const columns = (
@@ -67,6 +69,26 @@ export const columns = (
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
     {
+        id: "rating",
+        header: "Rating",
+        cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+                <RatingStars
+                    rating={
+                        typeof row.original.average_rating === "number"
+                            ? Math.round(row.original.average_rating)
+                            : 0
+                    }
+                    readonly
+                    size="sm"
+                />
+                <span className="text-sm text-muted-foreground">
+                    ({row.original.total_ratings})
+                </span>
+            </div>
+        ),
+    },
+    {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
@@ -89,14 +111,14 @@ export const columns = (
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onView(student)}>
-                            View
+                            <Eye className="w-4 h-4 mr-2" /> View
                         </DropdownMenuItem>
 
                         <DropdownMenuItem asChild>
                             <Link
                                 href={route("admin.students.edit", student.id)}
                             >
-                                Edit
+                                <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -108,12 +130,11 @@ export const columns = (
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                
             );
         },
     },

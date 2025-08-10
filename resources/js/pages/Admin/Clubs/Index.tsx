@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { PageProps } from "@/types"; // We'll define this below
-import { Eye } from "lucide-react";
+import { Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Select,
@@ -23,7 +23,6 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -135,11 +134,11 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onView(row.original)}>
-                        View
+                        <Eye className="w-4 h-4 mr-2" /> View
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link href={route("admin.clubs.edit", row.original.id)}>
-                            Edit
+                            <Edit className="w-4 h-4 mr-2" /> Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -148,7 +147,7 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
                             method="delete"
                             as="button"
                         >
-                            Delete
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>

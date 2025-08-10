@@ -22,7 +22,7 @@ class Club extends Model
         'country',
         'status',
     ];
-    
+
 
 
     public function organization()
@@ -44,9 +44,10 @@ class Club extends Model
         return $this->hasMany(Student::class);
     }
 
- 
-
-
+    public function instructors()
+    {
+        return $this->hasMany(Instructor::class);
+    }
 
     public function supporters()
     {

@@ -23,7 +23,7 @@ import {
     DialogFooter,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Eye } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, FileText } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -192,7 +192,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
                         <DropdownMenuItem
                             onClick={() => openModal(row.original)}
                         >
-                            View
+                            <Eye className="w-4 h-4 mr-2" /> View
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link
@@ -201,7 +201,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                     row.original.id
                                 )}
                             >
-                                Edit
+                                <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -213,7 +213,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -222,7 +222,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                     payment: row.original.id,
                                 })}
                             >
-                                Invoice
+                                <FileText className="w-4 h-4 mr-2" /> Invoice
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -242,28 +242,28 @@ export default function PaymentIndex({ payments, filters }: Props) {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-end gap-4 flex-wrap">
-                           <div className="flex flex-col w-[160px]">
-                                                <Label className="text-sm mb-1">Year</Label>
-                                                <Select
-                                                    value={selectedYear}
-                                                    onValueChange={(value) => {
-                                                        setSelectedYear(value);
-                                                        if (value === "All")
-                                                            setSelectedMonth(""); // Clear month if "All" is selected
-                                                    }}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Year" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {years.map((year) => (
-                                                            <SelectItem key={year} value={year}>
-                                                                {year}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                            <div className="flex flex-col w-[160px]">
+                                <Label className="text-sm mb-1">Year</Label>
+                                <Select
+                                    value={selectedYear}
+                                    onValueChange={(value) => {
+                                        setSelectedYear(value);
+                                        if (value === "All")
+                                            setSelectedMonth(""); // Clear month if "All" is selected
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Year" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {years.map((year) => (
+                                            <SelectItem key={year} value={year}>
+                                                {year}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
                             <div className="flex flex-col w-[160px]">
                                 <Label className="text-sm mb-1">Month</Label>
@@ -341,7 +341,9 @@ export default function PaymentIndex({ payments, filters }: Props) {
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogContent className="w-full">
                         <DialogHeader>
-                            <DialogTitle className="text-3xl text-foreground">Edit Payment</DialogTitle>
+                            <DialogTitle className="text-3xl text-foreground">
+                                Edit Payment
+                            </DialogTitle>
                             <DialogDescription className="text-muted-foreground">
                                 Update payment details like amount and status.
                             </DialogDescription>
@@ -352,15 +354,15 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                     <strong>Student:</strong>{" "}
                                     {selectedPayment.student?.name}
                                 </p>
-                                <p  className="flex justify-between">
+                                <p className="flex justify-between">
                                     <strong>Amount:</strong> RM{" "}
                                     {selectedPayment.amount}
                                 </p>
-                                <p  className="flex justify-between">
+                                <p className="flex justify-between">
                                     <strong>Status:</strong>{" "}
                                     {selectedPayment.status}
                                 </p>
-                                <p  className="flex justify-between">
+                                <p className="flex justify-between">
                                     <strong>Method:</strong>{" "}
                                     {selectedPayment.method}
                                 </p>
@@ -368,12 +370,12 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                     <strong>Payment Month:</strong>{" "}
                                     {selectedPayment.payment_month}
                                 </p>
-                                <p  className="flex justify-between">
+                                <p className="flex justify-between">
                                     <strong>Pay At:</strong>{" "}
                                     {selectedPayment.pay_at}
                                 </p>
                                 {selectedPayment.notes && (
-                                    <p  className="flex justify-between">
+                                    <p className="flex justify-between">
                                         <strong>Notes:</strong>{" "}
                                         {selectedPayment.notes}
                                     </p>

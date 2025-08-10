@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, router } from "@inertiajs/react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,15 @@ interface Rating {
     rater_type: string;
 }
 
+interface RatingGiven {
+    id: number;
+    rating: number;
+    comment: string | null;
+    created_at: string;
+    rated_name: string;
+    rated_type: string;
+}
+
 interface Instructor {
     id: number;
     name: string;
@@ -52,6 +61,7 @@ interface Instructor {
 interface Props {
     student: Student;
     ratingsReceived: Rating[];
+    ratingsGiven: RatingGiven[];
     instructors: Instructor[];
     stats: {
         certifications_count: number;
@@ -63,6 +73,7 @@ interface Props {
 const StudentProfile: React.FC<Props> = ({
     student,
     ratingsReceived,
+    ratingsGiven,
     instructors,
     stats,
 }) => {
@@ -77,24 +88,26 @@ const StudentProfile: React.FC<Props> = ({
         comment: "",
     });
 
-    const handleSubmitRating = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedInstructor || rating === 0) return;
+   const handleSubmitRating = (e: React.FormEvent<HTMLFormElement>) => {
+       e.preventDefault();
 
-        post(route("ratings.store"), {
-            data: {
-                rated_id: selectedInstructor,
-                rated_type: "App\\Models\\Instructor",
-                rating,
-                comment,
-            },
-            onSuccess: () => {
-                setSelectedInstructor("");
-                setRating(0);
-                setComment("");
-            },
-        });
-    };
+       router.post(
+           route("ratings.store"),
+           {
+               rated_id: selectedInstructor,
+               rated_type: "App\\Models\\Instructor",
+               rating,
+               comment,
+           },
+           {
+               onSuccess: () => {
+                   setSelectedInstructor("");
+                   setRating(0);
+                   setComment("");
+               },
+           }
+       );
+   };
 
     return (
         <AuthenticatedLayout header="My Profile">
@@ -263,6 +276,60 @@ const StudentProfile: React.FC<Props> = ({
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* Ratings Given */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Ratings Given ({ratingsGiven.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {ratingsGiven.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {ratingsGiven.map((rating) => (
+                                            <div
+                                                key={rating.id}
+                                                className="border rounded-lg p-4"
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <RatingStars
+                                                            rating={
+                                                                rating.rating
+                                                            }
+                                                            readonly
+                                                            size="sm"
+                                                        />
+                                                        <span className="text-sm text-muted-foreground">
+                                                            to{" "}
+                                                            {rating.rated_name}{" "}
+                                                            ({rating.rated_type}
+                                                            )
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {new Date(
+                                                            rating.created_at
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                {rating.comment && (
+                                                    <p className="text-sm">
+                                                        {rating.comment}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-center text-muted-foreground py-8">
+                                        No ratings given yet.
+                                    </p>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* Sidebar */}
@@ -350,6 +417,7 @@ const StudentProfile: React.FC<Props> = ({
                                     onSubmit={handleSubmitRating}
                                     className="space-y-4"
                                 >
+                                  
                                     <div>
                                         <Label htmlFor="instructor">
                                             Select Instructor
@@ -377,6 +445,11 @@ const StudentProfile: React.FC<Props> = ({
                                                 )}
                                             </SelectContent>
                                         </Select>
+                                        {errors.rated_id && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.rated_id}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -386,6 +459,11 @@ const StudentProfile: React.FC<Props> = ({
                                             onRatingChange={setRating}
                                             size="md"
                                         />
+                                        {errors.rating && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.rating}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -401,6 +479,11 @@ const StudentProfile: React.FC<Props> = ({
                                             placeholder="Share your experience..."
                                             rows={3}
                                         />
+                                        {errors.comment && (
+                                            <p className="text-sm text-red-500 mt-1">
+                                                {errors.comment}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <Button

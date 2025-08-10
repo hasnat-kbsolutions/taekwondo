@@ -6,7 +6,7 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Select,
@@ -21,13 +21,15 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
     DialogDescription,
+    DialogHeader,
 } from "@/components/ui/dialog";
+import RatingStars from "@/components/RatingStars";
+
 interface Organization {
     id: number;
     name: string;
@@ -49,6 +51,8 @@ interface Instructor {
     profile_picture: string | null;
     organization: Organization;
     club: Club | null;
+    average_rating: number;
+    total_ratings: number;
 }
 
 interface Props {
@@ -110,6 +114,25 @@ const columns = (
         cell: ({ row }) => row.original.club?.name ?? "-",
     },
     {
+        header: "Rating",
+        cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+                <RatingStars
+                    rating={
+                        typeof row.original.average_rating === "number"
+                            ? Math.round(row.original.average_rating)
+                            : 0
+                    }
+                    readonly
+                    size="sm"
+                />
+                <span className="text-sm text-muted-foreground">
+                    ({row.original.total_ratings})
+                </span>
+            </div>
+        ),
+    },
+    {
         header: "Actions",
         cell: ({ row }) => (
             <DropdownMenu>
@@ -120,7 +143,7 @@ const columns = (
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onView(row.original)}>
-                        View
+                        <Eye className="w-4 h-4 mr-2" /> View
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
@@ -129,7 +152,7 @@ const columns = (
                                 row.original.id
                             )}
                         >
-                            Edit
+                            <Edit className="w-4 h-4 mr-2" /> Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -141,7 +164,7 @@ const columns = (
                             method="delete"
                             as="button"
                         >
-                            Delete
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -292,92 +315,136 @@ export default function Index({
                             if (!open) setSelectedInstructor(null);
                         }}
                     >
-                        <DialogContent className="shadow-2xl p-10 max-w-xl ">
-                            <div className="flex justify-between">
-                                {/* Header: Title and Description */}
-                                <div className="text-left mb-8">
-                                    <DialogTitle className="text-3xl font-bold text-foreground">
-                                        Instructor Details
-                                    </DialogTitle>
-                                    <DialogDescription className="text-sm text-foreground mt-1">
-                                        Comprehensive information about the
-                                        instructor
-                                    </DialogDescription>
-                                </div>
-
-                                {/* Profile Image Centered */}
-                                <div className="flex justify-center mb-6">
-                                    <div className="flex flex-col items-center gap-2">
-                                        {selectedInstructor.profile_picture ? (
-                                            <img
-                                                src={
-                                                    selectedInstructor.profile_picture
-                                                }
-                                                alt="Profile"
-                                                className="w-24 h-24 rounded-full object-cover border boredr-gray-200 border-foreground shadow-md hover:shadow-lg transition duration-200"
-                                            />
-                                        ) : (
-                                            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-foreground  text-gray-400  text-sm italic border border-foreground ">
-                                                No Image
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Instructor Details</DialogTitle>
+                                <DialogDescription>
+                                    View detailed information about the
+                                    instructor.
+                                </DialogDescription>
+                            </DialogHeader>
+                            {selectedInstructor && (
+                                <div className="space-y-6">
+                                    {/* Profile Image Section */}
+                                    <div className="flex justify-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            {selectedInstructor.profile_picture ? (
+                                                <img
+                                                    src={
+                                                        selectedInstructor.profile_picture
+                                                    }
+                                                    alt="Profile"
+                                                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
+                                                />
+                                            ) : (
+                                                <div className="w-32 h-32 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
+                                                    No Image
+                                                </div>
+                                            )}
+                                            <div className="text-center">
+                                                <h3 className="font-semibold text-lg">
+                                                    {selectedInstructor.name}
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {selectedInstructor.grade}
+                                                </p>
                                             </div>
-                                        )}
+                                        </div>
+                                    </div>
+
+                                    {/* Details Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            {
+                                                label: "Email",
+                                                value: selectedInstructor.email,
+                                            },
+                                            {
+                                                label: "Mobile",
+                                                value:
+                                                    selectedInstructor.mobile ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "IC Number",
+                                                value:
+                                                    selectedInstructor.ic_number ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Grade",
+                                                value:
+                                                    selectedInstructor.grade ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Organization",
+                                                value:
+                                                    selectedInstructor
+                                                        .organization?.name ||
+                                                    "Not assigned",
+                                            },
+                                            {
+                                                label: "Club",
+                                                value:
+                                                    selectedInstructor.club
+                                                        ?.name ||
+                                                    "Not assigned",
+                                            },
+                                            {
+                                                label: "Address",
+                                                value:
+                                                    selectedInstructor.address ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Rating",
+                                                value: (
+                                                    <div className="flex items-center gap-2">
+                                                        <RatingStars
+                                                            rating={
+                                                                typeof selectedInstructor.average_rating ===
+                                                                "number"
+                                                                    ? Math.round(
+                                                                          selectedInstructor.average_rating
+                                                                      )
+                                                                    : 0
+                                                            }
+                                                            readonly
+                                                            size="sm"
+                                                        />
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {typeof selectedInstructor.average_rating ===
+                                                            "number"
+                                                                ? selectedInstructor.average_rating.toFixed(
+                                                                      1
+                                                                  )
+                                                                : "0.0"}{" "}
+                                                            (
+                                                            {
+                                                                selectedInstructor.total_ratings
+                                                            }{" "}
+                                                            ratings)
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            },
+                                        ].map((item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="space-y-1"
+                                            >
+                                                <Label className="text-sm font-medium text-muted-foreground">
+                                                    {item.label}
+                                                </Label>
+                                                <div className="text-sm">
+                                                    {item.value}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
-                            {/* Details Grid */}
-                            <div className="space-y-3">
-                                {[
-                                    {
-                                        label: "Name",
-                                        value: selectedInstructor.name,
-                                    },
-                                    {
-                                        label: "Email",
-                                        value: selectedInstructor.email,
-                                    },
-                                    {
-                                        label: "IC Number",
-                                        value: selectedInstructor.ic_number,
-                                    },
-                                    {
-                                        label: "Mobile",
-                                        value: selectedInstructor.mobile,
-                                    },
-                                    {
-                                        label: "Grade",
-                                        value: selectedInstructor.grade,
-                                    },
-                                    {
-                                        label: "Organization",
-                                        value:
-                                            selectedInstructor.organization
-                                                ?.name || "-",
-                                    },
-                                    {
-                                        label: "Club",
-                                        value:
-                                            selectedInstructor.club?.name ||
-                                            "-",
-                                    },
-                                    {
-                                        label: "Address",
-                                        value:
-                                            selectedInstructor.address || "-",
-                                    },
-                                ].map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex justify-between text-foreground text-sm  "
-                                    >
-                                        <span className="font-medium  text-base text-foreground">
-                                            {item.label}:
-                                        </span>
-                                        <span className="text-right text-foreground max-w-[60%] break-words">
-                                            {item.value}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            )}
                         </DialogContent>
                     </Dialog>
                 )}

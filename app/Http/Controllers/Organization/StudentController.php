@@ -40,7 +40,27 @@ class StudentController extends Controller
                 $query->where('status', $request->status === 'active' ? true : false);
             })
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'uid' => $student->uid,
+                    'code' => $student->code,
+                    'name' => $student->name,
+                    'surname' => $student->surname,
+                    'email' => $student->email,
+                    'phone' => $student->phone,
+                    'grade' => $student->grade,
+                    'gender' => $student->gender,
+                    'nationality' => $student->nationality,
+                    'country' => $student->country,
+                    'status' => $student->status,
+                    'organization' => $student->organization,
+                    'club' => $student->club,
+                    'average_rating' => $student->average_rating,
+                    'total_ratings' => $student->total_ratings,
+                ];
+            });
 
         return Inertia::render('Organization/Students/Index', [
             'students' => $students,

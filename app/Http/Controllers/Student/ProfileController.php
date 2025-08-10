@@ -39,6 +39,23 @@ class ProfileController extends Controller
                 ];
             });
 
+        // Get ratings given by this student
+        $ratingsGiven = Rating::with(['rated'])
+            ->where('rater_id', $student->id)
+            ->where('rater_type', 'App\Models\Student')
+            ->latest()
+            ->get()
+            ->map(function ($rating) {
+                return [
+                    'id' => $rating->id,
+                    'rating' => $rating->rating,
+                    'comment' => $rating->comment,
+                    'created_at' => $rating->created_at->format('Y-m-d H:i:s'),
+                    'rated_name' => $rating->rated->name ?? 'Unknown',
+                    'rated_type' => class_basename($rating->rated_type),
+                ];
+            });
+
         // Get instructors for rating
         $instructors = Instructor::where('club_id', $student->club_id)
             ->orWhere('organization_id', $student->organization_id)
@@ -70,6 +87,7 @@ class ProfileController extends Controller
                 'total_ratings' => $student->total_ratings,
             ],
             'ratingsReceived' => $ratingsReceived,
+            'ratingsGiven' => $ratingsGiven,
             'instructors' => $instructors,
             'stats' => [
                 'certifications_count' => $student->certifications->count(),

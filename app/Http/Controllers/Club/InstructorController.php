@@ -28,7 +28,20 @@ class InstructorController extends Controller
             ->when($request->organization_id, function ($query) use ($request) {
                 $query->where('organization_id', $request->organization_id);
             })
-            ->latest()->get();
+            ->latest()->get()
+            ->map(function ($instructor) {
+                return [
+                    'id' => $instructor->id,
+                    'name' => $instructor->name,
+                    'email' => $instructor->email,
+                    'mobile' => $instructor->mobile,
+                    'grade' => $instructor->grade,
+                    'organization' => $instructor->organization,
+                    'club' => $instructor->club,
+                    'average_rating' => $instructor->average_rating,
+                    'total_ratings' => $instructor->total_ratings,
+                ];
+            });
 
 
         return Inertia::render('Club/Instructors/Index', [

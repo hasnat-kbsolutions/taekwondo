@@ -12,8 +12,11 @@ class DashboardController extends Controller
     {
         $instructor = Auth::user()->userable;
         $studentsCount = $instructor->students()->count();
+
         return Inertia::render('Instructor/Dashboard', [
             'studentsCount' => $studentsCount,
+            'averageRating' => $instructor->average_rating,
+            'totalRatings' => $instructor->total_ratings,
         ]);
     }
 }

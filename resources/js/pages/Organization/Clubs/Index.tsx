@@ -15,7 +15,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 
 interface User {
     id: number;
@@ -85,7 +85,7 @@ const columns: ColumnDef<Club>[] = [
         header: "Invoice Prefix",
         accessorKey: "invoice_prefix",
     },
-  
+
     {
         header: "Email",
         cell: ({ row }) => row.original.user?.email ?? "-",
@@ -109,17 +109,25 @@ const columns: ColumnDef<Club>[] = [
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                        <Link href={route("organization.clubs.edit", row.original.id)}>
-                            Edit
+                        <Link
+                            href={route(
+                                "organization.clubs.edit",
+                                row.original.id
+                            )}
+                        >
+                            <Edit className="w-4 h-4 mr-2" /> Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route("organization.clubs.destroy", row.original.id)}
+                            href={route(
+                                "organization.clubs.destroy",
+                                row.original.id
+                            )}
                             method="delete"
                             as="button"
                         >
-                            Delete
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -129,8 +137,6 @@ const columns: ColumnDef<Club>[] = [
 ];
 
 export default function Index({ clubs, filters }: Props) {
-
-  
     const [country, setCountry] = useState(filters.country || "");
 
     const handleFilterChange = (extraParams = {}) => {

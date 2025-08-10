@@ -126,12 +126,18 @@ const RatingsIndex: React.FC<Props> = ({
                         <CardContent>
                             <div className="flex items-center gap-2">
                                 <RatingStars
-                                    rating={Math.round(averageRating)}
+                                    rating={
+                                        typeof averageRating === "number"
+                                            ? Math.round(averageRating)
+                                            : 0
+                                    }
                                     readonly
                                     size="lg"
                                 />
                                 <span className="text-2xl font-bold">
-                                    {averageRating.toFixed(1)}
+                                    {typeof averageRating === "number"
+                                        ? averageRating.toFixed(1)
+                                        : "0.0"}
                                 </span>
                             </div>
                         </CardContent>

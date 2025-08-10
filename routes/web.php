@@ -31,13 +31,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Admin\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Admin\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
-
-
-
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
-
 
     Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
@@ -103,8 +99,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('roles.update');
     Route::delete('/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('roles.destroy');
 
+    Route::get('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'index'])->name('instructors.index');
+    Route::get('/instructors/create', [App\Http\Controllers\Admin\InstructorController::class, 'create'])->name('instructors.create');
+    Route::post('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'store'])->name('instructors.store');
+    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Admin\InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
+    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
-    // Payment Routes
     Route::get('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Admin\PaymentController::class, 'create'])->name('payments.create');
     Route::post('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('payments.store');
@@ -113,27 +114,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Admin\PaymentController::class, 'invoice'])->name('payments.invoice');
 
-    Route::get('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'index'])->name('instructors.index');
-    Route::get('/instructors/create', [App\Http\Controllers\Admin\InstructorController::class, 'create'])->name('instructors.create');
-    Route::post('/instructors', [App\Http\Controllers\Admin\InstructorController::class, 'store'])->name('instructors.store');
-    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Admin\InstructorController::class, 'edit'])->name('instructors.edit');
-    Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
-    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
-
-    Route::get('/filter', [App\Http\Controllers\Admin\AttendanceController::class, 'filter'])->name('students.filter');
-    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'organizationsReport'])->name('admin.reports');
+    // Admin Ratings
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
 });
 
 // Organization routes
 Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('organization.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Organization\DashboardController::class, 'index'])->name('dashboard');
-    // Club Routes
-    Route::get('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'index'])->name('clubs.index');
-    Route::get('/clubs/create', [App\Http\Controllers\Organization\ClubController::class, 'create'])->name('clubs.create');
-    Route::post('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'store'])->name('clubs.store');
-    Route::get('/clubs/{club}/edit', [App\Http\Controllers\Organization\ClubController::class, 'edit'])->name('clubs.edit');
-    Route::put('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'update'])->name('clubs.update');
-    Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
 
     Route::get('/students', [App\Http\Controllers\Organization\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/create', [App\Http\Controllers\Organization\StudentController::class, 'create'])->name('students.create');
@@ -141,6 +128,20 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/students/{student}/edit', [App\Http\Controllers\Organization\StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [App\Http\Controllers\Organization\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Organization\StudentController::class, 'destroy'])->name('students.destroy');
+
+    Route::get('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'index'])->name('instructors.index');
+    Route::get('/instructors/create', [App\Http\Controllers\Organization\InstructorController::class, 'create'])->name('instructors.create');
+    Route::post('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'store'])->name('instructors.store');
+    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Organization\InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'update'])->name('instructors.update');
+    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'destroy'])->name('instructors.destroy');
+
+    Route::get('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'index'])->name('clubs.index');
+    Route::get('/clubs/create', [App\Http\Controllers\Organization\ClubController::class, 'create'])->name('clubs.create');
+    Route::post('/clubs', [App\Http\Controllers\Organization\ClubController::class, 'store'])->name('clubs.store');
+    Route::get('/clubs/{club}/edit', [App\Http\Controllers\Organization\ClubController::class, 'edit'])->name('clubs.edit');
+    Route::put('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'update'])->name('clubs.update');
+    Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
 
     Route::get('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Organization\PaymentController::class, 'create'])->name('payments.create');
@@ -158,13 +159,6 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/attendances/{attendance}', [App\Http\Controllers\Organization\AttendanceController::class, 'destroy'])->name('attendances.destroy');
     Route::post('/attendances/toggle', [App\Http\Controllers\Organization\AttendanceController::class, 'toggle'])->name('attendances.toggle');
 
-    Route::get('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'index'])->name('instructors.index');
-    Route::get('/instructors/create', [App\Http\Controllers\Organization\InstructorController::class, 'create'])->name('instructors.create');
-    Route::post('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'store'])->name('instructors.store');
-    Route::get('/instructors/{instructor}/edit', [App\Http\Controllers\Organization\InstructorController::class, 'edit'])->name('instructors.edit');
-    Route::put('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'update'])->name('instructors.update');
-    Route::delete('/instructors/{instructor}', [App\Http\Controllers\Organization\InstructorController::class, 'destroy'])->name('instructors.destroy');
-
     Route::get('/certifications', [\App\Http\Controllers\Organization\CertificationController::class, 'index'])->name('certifications.index');
     Route::get('/certifications/create', [\App\Http\Controllers\Organization\CertificationController::class, 'create'])->name('certifications.create');
     Route::post('/certifications', [\App\Http\Controllers\Organization\CertificationController::class, 'store'])->name('certifications.store');
@@ -172,8 +166,8 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Organization\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Organization\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
-
-
+    // Organization Ratings
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
 });
 
 // Club routes
@@ -217,13 +211,15 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Club\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Club\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
+    // Club Ratings
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
+
 
 
 });
 
 // Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
-
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
@@ -231,10 +227,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/student/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showStudent'])->name('profile.show-student');
     Route::get('/profile/instructor/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
+
+    // Student Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
-
-
-
 });
 
 // Guardian routes
@@ -251,6 +246,8 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('/profile', [App\Http\Controllers\Instructor\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/instructor/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
     Route::get('/profile/student/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showStudent'])->name('profile.show-student');
+
+    // Instructor Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
 });
 

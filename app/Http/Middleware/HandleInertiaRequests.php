@@ -34,12 +34,18 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'success' => fn() => $request->session()->get('success'),
+                // This ensures withErrors(['error' => '…']) also works
+                'error' => fn() =>
+                    $request->session()->get('error') ??
+                    $request->session()->get('errors')?->get('error'),
+                'import_log' => fn() => $request->session()->get('import_log'),
             ],
             'auth' => [
                 'user' => $request->user(),
             ],
         ];
     }
+
+
 }

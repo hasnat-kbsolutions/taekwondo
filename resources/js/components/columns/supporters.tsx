@@ -14,7 +14,7 @@ export type Supporter = {
     phone?: string;
     type: string;
     status: boolean;
-    profile_image: string | null; 
+    profile_image: string | null;
 };
 import {
     DropdownMenu,
@@ -29,7 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 
 export const columns = (
     onView: (supporter: Supporter) => void
@@ -60,7 +60,7 @@ export const columns = (
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onView(supporter)}>
-                            View
+                            <Eye className="w-4 h-4 mr-2" /> View
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link
@@ -69,7 +69,7 @@ export const columns = (
                                     supporter.id
                                 )}
                             >
-                                Edit
+                                <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -81,7 +81,7 @@ export const columns = (
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
