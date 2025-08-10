@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@tkd.com',
-            'password' => Hash::make('mtf'),
+            'password' => Hash::make('mtf@1234'),
             'role' => 'admin',
             'userable_type' => null,
             'userable_id' => null,
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name' => $organization->name . ' Admin',
                 'email' => 'org.' . strtolower(str_replace(' ', '', $organization->name)) . '@tkd.com',
-                'password' => Hash::make('mtf'),
+                'password' => Hash::make('mtf@1234'),
                 'role' => 'organization',
                 'userable_type' => Organization::class,
                 'userable_id' => $organization->id,
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name' => $club->name . ' Manager',
                 'email' => 'club.' . strtolower(str_replace(' ', '', $club->name)) . '@tkd.com',
-                'password' => Hash::make('mtf'),
+                'password' => Hash::make('mtf@1234'),
                 'role' => 'club',
                 'userable_type' => Club::class,
                 'userable_id' => $club->id,
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name' => $student->name . ' ' . $student->surname,
                 'email' => 'student' . ($index + 1) . '@tkd.com',
-                'password' => Hash::make('mtf'),
+                'password' => Hash::make('mtf@1234'),
                 'role' => 'student',
                 'userable_type' => Student::class,
                 'userable_id' => $student->id,
@@ -72,7 +72,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name' => $instructor->name,
                 'email' => 'instructor' . ($index + 1) . '@tkd.com',
-                'password' => Hash::make('mtf'),
+                'password' => Hash::make('mtf@1234'),
                 'role' => 'instructor',
                 'userable_type' => Instructor::class,
                 'userable_id' => $instructor->id,

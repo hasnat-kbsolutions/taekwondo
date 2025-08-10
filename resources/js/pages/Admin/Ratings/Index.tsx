@@ -125,7 +125,6 @@ const AdminRatingsIndex: React.FC<Props> = ({ ratings }) => {
                             <DataTable
                                 columns={columns}
                                 data={ratings}
-                                searchKey=""
                             />
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">

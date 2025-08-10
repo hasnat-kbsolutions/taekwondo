@@ -182,7 +182,6 @@ const RatingsIndex: React.FC<Props> = ({
                             <DataTable
                                 columns={receivedColumns}
                                 data={ratingsReceived}
-                                searchKey=""
                             />
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
@@ -204,7 +203,6 @@ const RatingsIndex: React.FC<Props> = ({
                             <DataTable
                                 columns={givenColumns}
                                 data={ratingsGiven}
-                                searchKey=""
                             />
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
