@@ -19,7 +19,6 @@ interface Organization {
     email?: string;
     phone?: string;
     website?: string;
-    skype?: string;
     city?: string;
     country?: string;
     street?: string;
@@ -37,7 +36,6 @@ export default function Edit({ organization }: Props) {
         email: organization.email || "",
         phone: organization.phone || "",
         website: organization.website || "",
-        skype: organization.skype || "",
         city: organization.city || "",
         country: organization.country || "",
         street: organization.street || "",
@@ -129,16 +127,6 @@ export default function Edit({ organization }: Props) {
                                 {renderError("phone")}
                             </div>
 
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Skype</Label>
-                                <Input
-                                    value={data.skype}
-                                    onChange={(e) =>
-                                        setData("skype", e.target.value)
-                                    }
-                                />
-                                {renderError("skype")}
-                            </div>
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Website</Label>

@@ -308,16 +308,7 @@ export default function Edit({ clubs, organizations, student }: Props) {
                         {renderError("id_passport")}
                     </div>
 
-                    {/* Optional: Skype */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Skype</Label>
-                        <Input
-                            placeholder="Skype"
-                            value={data.skype}
-                            onChange={(e) => setData("skype", e.target.value)}
-                        />
-                        {renderError("skype")}
-                    </div>
+             
 
                     {/* Optional: Website */}
                     <div className="w-[33.33%] px-2 mt-3">

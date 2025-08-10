@@ -32,6 +32,7 @@ interface Instructor {
     address: string;
     mobile: string;
     grade: string;
+    gender: string;
     profile_picture: string | null;
     organization_id: number | string;
     club_id: number | string;
@@ -66,6 +67,7 @@ export default function Edit({
         address: instructor.address || "",
         mobile: instructor.mobile || "",
         grade: instructor.grade || "",
+        gender: instructor.gender || "",
         organization_id: String(instructor.organization_id || ""),
         club_id: String(instructor.club_id || ""),
         profile_picture: null as File | null,
@@ -171,6 +173,32 @@ export default function Edit({
                                 {renderError("grade")}
                             </div>
 
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Gender</Label>
+                                <Select
+                                    value={data.gender}
+                                    onValueChange={(value) =>
+                                        setData("gender", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male">
+                                            Male
+                                        </SelectItem>
+                                        <SelectItem value="female">
+                                            Female
+                                        </SelectItem>
+                                        <SelectItem value="other">
+                                            Other
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {renderError("gender")}
+                            </div>
+
                             {/* Organization Select */}
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>
@@ -249,19 +277,37 @@ export default function Edit({
                             <div className="w-full px-2 mt-3">
                                 <Label>Assign Students</Label>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded p-2">
-                                    {students.map(student => (
-                                        <label key={student.id} className="flex items-center gap-2 cursor-pointer">
+                                    {students.map((student) => (
+                                        <label
+                                            key={student.id}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
                                             <Checkbox
-                                                checked={data.student_ids.includes(student.id)}
-                                                onCheckedChange={checked => {
+                                                checked={data.student_ids.includes(
+                                                    student.id
+                                                )}
+                                                onCheckedChange={(checked) => {
                                                     if (checked) {
-                                                        setData("student_ids", [...data.student_ids, student.id]);
+                                                        setData("student_ids", [
+                                                            ...data.student_ids,
+                                                            student.id,
+                                                        ]);
                                                     } else {
-                                                        setData("student_ids", data.student_ids.filter(id => id !== student.id));
+                                                        setData(
+                                                            "student_ids",
+                                                            data.student_ids.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    student.id
+                                                            )
+                                                        );
                                                     }
                                                 }}
                                             />
-                                            <span>{student.name} {student.surname || ""}</span>
+                                            <span>
+                                                {student.name}{" "}
+                                                {student.surname || ""}
+                                            </span>
                                         </label>
                                     ))}
                                 </div>

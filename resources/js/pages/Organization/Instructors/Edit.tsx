@@ -32,6 +32,7 @@ interface Instructor {
     address: string;
     mobile: string;
     grade: string;
+    gender: string;
     profile_picture: string | null;
     club_id: number | string;
 }
@@ -65,6 +66,7 @@ export default function Edit({
         address: instructor.address || "",
         mobile: instructor.mobile || "",
         grade: instructor.grade || "",
+        gender: instructor.gender || "",
         club_id: selected_club_id
             ? String(selected_club_id)
             : String(instructor.club_id || ""),
@@ -207,6 +209,32 @@ export default function Edit({
                                     }
                                 />
                                 {renderError("grade")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Gender</Label>
+                                <Select
+                                    value={data.gender}
+                                    onValueChange={(value) =>
+                                        setData("gender", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male">
+                                            Male
+                                        </SelectItem>
+                                        <SelectItem value="female">
+                                            Female
+                                        </SelectItem>
+                                        <SelectItem value="other">
+                                            Other
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {renderError("gender")}
                             </div>
 
                             {/* Profile Picture */}

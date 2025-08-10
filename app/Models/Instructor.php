@@ -14,6 +14,7 @@ class Instructor extends Model
         'address',
         'mobile',
         'grade',
+        'gender',
         'profile_picture',
         'organization_id',
         'club_id',

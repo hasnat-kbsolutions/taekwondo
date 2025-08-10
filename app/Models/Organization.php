@@ -11,7 +11,6 @@ class Organization extends Model
         'email',
         'phone',
         'website',
-        'skype',
         'city',
         'country',
         'street',

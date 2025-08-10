@@ -37,7 +37,6 @@ export default function Create({ organizations }: Props) {
         tax_number: "",
         invoice_prefix: "",
         phone: "",
-        skype: "",
         notification_emails: "",
         website: "",
         logo: null as File | null,
@@ -176,16 +175,7 @@ export default function Create({ organizations }: Props) {
                                 {renderError("phone")}
                             </div>
 
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Skype</Label>
-                                <Input
-                                    value={data.skype}
-                                    onChange={(e) =>
-                                        setData("skype", e.target.value)
-                                    }
-                                />
-                                {renderError("skype")}
-                            </div>
+                     
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Notification Emails</Label>

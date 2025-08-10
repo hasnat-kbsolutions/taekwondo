@@ -1,213 +1,273 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, router } from "@inertiajs/react";
-import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    GraduationCap,
+    DollarSign,
+    BadgeCheck,
+    Hourglass,
+    Star,
+    Calendar,
+    TrendingUp,
+} from "lucide-react";
+import RatingStars from "@/components/RatingStars";
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 61 }, (_, i) => currentYear - 30 + i); // [currentYear -30, ..., currentYear +30]
+const years = Array.from({ length: 31 }, (_, i) => currentYear - 15 + i); // [currentYear -15, ..., currentYear +15]
 
-interface Payment {
-    id: number;
-    amount: number;
-    method: string;
-    status: string;
-    payment_month: string;
-    pay_at: string;
-    notes?: string;
+interface AttendanceStats {
+    totalDays: number;
+    presentDays: number;
+    absentDays: number;
+    attendanceRate: number;
 }
 
+interface PaymentStats {
+    totalPayments: number;
+    paidPayments: number;
+    pendingPayments: number;
+    totalAmount: number;
+    paidAmount: number;
+}
+
+interface RatingStats {
+    averageRating: number;
+    totalRatings: number;
+}
 
 interface Props {
-    attendance: Record<string, "present" | "absent">;
-    payments: Payment[];
     year: number;
+    attendanceStats: AttendanceStats;
+    paymentStats: PaymentStats;
+    ratingStats: RatingStats;
 }
 
+export default function Dashboard({
+    year,
+    attendanceStats,
+    paymentStats,
+    ratingStats,
+}: Props) {
+    const [selectedYear, setSelectedYear] = useState(year || currentYear);
 
-
-
-
-export default function Dashboard({ attendance, year, payments }: Props) {
-    const [selectedYear, setSelectedYear] = useState(year);
-
-    const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newYear = parseInt(e.target.value);
+    const handleYearChange = (value: string) => {
+        const newYear = parseInt(value);
         setSelectedYear(newYear);
         router.get(route("student.dashboard"), { year: newYear });
     };
 
-    const getStatusIcon = (date: string) => {
-        const status = attendance[date];
-        if (status === "present") return "✅";
-        if (status === "absent") return "❌";
-        return "–";
+    const resetFilters = () => {
+        setSelectedYear(currentYear);
+        router.get(route("student.dashboard"), { year: currentYear });
     };
 
     return (
-        <AuthenticatedLayout header="Yearly Attendance">
-            <Head title="Student Attendance" />
+        <AuthenticatedLayout header="Student Dashboard">
+            <Head title="Student Dashboard" />
 
             <div className="container mx-auto py-8">
+                {/* Year Selector */}
                 <div className="mb-6">
-                    <label className="block text-sm font-medium mb-1">
-                        Select Year
-                    </label>
-                    <select
-                        value={selectedYear}
-                        onChange={(e) =>
-                            setSelectedYear(parseInt(e.target.value))
-                        }
-                        className="border px-3 py-2 rounded-md w-40"
-                    >
-                        {years.map((year) => (
-                            <option key={year} value={year}>
-                                {year}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="table-auto border border-collapse w-full text-sm">
-                        <thead>
-                            <tr>
-                                <th className="border px-2 py-1 text-left">
-                                    Month
-                                </th>
-                                {[...Array(31)].map((_, i) => (
-                                    <th
-                                        key={i + 1}
-                                        className="border px-2 py-1 text-center"
-                                    >
-                                        {i + 1}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[...Array(12)].map((_, monthIndex) => {
-                                const monthName = new Date(
-                                    selectedYear,
-                                    monthIndex
-                                ).toLocaleString("default", { month: "long" });
-
-                                return (
-                                    <tr key={monthIndex}>
-                                        <td className="border px-2 py-1 font-semibold">
-                                            {monthName}
-                                        </td>
-                                        {[...Array(31)].map((_, dayIndex) => {
-                                            const date = new Date(
-                                                selectedYear,
-                                                monthIndex,
-                                                dayIndex + 1
-                                            );
-                                            const formatted = format(
-                                                date,
-                                                "yyyy-MM-dd"
-                                            );
-
-                                            const isValidDate =
-                                                date.getMonth() === monthIndex;
-
-                                            return (
-                                                <td
-                                                    key={dayIndex}
-                                                    className="border px-1 py-1 text-center"
-                                                >
-                                                    {isValidDate
-                                                        ? getStatusIcon(
-                                                              formatted
-                                                          )
-                                                        : ""}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div className="mt-12">
-                    <h2 className="text-lg font-semibold mb-4">
-                        Payments for {selectedYear}
-                    </h2>
-                    <div className="overflow-x-auto">
-                        <table className="table-auto w-full border border-collapse text-sm">
-                            <thead>
-                                <tr>
-                                    <th className="border px-3 py-2 text-left">
-                                        #
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Date
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Month
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Amount
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Method
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Status
-                                    </th>
-                                    <th className="border px-3 py-2 text-left">
-                                        Notes
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {payments.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={7}
-                                            className="border px-3 py-4 text-center text-gray-500"
+                    <div className="flex items-end gap-4 flex-wrap">
+                        <div className="flex flex-col w-[180px]">
+                            <label className="block text-sm font-medium mb-1">
+                                Select Year
+                            </label>
+                            <Select
+                                onValueChange={handleYearChange}
+                                value={selectedYear.toString()}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {years.map((year) => (
+                                        <SelectItem
+                                            key={year}
+                                            value={year.toString()}
                                         >
-                                            No payments found for this year.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    payments.map((payment, index) => (
-                                        <tr key={payment.id}>
-                                            <td className="border px-3 py-2">
-                                                {index + 1}
-                                            </td>
-                                            <td className="border px-3 py-2">
-                                                {payment.pay_at
-                                                    ? format(
-                                                          new Date(
-                                                              payment.pay_at
-                                                          ),
-                                                          "yyyy-MM-dd"
-                                                      )
-                                                    : "-"}
-                                            </td>
-                                            <td className="border px-3 py-2">
-                                                {payment.payment_month}
-                                            </td>
-                                            <td className="border px-3 py-2">
-                                                Rs. {payment.amount}
-                                            </td>
-                                            <td className="border px-3 py-2 capitalize">
-                                                {payment.method}
-                                            </td>
-                                            <td className="border px-3 py-2 capitalize">
-                                                {payment.status}
-                                            </td>
-                                            <td className="border px-3 py-2">
-                                                {payment.notes || "-"}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                            {year}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="flex items-end">
+                            <Button onClick={resetFilters}>
+                                Reset Filters
+                            </Button>
+                        </div>
                     </div>
+                </div>
+
+                {/* Main Statistics */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Days
+                            </CardTitle>
+                            <Calendar className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {attendanceStats.totalDays}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Present Days
+                            </CardTitle>
+                            <BadgeCheck className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {attendanceStats.presentDays}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Absent Days
+                            </CardTitle>
+                            <Hourglass className="h-6 w-6 text-red-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-500">
+                                {attendanceStats.absentDays}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Attendance Rate
+                            </CardTitle>
+                            <TrendingUp className="h-6 w-6 text-blue-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-blue-600">
+                                {attendanceStats.attendanceRate}%
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Payment Statistics */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Payments
+                            </CardTitle>
+                            <DollarSign className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {paymentStats.totalPayments}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Paid
+                            </CardTitle>
+                            <BadgeCheck className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {paymentStats.paidPayments}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Pending
+                            </CardTitle>
+                            <Hourglass className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-yellow-500">
+                                {paymentStats.pendingPayments}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Amount
+                            </CardTitle>
+                            <DollarSign className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                Rs. {paymentStats.totalAmount.toFixed(2)}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Rating Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Average Rating
+                            </CardTitle>
+                            <Star className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center gap-2">
+                                <RatingStars
+                                    rating={Math.round(
+                                        ratingStats.averageRating || 0
+                                    )}
+                                    readonly
+                                    size="sm"
+                                />
+                                <span className="text-2xl font-bold">
+                                    {(ratingStats.averageRating || 0).toFixed(
+                                        1
+                                    )}
+                                </span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Ratings
+                            </CardTitle>
+                            <Star className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {ratingStats.totalRatings || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </AuthenticatedLayout>

@@ -38,7 +38,6 @@ export default function Create({ clubs, organizations }: Props) {
         profile_image: null as File | null,
         id_passport_image: null as File | null,
         signature_image: null as File | null,
-        skype: "",
         website: "",
         city: "",
         postal_code: "",
@@ -299,16 +298,7 @@ export default function Create({ clubs, organizations }: Props) {
                         {renderError("id_passport")}
                     </div>
 
-                    {/* Optional: Skype */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Skype</Label>
-                        <Input
-                            placeholder="Skype"
-                            value={data.skype}
-                            onChange={(e) => setData("skype", e.target.value)}
-                        />
-                        {renderError("skype")}
-                    </div>
+                 
 
                     {/* Optional: Website */}
                     <div className="w-[33.33%] px-2 mt-3">

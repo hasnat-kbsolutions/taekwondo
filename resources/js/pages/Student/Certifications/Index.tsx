@@ -145,61 +145,56 @@ const CertificationsIndex: React.FC<Props> = ({ certifications, filters }) => {
     return (
         <AuthenticatedLayout header="My Certifications">
             <Head title="My Certifications" />
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-10 space-y-6">
+                {/* Filters */}
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle>
-                                    My Certifications (
-                                    {filteredCertifications.length})
-                                </CardTitle>
-                                <p className="text-muted-foreground text-sm mt-1">
-                                    View all your certifications and
-                                    certificates.
-                                </p>
-                            </div>
-                        </div>
+                        <CardTitle>Filters</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {/* Filters */}
-                        <div className="mb-6">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <Filter className="w-4 h-4 text-muted-foreground" />
-                                    <Label className="text-sm font-medium">
-                                        Filters:
-                                    </Label>
-                                </div>
-                                <div className="flex-1 max-w-sm">
-                                    <Input
-                                        placeholder="Search by notes..."
-                                        value={localFilters.search}
-                                        onChange={(e) => {
-                                            const newFilters = {
-                                                ...localFilters,
-                                                search: e.target.value,
-                                            };
-                                            setLocalFilters(newFilters);
-                                            applyFilters(newFilters);
-                                        }}
-                                    />
-                                </div>
-                                {localFilters.search && (
+                        <div className="flex items-end gap-4 flex-wrap">
+                            <div className="flex-1 max-w-sm">
+                                <Label className="text-sm mb-1">Search by notes</Label>
+                                <Input
+                                    placeholder="Search by notes..."
+                                    value={localFilters.search}
+                                    onChange={(e) => {
+                                        const newFilters = {
+                                            ...localFilters,
+                                            search: e.target.value,
+                                        };
+                                        setLocalFilters(newFilters);
+                                        applyFilters(newFilters);
+                                    }}
+                                />
+                            </div>
+                            {localFilters.search && (
+                                <div className="flex items-end">
                                     <Button
                                         variant="outline"
-                                        size="sm"
                                         onClick={clearFilters}
                                         className="flex items-center gap-2"
                                     >
                                         <X className="w-4 h-4" />
-                                        Clear
+                                        Clear Filters
                                     </Button>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
+                    </CardContent>
+                </Card>
 
-                        {/* DataTable */}
+                {/* Certifications Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            My Certifications ({filteredCertifications.length})
+                        </CardTitle>
+                        <p className="text-muted-foreground text-sm mt-1">
+                            View all your certifications and certificates.
+                        </p>
+                    </CardHeader>
+                    <CardContent>
                         <DataTable
                             columns={columns}
                             data={filteredCertifications}

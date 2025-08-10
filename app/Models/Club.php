@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Club extends Model
 {
@@ -13,7 +16,6 @@ class Club extends Model
         'invoice_prefix',
         'logo', // or 'logo_image' — pick one to match your migration
         'phone',
-        'skype',
         'notification_emails',
         'website',
         'postal_code',
@@ -25,31 +27,27 @@ class Club extends Model
 
 
 
-    public function organization()
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
-    public function clubs()
-    {
-        return $this->hasMany(Club::class);
-    }
 
-    public function user()
+    public function user(): MorphOne
     {
         return $this->morphOne(User::class, 'userable');
     }
 
-    public function students()
+    public function students(): HasMany
     {
         return $this->hasMany(Student::class);
     }
 
-    public function instructors()
+    public function instructors(): HasMany
     {
         return $this->hasMany(Instructor::class);
     }
 
-    public function supporters()
+    public function supporters(): HasMany
     {
         return $this->hasMany(Supporter::class);
     }

@@ -29,7 +29,6 @@ class StudentExport implements FromCollection, WithMapping, WithHeadings
             $student->nationality,
             $student->grade,
             $student->id_passport,
-            $student->skype,
             $student->website,
             $student->city,
             $student->postal_code,

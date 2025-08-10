@@ -15,7 +15,7 @@ class OrganizationController extends Controller
 {
     public function index()
     {
-        $organizations = Organization::with(['students', 'supporters'])->get();
+        $organizations = Organization::with(['students', 'supporters', 'clubs', 'instructors'])->get();
 
         return Inertia::render('Admin/Organizations/Index', [
             'organizations' => $organizations,
@@ -34,10 +34,9 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-    
+
             'phone' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -45,20 +44,19 @@ class OrganizationController extends Controller
             'status' => 'boolean',
         ]);
 
-    
+
         $organization = Organization::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'website' => $validated['website'] ?? null,
-            'skype' => $validated['skype'] ?? null,
             'city' => $validated['city'] ?? null,
             'country' => $validated['country'] ?? null,
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'status' => $validated['status'] ?? false,
         ]);
-    
+
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -67,7 +65,7 @@ class OrganizationController extends Controller
             'userable_type' => Organization::class,
             'userable_id' => $organization->id,
         ]);
-    
+
         return redirect()
             ->route('admin.organizations.index')
             ->with('success', 'Organization created successfully');
@@ -89,7 +87,6 @@ class OrganizationController extends Controller
 
             'phone' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -104,7 +101,6 @@ class OrganizationController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'website' => $validated['website'] ?? null,
-            'skype' => $validated['skype'] ?? null,
             'city' => $validated['city'] ?? null,
             'country' => $validated['country'] ?? null,
             'street' => $validated['street'] ?? null,
@@ -139,10 +135,10 @@ class OrganizationController extends Controller
         }
         // Then delete the organization
         $organization->delete();
-    
+
         return redirect()
             ->route('admin.organizations.index')
             ->with('success', 'Organization and associated user deleted successfully');
     }
-    
+
 }

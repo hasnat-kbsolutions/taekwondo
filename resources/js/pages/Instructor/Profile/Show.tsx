@@ -22,6 +22,7 @@ interface Instructor {
     email: string;
     mobile: string;
     grade: string;
+    gender: string;
     address: string;
     ic_number: string;
     profile_picture: string | null;
@@ -140,6 +141,19 @@ const InstructorProfile: React.FC<Props> = ({
                                         </Label>
                                         <p className="text-lg">
                                             {instructor.grade}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-sm font-medium text-muted-foreground">
+                                            Gender
+                                        </Label>
+                                        <p className="text-lg">
+                                            {instructor.gender
+                                                ? instructor.gender
+                                                      .charAt(0)
+                                                      .toUpperCase() +
+                                                  instructor.gender.slice(1)
+                                                : "Not specified"}
                                         </p>
                                     </div>
                                     <div>
@@ -301,7 +315,6 @@ const InstructorProfile: React.FC<Props> = ({
                                     onSubmit={handleSubmitRating}
                                     className="space-y-4"
                                 >
-                             
                                     <div>
                                         <Label htmlFor="student">
                                             Select Student

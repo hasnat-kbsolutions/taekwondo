@@ -25,6 +25,7 @@ class InstructorSeeder extends Seeder
                 'address' => '123 Jalan Bukit Bintang, Kuala Lumpur',
                 'mobile' => '+6012-111-2222',
                 'grade' => '6th Dan Black Belt',
+                'gender' => 'male',
                 'profile_picture' => null,
             ],
             [
@@ -34,6 +35,7 @@ class InstructorSeeder extends Seeder
                 'address' => '456 Jalan Subang, Shah Alam',
                 'mobile' => '+6012-333-4444',
                 'grade' => '4th Dan Black Belt',
+                'gender' => 'male',
                 'profile_picture' => null,
             ],
             [
@@ -43,6 +45,7 @@ class InstructorSeeder extends Seeder
                 'address' => '789 Jalan Gurney, George Town',
                 'mobile' => '+6012-555-6666',
                 'grade' => '3rd Dan Black Belt',
+                'gender' => 'female',
                 'profile_picture' => null,
             ],
         ];
@@ -53,4 +56,4 @@ class InstructorSeeder extends Seeder
             Instructor::create($instructor);
         }
     }
-} 
+}

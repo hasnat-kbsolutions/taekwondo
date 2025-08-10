@@ -47,6 +47,7 @@ export default function Create({ clubs, students, selected_club_id }: Props) {
         address: "",
         mobile: "",
         grade: "",
+        gender: "",
         profile_picture: null as File | null,
         club_id: selected_club_id ? String(selected_club_id) : "",
         student_ids: [] as number[],
@@ -186,6 +187,32 @@ export default function Create({ clubs, students, selected_club_id }: Props) {
                                     }
                                 />
                                 {renderError("grade")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Gender</Label>
+                                <Select
+                                    value={data.gender}
+                                    onValueChange={(value) =>
+                                        setData("gender", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male">
+                                            Male
+                                        </SelectItem>
+                                        <SelectItem value="female">
+                                            Female
+                                        </SelectItem>
+                                        <SelectItem value="other">
+                                            Other
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {renderError("gender")}
                             </div>
 
                             {/* Profile Picture */}

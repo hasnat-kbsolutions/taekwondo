@@ -23,6 +23,7 @@ import { Link } from "@inertiajs/react";
 
 export function NavUser({ user }: { user: User }) {
     const { isMobile } = useSidebar();
+    const role = user.role || "student";
 
     return (
         <SidebarMenu>
@@ -77,9 +78,9 @@ export function NavUser({ user }: { user: User }) {
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem asChild>
-                                <Link href={route("admin.profile.edit")}>
+                                <Link href={route(`${role}.profile.${role === 'admin' ? 'edit' : 'show'}`)}>
                                     <BadgeCheck />
-                                    Edit Profile
+                                    {role === 'admin' ? 'Edit Profile' : 'View Profile'}
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>

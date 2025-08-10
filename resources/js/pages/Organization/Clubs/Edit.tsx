@@ -31,7 +31,6 @@ interface Club {
     tax_number?: string;
     invoice_prefix?: string;
     phone?: string;
-    skype?: string;
     notification_emails?: string;
     website?: string;
     status: boolean;
@@ -63,7 +62,6 @@ export default function Edit({ club, organizations }: Props) {
         tax_number: club.tax_number ?? "",
         invoice_prefix: club.invoice_prefix ?? "",
         phone: club.phone ?? "",
-        skype: club.skype ?? "",
         notification_emails: club.notification_emails ?? "",
         website: club.website ?? "",
         status: club.status ?? false,
@@ -173,16 +171,7 @@ export default function Edit({ club, organizations }: Props) {
                                 {renderError("phone")}
                             </div>
 
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Skype</Label>
-                                <Input
-                                    value={data.skype}
-                                    onChange={(e) =>
-                                        setData("skype", e.target.value)
-                                    }
-                                />
-                                {renderError("skype")}
-                            </div>
+                          
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Notification Emails</Label>

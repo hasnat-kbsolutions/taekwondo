@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Head, Link, router, usePage } from "@inertiajs/react";
+import React, { useState } from "react";
+import { Head, Link, router } from "@inertiajs/react";
+import { route } from "ziggy-js";
 import { Button } from "@/components/ui/button";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -7,8 +8,16 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { PageProps } from "@/types"; // We'll define this below
-import { Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Eye,
+    Edit,
+    Trash2,
+    MoreHorizontal,
+    Users,
+    GraduationCap,
+    Heart,
+    DollarSign,
+} from "lucide-react";
 import {
     Select,
     SelectTrigger,
@@ -28,7 +37,9 @@ import {
     DialogContent,
     DialogDescription,
     DialogTitle,
+    DialogHeader,
 } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface User {
     id: number;
@@ -53,6 +64,52 @@ interface Club {
     status: boolean;
     organization: Organization;
     user?: User;
+    students?: Student[];
+    instructors?: Instructor[];
+    supporters?: Supporter[];
+    payment_stats?: {
+        total_payments: number;
+        paid_count: number;
+        pending_count: number;
+        total_amount: number;
+        average_amount: number;
+    };
+    attendance_stats?: {
+        total_attendances: number;
+        present_count: number;
+        absent_count: number;
+        late_count: number;
+        attendance_rate: number;
+    };
+    certification_stats?: {
+        total_certifications: number;
+        completed_count: number;
+        pending_count: number;
+        completion_rate: number;
+    };
+    performance_metrics?: {
+        total_members: number;
+        student_to_instructor_ratio: number;
+        monthly_revenue: number;
+    };
+}
+
+interface Student {
+    id: number;
+    name: string;
+    email?: string;
+}
+
+interface Instructor {
+    id: number;
+    name: string;
+    email?: string;
+}
+
+interface Supporter {
+    id: number;
+    name: string;
+    email?: string;
 }
 
 interface Props {
@@ -69,7 +126,6 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
         header: "#",
         cell: ({ row }) => row.index + 1,
     },
-
     {
         header: "Logo",
         cell: ({ row }) =>
@@ -84,37 +140,31 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
             ),
     },
     {
-        header: "User Name",
+        header: "Club Name",
         cell: ({ row }) => row.original.user?.name ?? "-",
-    },
-    {
-        header: "City",
-        accessorKey: "city",
-    },
-    {
-        header: "Country",
-        accessorKey: "country",
-    },
-    {
-        header: "Phone",
-        accessorKey: "phone",
-    },
-    {
-        header: "Tax No.",
-        accessorKey: "tax_number",
-    },
-    {
-        header: "Invoice Prefix",
-        accessorKey: "invoice_prefix",
     },
     {
         header: "Organization",
         cell: ({ row }) => row.original.organization?.name ?? "-",
     },
     {
-        header: "Email",
-        cell: ({ row }) => row.original.user?.email ?? "-",
+        header: "Location",
+        cell: ({ row }) => (
+            <div className="text-sm">
+                {row.original.city && row.original.country ? (
+                    <>
+                        <div>{row.original.city}</div>
+                        <div className="text-muted-foreground">
+                            {row.original.country}
+                        </div>
+                    </>
+                ) : (
+                    row.original.city || row.original.country || "-"
+                )}
+            </div>
+        ),
     },
+
     {
         header: "Status",
         cell: ({ row }) => (
@@ -123,6 +173,7 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
             </Badge>
         ),
     },
+
     {
         header: "Actions",
         cell: ({ row }) => (
@@ -157,6 +208,9 @@ const columns = (onView: (instructor: Club) => void): ColumnDef<Club>[] => [
 ];
 
 export default function Index({ clubs, organizations = [], filters }: Props) {
+    // Ensure clubs is always an array to prevent runtime errors
+    const safeClubs = Array.isArray(clubs) ? clubs : [];
+
     const [organizationId, setOrganizationId] = useState(
         filters.organization_id || ""
     );
@@ -258,6 +312,111 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                 </Card>
             </div>
             <div className="container mx-auto ">
+                {/* Statistics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center space-x-2">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <Users className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Students
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {Number(
+                                            safeClubs.reduce(
+                                                (total, club) =>
+                                                    total +
+                                                    Number(club.students?.length || 0),
+                                                0
+                                            )
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center space-x-2">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                    <GraduationCap className="h-4 w-4 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Instructors
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {Number(
+                                            safeClubs.reduce(
+                                                (total, club) =>
+                                                    total +
+                                                    Number(club.instructors?.length || 0),
+                                                0
+                                            )
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center space-x-2">
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                    <Heart className="h-4 w-4 text-purple-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Supporters
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {Number(
+                                            safeClubs.reduce(
+                                                (total, club) =>
+                                                    total +
+                                                    Number(club.supporters?.length || 0),
+                                                0
+                                            )
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center space-x-2">
+                                <div className="p-2 bg-orange-100 rounded-lg">
+                                    <DollarSign className="h-4 w-4 text-orange-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Revenue
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        $
+                                        {Number(
+                                            safeClubs.reduce(
+                                                (total, club) =>
+                                                    total +
+                                                    Number(club.payment_stats
+                                                        ?.total_amount || 0),
+                                                0
+                                            )
+                                        ).toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Clubs</CardTitle>
@@ -268,11 +427,12 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                     </CardHeader>
                     <CardContent>
                         <DataTable
-                            columns={columns((clubs) => setSelectedClub(clubs))}
-                            data={clubs}
+                            columns={columns((club) => setSelectedClub(club))}
+                            data={safeClubs}
                         />
                     </CardContent>
                 </Card>
+                {/* View Dialog */}
                 {selectedClub && (
                     <Dialog
                         open={!!selectedClub}
@@ -280,106 +440,287 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                             if (!open) setSelectedClub(null);
                         }}
                     >
-                        <DialogContent className="w-full h-auto">
-                            <div className=" flex justify-between items-center ">
-                                <div className="block">
-                                    <DialogTitle className="text-3xl text-foreground  text-left">
-                                        Club Details
-                                    </DialogTitle>
-                                    <DialogDescription className="text-gray-200 text-foreground ml-2">
-                                        Full club details
-                                    </DialogDescription>
-                                </div>
-                                <div className="block">
-                                    <div className="mt-1 justify-center flex  bg-foreground  w-24 h-24 border rounded-full text-center items-center">
-                                        {selectedClub.logo ? (
-                                            <img
-                                                src={selectedClub.logo}
-                                                alt="Club Logo"
-                                                className="w-24 h-24 object-cover rounded"
-                                            />
-                                        ) : (
-                                            <span className="italic text-muted-foreground ">
-                                                No image
-                                            </span>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Club Details</DialogTitle>
+                                <DialogDescription>
+                                    View detailed information about the club.
+                                </DialogDescription>
+                            </DialogHeader>
+                            {selectedClub && (
+                                <div className="space-y-6">
+                                    {/* Club Header Section */}
+                                    <div className="flex justify-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="w-32 h-32 flex items-center justify-center rounded-full bg-primary/10 text-primary text-4xl font-bold border-2 border-primary/20 shadow-lg">
+                                                {selectedClub.logo ? (
+                                                    <img
+                                                        src={selectedClub.logo}
+                                                        alt="Club Logo"
+                                                        className="w-32 h-32 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    selectedClub.name
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                )}
+                                            </div>
+                                            <div className="text-center">
+                                                <h3 className="font-semibold text-xl">
+                                                    {selectedClub.name}
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Club ID: {selectedClub.id}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Basic Details Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            {
+                                                label: "Email",
+                                                value:
+                                                    selectedClub.user?.email ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Phone",
+                                                value:
+                                                    selectedClub.phone ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "City",
+                                                value:
+                                                    selectedClub.city ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Country",
+                                                value:
+                                                    selectedClub.country ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Tax Number",
+                                                value:
+                                                    selectedClub.tax_number ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Invoice Prefix",
+                                                value:
+                                                    selectedClub.invoice_prefix ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Organization",
+                                                value:
+                                                    selectedClub.organization
+                                                        ?.name ||
+                                                    "Not specified",
+                                            },
+                                            {
+                                                label: "Status",
+                                                value: (
+                                                    <Badge
+                                                        variant={
+                                                            selectedClub.status
+                                                                ? "default"
+                                                                : "destructive"
+                                                        }
+                                                    >
+                                                        {selectedClub.status
+                                                            ? "Active"
+                                                            : "Inactive"}
+                                                    </Badge>
+                                                ),
+                                            },
+                                        ].map((item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex flex-col space-y-1"
+                                            >
+                                                <Label className="text-sm font-medium text-muted-foreground">
+                                                    {item.label}
+                                                </Label>
+                                                <div className="text-sm">
+                                                    {item.value}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Students List */}
+                                    {selectedClub.students &&
+                                        selectedClub.students.length > 0 && (
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>
+                                                        Students (
+                                                        {
+                                                            selectedClub
+                                                                .students.length
+                                                        }
+                                                        )
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-2">
+                                                        {selectedClub.students.map(
+                                                            (student) => (
+                                                                <div
+                                                                    key={
+                                                                        student.id
+                                                                    }
+                                                                    className="flex items-center justify-between p-2 border rounded-lg"
+                                                                >
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold">
+                                                                            {student.name
+                                                                                .charAt(
+                                                                                    0
+                                                                                )
+                                                                                .toUpperCase()}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-medium">
+                                                                                {
+                                                                                    student.name
+                                                                                }
+                                                                            </p>
+                                                                            {student.email && (
+                                                                                <p className="text-sm text-muted-foreground">
+                                                                                    {
+                                                                                        student.email
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
                                         )}
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="space-y-3 text-sm">
-                                {[
-                                    {
-                                        label: "Club Name",
-                                        value: selectedClub.name,
-                                    },
-                                    {
-                                        label: "City",
-                                        value: selectedClub.city || "-",
-                                    },
-                                    {
-                                        label: "Country",
-                                        value: selectedClub.country || "-",
-                                    },
-                                    {
-                                        label: "Phone",
-                                        value: selectedClub.phone || "-",
-                                    },
-                                    {
-                                        label: "Tax Number",
-                                        value: selectedClub.tax_number || "-",
-                                    },
-                                    {
-                                        label: "Invoice Prefix",
-                                        value:
-                                            selectedClub.invoice_prefix || "-",
-                                    },
-                                    {
-                                        label: "Organization",
-                                        value:
-                                            selectedClub.organization?.name ||
-                                            "-",
-                                    },
-                                    {
-                                        label: "User Name",
-                                        value: selectedClub.user?.name || "-",
-                                    },
-                                    {
-                                        label: "User Email",
-                                        value: selectedClub.user?.email || "-",
-                                    },
-                                ].map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex justify-between"
-                                    >
-                                        <span className="text-foreground  text-base font-semibold">
-                                            {item.label}:
-                                        </span>
-                                        <span className="text-foreground text-sm text-right max-w-[60%] break-words">
-                                            {item.value}
-                                        </span>
-                                    </div>
-                                ))}
+                                    {/* Instructors List */}
+                                    {selectedClub.instructors &&
+                                        selectedClub.instructors.length > 0 && (
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>
+                                                        Instructors (
+                                                        {
+                                                            selectedClub
+                                                                .instructors
+                                                                .length
+                                                        }
+                                                        )
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-2">
+                                                        {selectedClub.instructors.map(
+                                                            (instructor) => (
+                                                                <div
+                                                                    key={
+                                                                        instructor.id
+                                                                    }
+                                                                    className="flex items-center justify-between p-2 border rounded-lg"
+                                                                >
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold">
+                                                                            {instructor.name
+                                                                                .charAt(
+                                                                                    0
+                                                                                )
+                                                                                .toUpperCase()}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-medium">
+                                                                                {
+                                                                                    instructor.name
+                                                                                }
+                                                                            </p>
+                                                                            {instructor.email && (
+                                                                                <p className="text-sm text-muted-foreground">
+                                                                                    {
+                                                                                        instructor.email
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        )}
 
-                                {/* Status badge row */}
-                                <div className="flex justify-between items-center">
-                                    <span className="text-foreground text-base font-semibold">
-                                        Status:
-                                    </span>
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-sm font-medium ${
-                                            selectedClub.status
-                                                ? "bg-green-600 text-white"
-                                                : "bg-red-600 text-white"
-                                        }`}
-                                    >
-                                        {selectedClub.status
-                                            ? "Active"
-                                            : "Inactive"}
-                                    </span>
+                                    {/* Supporters List */}
+                                    {selectedClub.supporters &&
+                                        selectedClub.supporters.length > 0 && (
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>
+                                                        Supporters (
+                                                        {
+                                                            selectedClub
+                                                                .supporters
+                                                                .length
+                                                        }
+                                                        )
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-2">
+                                                        {selectedClub.supporters.map(
+                                                            (supporter) => (
+                                                                <div
+                                                                    key={
+                                                                        supporter.id
+                                                                    }
+                                                                    className="flex items-center justify-between p-2 border rounded-lg"
+                                                                >
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold">
+                                                                            {supporter.name
+                                                                                .charAt(
+                                                                                    0
+                                                                                )
+                                                                                .toUpperCase()}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-medium">
+                                                                                {
+                                                                                    supporter.name
+                                                                                }
+                                                                            </p>
+                                                                            {supporter.email && (
+                                                                                <p className="text-sm text-muted-foreground">
+                                                                                    {
+                                                                                        supporter.email
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        )}
                                 </div>
-                            </div>
+                            )}
                         </DialogContent>
                     </Dialog>
                 )}

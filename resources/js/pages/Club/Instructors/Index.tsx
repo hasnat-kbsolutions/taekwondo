@@ -48,6 +48,7 @@ interface Instructor {
     address: string;
     mobile: string;
     grade: string;
+    gender: string;
     profile_picture: string | null;
     average_rating: number;
     total_ratings: number;
@@ -96,6 +97,15 @@ const columns = (
     {
         header: "Grade",
         accessorKey: "grade",
+    },
+    {
+        header: "Gender",
+        accessorKey: "gender",
+        cell: ({ row }) => {
+            const gender = row.original.gender;
+            if (!gender) return "-";
+            return gender.charAt(0).toUpperCase() + gender.slice(1);
+        },
     },
     {
         header: "Rating",

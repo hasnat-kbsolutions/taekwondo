@@ -53,7 +53,6 @@ export type Student = {
     signature_image: string | null;
     email: string;
     phone: string;
-    skype: string;
     website: string;
     city: string;
     postal_code: string;

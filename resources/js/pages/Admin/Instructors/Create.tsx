@@ -54,6 +54,7 @@ export default function Create({
         address: "",
         mobile: "",
         grade: "",
+        gender: "",
         profile_picture: null as File | null,
         organization_id: selected_organization_id
             ? String(selected_organization_id)
@@ -175,6 +176,32 @@ export default function Create({
                                     }
                                 />
                                 {renderError("grade")}
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>Gender</Label>
+                                <Select
+                                    value={data.gender}
+                                    onValueChange={(value) =>
+                                        setData("gender", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male">
+                                            Male
+                                        </SelectItem>
+                                        <SelectItem value="female">
+                                            Female
+                                        </SelectItem>
+                                        <SelectItem value="other">
+                                            Other
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {renderError("gender")}
                             </div>
 
                             {/* Organization Select */}

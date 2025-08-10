@@ -25,7 +25,6 @@ class Student extends Model
         'signature_image',
         'email',
         'phone',
-        'skype',
         'website',
         'city',
         'postal_code',

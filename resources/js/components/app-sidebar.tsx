@@ -250,9 +250,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={route("admin.dashboard")}>
+                            <Link href={route(`${role}.dashboard`)}>
                                 {" "}
-                                {/* Use route based on role if needed */}
+                                {/* Use route based on role */}
                                 <img
                                     src="/assets/images/logo.jpg"
                                     alt=""

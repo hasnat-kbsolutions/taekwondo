@@ -20,27 +20,54 @@ class DashboardController extends Controller
         $student = Auth::user()->userable;
         $year = $request->input('year', now()->year);
 
+        // Get attendance statistics for the year
         $attendances = $student->attendances()
             ->whereYear('date', $year)
-            ->get()
-            ->keyBy(fn($a) => \Carbon\Carbon::parse($a->date)->format('Y-m-d'));
-
-        $payments = $student->payments()
-            ->whereYear('payment_month', $year)
-            ->orderBy('pay_at', 'desc')
             ->get();
 
+        $totalDays = $attendances->count();
+        $presentDays = $attendances->where('status', 'present')->count();
+        $absentDays = $attendances->where('status', 'absent')->count();
+        $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 1) : 0;
+
+        // Get payment statistics for the year
+        $payments = $student->payments()
+            ->whereYear('payment_month', $year)
+            ->get();
+
+        $totalPayments = $payments->count();
+        $paidPayments = $payments->where('status', 'paid')->count();
+        $pendingPayments = $payments->where('status', 'pending')->count();
+        $totalAmount = $payments->sum('amount');
+        $paidAmount = $payments->where('status', 'paid')->sum('amount');
+
+        // Get rating statistics
+        $averageRating = $student->average_rating ?? 0;
+        $totalRatings = $student->total_ratings ?? 0;
+
+        // Ensure averageRating is numeric
+        $averageRating = is_numeric($averageRating) ? (float) $averageRating : 0.0;
+        $totalRatings = is_numeric($totalRatings) ? (int) $totalRatings : 0;
+
         return Inertia::render('Student/Dashboard', [
-            'attendance' => $attendances->map(fn($a) => $a->status),
-            'payments' => $payments,
             'year' => $year,
+            'attendanceStats' => [
+                'totalDays' => $totalDays,
+                'presentDays' => $presentDays,
+                'absentDays' => $absentDays,
+                'attendanceRate' => $attendanceRate,
+            ],
+            'paymentStats' => [
+                'totalPayments' => $totalPayments,
+                'paidPayments' => $paidPayments,
+                'pendingPayments' => $pendingPayments,
+                'totalAmount' => $totalAmount,
+                'paidAmount' => $paidAmount,
+            ],
+            'ratingStats' => [
+                'averageRating' => $averageRating,
+                'totalRatings' => $totalRatings,
+            ],
         ]);
     }
-
-
-
-
-
-
-
 }

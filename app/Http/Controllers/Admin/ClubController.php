@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Club;
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\Payment;
+use App\Models\Attendance;
+use App\Models\Certification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +19,14 @@ class ClubController extends Controller
     public function index(Request $request)
     {
         $organizations = Organization::all();
-        
-        $query = Club::with(['organization', 'user']);
+
+        $query = Club::with([
+            'organization',
+            'user',
+            'students',
+            'instructors',
+            'supporters'
+        ]);
 
         if ($request->filled('organization_id')) {
             $query->where('organization_id', $request->organization_id);
@@ -28,6 +37,57 @@ class ClubController extends Controller
         }
 
         $clubs = $query->latest()->get();
+
+        // Add statistics for each club
+        $clubs->each(function ($club) {
+            // Get student IDs for this club
+            $studentIds = $club->students->pluck('id');
+
+            // Payment statistics
+            $payments = \App\Models\Payment::whereIn('student_id', $studentIds);
+            $totalPayments = $payments->count();
+            $totalAmount = $payments->sum('amount');
+
+            $club->payment_stats = [
+                'total_payments' => $totalPayments,
+                'paid_count' => $payments->where('status', 'paid')->count(),
+                'pending_count' => $payments->where('status', 'pending')->count(),
+                'total_amount' => $totalAmount,
+                'average_amount' => $totalPayments > 0 ? round($totalAmount / $totalPayments, 2) : 0,
+            ];
+
+            // Attendance statistics
+            $attendances = \App\Models\Attendance::whereIn('student_id', $studentIds);
+            $totalAttendances = $attendances->count();
+            $presentCount = $attendances->where('status', 'present')->count();
+
+            $club->attendance_stats = [
+                'total_attendances' => $totalAttendances,
+                'present_count' => $presentCount,
+                'absent_count' => $attendances->where('status', 'absent')->count(),
+                'late_count' => $attendances->where('status', 'late')->count(),
+                'attendance_rate' => $totalAttendances > 0 ? round(($presentCount / $totalAttendances) * 100, 1) : 0,
+            ];
+
+            // Certification statistics
+            $certifications = \App\Models\Certification::whereIn('student_id', $studentIds);
+            $totalCertifications = $certifications->count();
+            $completedCount = $certifications->whereNotNull('issued_at')->count();
+
+            $club->certification_stats = [
+                'total_certifications' => $totalCertifications,
+                'completed_count' => $completedCount,
+                'pending_count' => $certifications->whereNull('issued_at')->count(),
+                'completion_rate' => $totalCertifications > 0 ? round(($completedCount / $totalCertifications) * 100, 1) : 0,
+            ];
+
+            // Club performance metrics
+            $club->performance_metrics = [
+                'total_members' => $club->students->count() + $club->instructors->count() + $club->supporters->count(),
+                'student_to_instructor_ratio' => $club->instructors->count() > 0 ? round($club->students->count() / $club->instructors->count(), 1) : 0,
+                'monthly_revenue' => $totalAmount, // This could be enhanced to show monthly breakdown
+            ];
+        });
 
         return Inertia::render('Admin/Clubs/Index', [
             'clubs' => $clubs,
@@ -57,7 +117,6 @@ class ClubController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
             'notification_emails' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'tax_number' => 'nullable|string|max:255',
@@ -81,7 +140,6 @@ class ClubController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'phone' => $validated['phone'] ?? null,
-            'skype' => $validated['skype'] ?? null,
             'notification_emails' => $validated['notification_emails'] ?? null,
             'website' => $validated['website'] ?? null,
             'tax_number' => $validated['tax_number'] ?? null,
@@ -103,7 +161,7 @@ class ClubController extends Controller
 
     }
 
-    public function edit( $id)
+    public function edit($id)
     {
         $club = Club::with('user')->findOrFail($id);
         return Inertia::render('Admin/Clubs/Edit', [
@@ -127,7 +185,6 @@ class ClubController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'skype' => 'nullable|string|max:255',
             'notification_emails' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'tax_number' => 'nullable|string|max:255',
@@ -157,7 +214,6 @@ class ClubController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'phone' => $validated['phone'] ?? null,
-            'skype' => $validated['skype'] ?? null,
             'notification_emails' => $validated['notification_emails'] ?? null,
             'website' => $validated['website'] ?? null,
             'tax_number' => $validated['tax_number'] ?? null,

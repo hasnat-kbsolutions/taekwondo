@@ -21,7 +21,6 @@ export default function Create() {
         password_confirmation: "",
         phone: "",
         website: "",
-        skype: "",
         city: "",
         country: "",
         street: "",
@@ -126,16 +125,7 @@ export default function Create() {
                                 {renderError("phone")}
                             </div>
 
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Skype</Label>
-                                <Input
-                                    value={data.skype}
-                                    onChange={(e) =>
-                                        setData("skype", e.target.value)
-                                    }
-                                />
-                                {renderError("skype")}
-                            </div>
+                    
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Website</Label>
