@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Middleware\RedirectBasedOnRole;
+use App\Services\AuthService;
+
 class AuthenticatedSessionController extends Controller
 {
     /**
@@ -18,7 +19,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
-
         return Inertia::render('auth/login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -30,26 +30,25 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        // Clear any previous authentication to prevent conflicts
+        AuthService::clearForNewRole();
+
+        $request->authenticate('web');
         $request->session()->regenerate();
 
-        $role = Auth::user()->role;
+        // Get the redirect route based on user role using AuthService
+        $redirectRoute = AuthService::getRedirectRoute();
 
-        // Use middleware logic directly
-        return app(RedirectBasedOnRole::class)->handle($request, fn() => null);
+        return redirect()->route($redirectRoute);
     }
-
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
+        // Use AuthService to logout from all guards
+        AuthService::logout();
 
         return redirect('/');
     }

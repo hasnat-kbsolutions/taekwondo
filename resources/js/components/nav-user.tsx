@@ -1,6 +1,12 @@
 "use client";
 
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import {
+    BadgeCheck,
+    ChevronsUpDown,
+    LogOut,
+    Building2,
+    Users,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -78,11 +84,73 @@ export function NavUser({ user }: { user: User }) {
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${role}.profile.${role === 'admin' ? 'edit' : 'show'}`)}>
+                                <Link
+                                    href={route(
+                                        `${role}.profile.${
+                                            role === "admin" ? "edit" : "show"
+                                        }`
+                                    )}
+                                >
                                     <BadgeCheck />
-                                    {role === 'admin' ? 'Edit Profile' : 'View Profile'}
+                                    {role === "admin"
+                                        ? "Edit Profile"
+                                        : "View Profile"}
                                 </Link>
                             </DropdownMenuItem>
+
+                            {/* Additional Profile Links for Different Roles */}
+                            {role === "student" && (
+                                <>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={route("club.profile.show")}>
+                                            <Building2 />
+                                            Club Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={route(
+                                                "organization.profile.show"
+                                            )}
+                                        >
+                                            <Users />
+                                            Organization Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+
+                            {role === "organization" && (
+                                <>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={route("club.profile.show")}>
+                                            <Building2 />
+                                            Club Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+
+                            {role === "branch" && (
+                                <>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={route("club.profile.show")}>
+                                            <Building2 />
+                                            Club Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={route(
+                                                "organization.profile.show"
+                                            )}
+                                        >
+                                            <Users />
+                                            Organization Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </>
+                            )}
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
 

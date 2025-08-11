@@ -8,10 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Models\Traits\HasRoleGuards;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
     use HasRoles;
+    use HasRoleGuards;
 
     /**
      * The attributes that are mass assignable.
@@ -54,5 +57,5 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->morphTo();
     }
-    
+
 }

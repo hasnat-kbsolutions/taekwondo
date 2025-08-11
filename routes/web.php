@@ -20,6 +20,16 @@ Route::get('/storage-link', function () {
     return 'storage-linked';
 });
 
+// General logout route for all user types
+Route::post('/logout', function () {
+    \App\Services\AuthService::logout();
+    return redirect('/login');
+})->name('logout');
+
+Route::get('/logout', function () {
+    \App\Services\AuthService::logout();
+    return redirect('/login');
+})->name('logout.get');
 
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -166,8 +176,15 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Organization\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Organization\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
+    // Organization Profile Routes
+    Route::get('/profile', [App\Http\Controllers\Organization\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/organization/{id}', [App\Http\Controllers\Organization\ProfileController::class, 'showOrganization'])->name('profile.show-organization');
+    Route::get('/profile/student/{id}', [App\Http\Controllers\Organization\ProfileController::class, 'showStudent'])->name('profile.show-student');
+    Route::get('/profile/instructor/{id}', [App\Http\Controllers\Organization\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
+    Route::get('/profile/club/{id}', [App\Http\Controllers\Organization\ProfileController::class, 'showClub'])->name('profile.show-club');
+
     // Organization Ratings
-    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'organizationIndex'])->name('ratings.index');
 });
 
 // Club routes
@@ -211,8 +228,15 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Club\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Club\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
+    // Club Profile Routes
+    Route::get('/profile', [App\Http\Controllers\Club\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/club/{id}', [App\Http\Controllers\Club\ProfileController::class, 'showClub'])->name('profile.show-club');
+    Route::get('/profile/student/{id}', [App\Http\Controllers\Club\ProfileController::class, 'showStudent'])->name('profile.show-student');
+    Route::get('/profile/instructor/{id}', [App\Http\Controllers\Club\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
+    Route::get('/profile/organization/{id}', [App\Http\Controllers\Club\ProfileController::class, 'showOrganization'])->name('profile.show-organization');
+
     // Club Ratings
-    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
+    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'clubIndex'])->name('ratings.index');
 
 
 

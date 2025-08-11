@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Frame, Home, LifeBuoy, Send, SquareTerminal } from "lucide-react";
+import {
+    Frame,
+    Home,
+    LifeBuoy,
+    Send,
+    SquareTerminal,
+    Star,
+} from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -158,7 +165,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Ratings",
             url: "/organization/ratings",
-            icon: SquareTerminal,
+            icon: Star,
         },
     ],
 
@@ -193,7 +200,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Ratings",
             url: "/club/ratings",
-            icon: SquareTerminal,
+            icon: Star,
         },
     ],
 

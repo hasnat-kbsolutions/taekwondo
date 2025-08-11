@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Club extends Model
 {
@@ -24,8 +25,6 @@ class Club extends Model
         'country',
         'status',
     ];
-
-
 
     public function organization(): BelongsTo
     {
@@ -52,4 +51,35 @@ class Club extends Model
         return $this->hasMany(Supporter::class);
     }
 
+    /**
+     * Get ratings given by this club
+     */
+    public function ratingsGiven(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rater');
+    }
+
+    /**
+     * Get ratings received by this club
+     */
+    public function ratingsReceived(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rated');
+    }
+
+    /**
+     * Get average rating received by this club
+     */
+    public function getAverageRatingAttribute()
+    {
+        return Rating::getAverageRating($this->id, 'App\Models\Club');
+    }
+
+    /**
+     * Get total ratings received by this club
+     */
+    public function getTotalRatingsAttribute()
+    {
+        return Rating::getTotalRatings($this->id, 'App\Models\Club');
+    }
 }

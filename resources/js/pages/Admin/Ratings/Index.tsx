@@ -17,11 +17,27 @@ interface Rating {
     rated_type: string;
 }
 
-interface Props {
-    ratings: Rating[];
+interface Stats {
+    total_ratings: number;
+    average_rating: number;
+    students_rated: number;
+    instructors_rated: number;
+    rating_distribution: {
+        '5_stars': number;
+        '4_stars': number;
+        '3_stars': number;
+        '2_stars': number;
+        '1_stars': number;
+    };
 }
 
-const AdminRatingsIndex: React.FC<Props> = ({ ratings }) => {
+interface Props {
+    ratings: Rating[];
+    stats?: Stats;
+    userType?: string;
+}
+
+const AdminRatingsIndex: React.FC<Props> = ({ ratings, stats, userType }) => {
     const columns: ColumnDef<Rating>[] = [
         {
             header: "#",
@@ -70,55 +86,128 @@ const AdminRatingsIndex: React.FC<Props> = ({ ratings }) => {
         },
     ];
 
-    const totalRatings = ratings.length;
-    const avgRating =
+    // Use stats if provided, otherwise calculate basic stats
+    const totalRatings = stats?.total_ratings ?? ratings.length;
+    const avgRating = stats?.average_rating ?? (
         totalRatings > 0
-            ? ratings.reduce((sum, rating) => sum + rating.rating, 0) /
-              totalRatings
-            : 0;
+            ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / totalRatings
+            : 0
+    );
+
+    const isOrganization = userType === 'Organization';
 
     return (
         <AuthenticatedLayout header="Ratings Overview">
             <Head title="Ratings Overview" />
             <div className="container mx-auto py-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">
-                                Total Ratings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <span className="text-3xl font-bold">
-                                {totalRatings}
-                            </span>
-                        </CardContent>
-                    </Card>
+                {isOrganization && stats ? (
+                    // Enhanced stats for organizations
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Total Ratings</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <span className="text-3xl font-bold">{stats.total_ratings}</span>
+                            </CardContent>
+                        </Card>
 
-                    <Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Average Rating</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-2">
+                                    <RatingStars
+                                        rating={Math.round(stats.average_rating)}
+                                        readonly
+                                        size="sm"
+                                    />
+                                    <span className="text-2xl font-bold">
+                                        {stats.average_rating.toFixed(1)}
+                                    </span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Students Rated</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <span className="text-3xl font-bold">{stats.students_rated}</span>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Instructors Rated</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <span className="text-3xl font-bold">{stats.instructors_rated}</span>
+                            </CardContent>
+                        </Card>
+                    </div>
+                ) : (
+                    // Basic stats for other user types
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Total Ratings</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <span className="text-3xl font-bold">{totalRatings}</span>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Average Rating</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-2">
+                                    <RatingStars
+                                        rating={Math.round(avgRating)}
+                                        readonly
+                                        size="sm"
+                                    />
+                                    <span className="text-2xl font-bold">
+                                        {avgRating.toFixed(1)}
+                                    </span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                {/* Rating Distribution Chart for Organizations */}
+                {isOrganization && stats && (
+                    <Card className="mb-8">
                         <CardHeader>
-                            <CardTitle className="text-lg">
-                                Average Rating
-                            </CardTitle>
+                            <CardTitle>Rating Distribution</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-2">
-                                <RatingStars
-                                    rating={Math.round(avgRating)}
-                                    readonly
-                                    size="sm"
-                                />
-                                <span className="text-2xl font-bold">
-                                    {avgRating.toFixed(1)}
-                                </span>
+                            <div className="grid grid-cols-5 gap-4">
+                                {Object.entries(stats.rating_distribution).map(([key, count]) => (
+                                    <div key={key} className="text-center">
+                                        <div className="text-2xl font-bold text-blue-600">
+                                            {count}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {key.replace('_', ' ').replace('stars', '★')}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
-                </div>
+                )}
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>All Ratings ({ratings.length})</CardTitle>
+                        <CardTitle>
+                            {isOrganization ? 'Student & Instructor Ratings' : 'All Ratings'} ({ratings.length})
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {ratings.length > 0 ? (
