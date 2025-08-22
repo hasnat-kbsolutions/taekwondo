@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 
 use App\Models\Organization;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Club;
@@ -25,7 +26,11 @@ class OrganizationController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Organizations/Create');
+        $currencies = Currency::where('is_active', true)->get();
+
+        return Inertia::render('Admin/Organizations/Create', [
+            'currencies' => $currencies,
+        ]);
     }
 
     public function store(Request $request)
@@ -42,6 +47,7 @@ class OrganizationController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'default_currency' => 'required|string|exists:currencies,code',
         ]);
 
 
@@ -55,6 +61,7 @@ class OrganizationController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'status' => $validated['status'] ?? false,
+            'default_currency' => $validated['default_currency'],
         ]);
 
         User::create([
@@ -73,8 +80,11 @@ class OrganizationController extends Controller
 
     public function edit(Organization $organization)
     {
+        $currencies = Currency::where('is_active', true)->get();
+
         return Inertia::render('Admin/Organizations/Edit', [
             'organization' => $organization,
+            'currencies' => $currencies,
         ]);
     }
 
@@ -92,6 +102,7 @@ class OrganizationController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'default_currency' => 'required|string|exists:currencies,code',
         ]);
 
 
@@ -106,6 +117,7 @@ class OrganizationController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'status' => $validated['status'] ?? false,
+            'default_currency' => $validated['default_currency'],
         ]);
 
         if ($organization->user) {

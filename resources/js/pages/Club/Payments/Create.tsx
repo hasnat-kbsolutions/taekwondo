@@ -22,11 +22,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 export default function Create() {
-    const { students } = usePage().props as any;
+    const { students, currencies, defaultCurrency } = usePage().props as any;
 
     const [form, setForm] = useState({
         student_id: "",
         amount: "",
+        currency_code: defaultCurrency || "MYR",
         status: "paid",
         method: "cash",
         pay_at: "",
@@ -89,6 +90,31 @@ export default function Create() {
                                             )
                                         }
                                     />
+                                </div>
+                                <div>
+                                    <Label>Currency</Label>
+                                    <Select
+                                        value={form.currency_code}
+                                        onValueChange={(value) =>
+                                            handleChange("currency_code", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Currency" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {currencies.map((currency: any) => (
+                                                <SelectItem
+                                                    key={currency.code}
+                                                    value={currency.code}
+                                                >
+                                                    {currency.code} -{" "}
+                                                    {currency.symbol}{" "}
+                                                    {currency.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <Label>Status</Label>

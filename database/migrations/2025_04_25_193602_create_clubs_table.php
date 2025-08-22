@@ -25,9 +25,11 @@ return new class extends Migration {
             $table->string('street')->nullable();
             $table->string('country')->nullable();
             $table->boolean('status')->default(false);
+            $table->string('default_currency', 3)->default('MYR');
+
             $table->timestamps();
         });
-        
+
 
     }
 

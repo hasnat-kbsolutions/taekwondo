@@ -28,9 +28,7 @@ return new class extends Migration {
             $table->string('id_passport')->nullable();
 
             $table->string('profile_image')->nullable();
-            $table->string('id_passport_image')->nullable();
-            $table->string('signature_image')->nullable();
-
+            $table->string('identification_document')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();

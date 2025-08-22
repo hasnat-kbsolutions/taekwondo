@@ -23,13 +23,13 @@ import {
 import { useTheme } from "next-themes";
 
 const roles = [
-    {
-        id: "admin",
-        name: "Admin",
-        description: "System administrator with full access",
-        icon: Shield,
-        route: "/admin/login",
-    },
+    // {
+    //     id: "admin",
+    //     name: "Admin",
+    //     description: "System administrator with full access",
+    //     icon: Shield,
+    //     route: "/admin/login",
+    // },
     {
         id: "organization",
         name: "Organization",

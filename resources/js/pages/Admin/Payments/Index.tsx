@@ -39,6 +39,12 @@ interface Payment {
     id: number;
     student: Student;
     amount: number;
+    currency_code: string;
+    currency?: {
+        code: string;
+        symbol: string;
+        name: string;
+    };
     status: string;
     method: string;
     payment_month: string;
@@ -51,7 +57,13 @@ interface Props {
     filters: {
         status?: string;
         payment_month?: string;
+        currency_code?: string;
     };
+    currencies: Array<{
+        code: string;
+        name: string;
+        symbol: string;
+    }>;
 }
 
 // Add "All" option to years
@@ -76,7 +88,7 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-export default function PaymentIndex({ payments, filters }: Props) {
+export default function PaymentIndex({ payments, filters, currencies }: Props) {
     const [status, setStatus] = useState(filters.status || "");
     const [selectedYear, setSelectedYear] = useState(
         filters.payment_month?.split("-")[0] || currentYear.toString()
@@ -84,6 +96,20 @@ export default function PaymentIndex({ payments, filters }: Props) {
     const [selectedMonth, setSelectedMonth] = useState(
         filters.payment_month?.split("-")[1] || ""
     );
+    const [selectedCurrency, setSelectedCurrency] = useState(
+        filters.currency_code || ""
+    );
+
+    // Utility function to safely format amounts
+    const formatAmount = (amount: any, currencyCode: string) => {
+        const numAmount = Number(amount) || 0;
+
+        if (currencyCode === "JPY") {
+            return numAmount.toLocaleString();
+        } else {
+            return numAmount.toFixed(2);
+        }
+    };
 
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(
         null
@@ -99,20 +125,29 @@ export default function PaymentIndex({ payments, filters }: Props) {
         year,
         month,
         status,
+        currency,
     }: {
         year: string;
         month: string;
         status: string;
+        currency: string;
     }) => {
         // Ensure a valid payment_month format (default to "01" if no month selected, clear if year is "All")
         const paymentMonth =
             year === "All" ? "" : month ? `${year}-${month}` : `${year}-01`; // Default to January if no month
-        console.log("Filter Values:", { year, month, status, paymentMonth }); // Debug log
+        console.log("Filter Values:", {
+            year,
+            month,
+            status,
+            currency,
+            paymentMonth,
+        }); // Debug log
         router.get(
             route("admin.payments.index"),
             {
                 status: status || null,
                 payment_month: paymentMonth || null,
+                currency_code: currency || null,
             },
             {
                 preserveScroll: true,
@@ -133,13 +168,15 @@ export default function PaymentIndex({ payments, filters }: Props) {
             year: selectedYear,
             month: selectedMonth,
             status: status,
+            currency: selectedCurrency,
         });
-    }, [selectedYear, selectedMonth, status]);
+    }, [selectedYear, selectedMonth, status, selectedCurrency]);
 
     const resetFilters = () => {
         setStatus("");
         setSelectedYear(currentYear.toString());
         setSelectedMonth("");
+        setSelectedCurrency("");
         router.get(
             route("admin.payments.index"),
             {},
@@ -160,7 +197,30 @@ export default function PaymentIndex({ payments, filters }: Props) {
             header: "Student",
             cell: ({ row }) => row.original.student?.name || "-",
         },
-        { header: "Amount", accessorKey: "amount" },
+        {
+            header: "Amount",
+            cell: ({ row }) => {
+                const payment = row.original;
+                const amount = payment.amount;
+                const currencyCode = payment.currency_code;
+                const currencySymbol = payment.currency?.symbol || currencyCode;
+
+                // Use utility function to safely format amount
+                const formattedAmount = formatAmount(amount, currencyCode);
+
+                return (
+                    <div className="text-right">
+                        <div className="font-medium">
+                            {currencyCode === "MYR" ? "RM " : currencySymbol}
+                            {formattedAmount}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            {currencyCode}
+                        </div>
+                    </div>
+                );
+            },
+        },
         {
             header: "Status",
             cell: ({ row }) => (
@@ -315,6 +375,34 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                 </Select>
                             </div>
 
+                            <div className="flex flex-col w-[160px]">
+                                <Label className="text-sm mb-1">Currency</Label>
+                                <Select
+                                    value={selectedCurrency}
+                                    onValueChange={(val) =>
+                                        setSelectedCurrency(
+                                            val === "all" ? "" : val
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Currencies" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All</SelectItem>
+                                        {currencies.map((currency) => (
+                                            <SelectItem
+                                                key={currency.code}
+                                                value={currency.code}
+                                            >
+                                                {currency.code} -{" "}
+                                                {currency.symbol}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="flex items-end">
                                 <Button onClick={resetFilters}>
                                     Reset Filters
@@ -355,8 +443,10 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                     {selectedPayment.student?.name}
                                 </p>
                                 <p className="flex justify-between">
-                                    <strong>Amount:</strong> RM{" "}
-                                    {selectedPayment.amount}
+                                    <strong>Amount:</strong>{" "}
+                                    {selectedPayment.currency?.symbol || "RM"}{" "}
+                                    {selectedPayment.amount} (
+                                    {selectedPayment.currency_code})
                                 </p>
                                 <p className="flex justify-between">
                                     <strong>Status:</strong>{" "}

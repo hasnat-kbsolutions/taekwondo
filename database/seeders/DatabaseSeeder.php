@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            CurrencySeeder::class, // Must be first as other models depend on currencies
             OrganizationSeeder::class,
             ClubSeeder::class,
             StudentSeeder::class,

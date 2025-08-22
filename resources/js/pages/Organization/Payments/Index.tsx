@@ -15,7 +15,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Edit, Trash2, FileText } from "lucide-react";
+import {
+    MoreHorizontal,
+    Edit,
+    Trash2,
+    FileText,
+    DollarSign,
+    BadgeCheck,
+    Hourglass,
+} from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -31,6 +39,12 @@ interface Payment {
     id: number;
     student: Student;
     amount: number;
+    currency_code: string;
+    currency?: {
+        code: string;
+        symbol: string;
+        name: string;
+    };
     status: string;
     method: string;
     payment_month: string;
@@ -43,7 +57,15 @@ interface Props {
     filters: {
         status?: string;
         payment_month?: string;
+        currency_code?: string;
     };
+    amountsByCurrency?: Record<string, number>;
+    defaultCurrencyCode?: string;
+    currencies: Array<{
+        code: string;
+        name: string;
+        symbol: string;
+    }>;
 }
 
 const columns: ColumnDef<Payment>[] = [
@@ -55,7 +77,30 @@ const columns: ColumnDef<Payment>[] = [
         header: "Student",
         cell: ({ row }) => row.original.student?.name || "-",
     },
-    { header: "Amount", accessorKey: "amount" },
+    {
+        header: "Amount",
+        cell: ({ row }) => {
+            const payment = row.original;
+            const amount = payment.amount;
+            const currencyCode = payment.currency_code;
+            const currencySymbol = payment.currency?.symbol || currencyCode;
+
+            // Use utility function to safely format amount
+            const formattedAmount = formatAmount(amount, currencyCode);
+
+            return (
+                <div className="text-right">
+                    <div className="font-medium">
+                        {currencyCode === "MYR" ? "RM " : currencySymbol}
+                        {formattedAmount}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                        {currencyCode}
+                    </div>
+                </div>
+            );
+        },
+    },
     {
         header: "Status",
         cell: ({ row }) => (
@@ -142,8 +187,28 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-export default function PaymentIndex({ payments, filters }: Props) {
+// Utility function to safely format amounts
+const formatAmount = (amount: any, currencyCode: string) => {
+    const numAmount = Number(amount) || 0;
+
+    if (currencyCode === "JPY") {
+        return numAmount.toLocaleString();
+    } else {
+        return numAmount.toFixed(2);
+    }
+};
+
+export default function PaymentIndex({
+    payments,
+    filters,
+    amountsByCurrency = {},
+    defaultCurrencyCode = "MYR",
+    currencies = [],
+}: Props) {
     const [status, setStatus] = useState(filters.status || "");
+    const [selectedCurrency, setSelectedCurrency] = useState(
+        filters.currency_code || ""
+    );
 
     const [selectedYear, setSelectedYear] = useState(
         filters.payment_month?.split("-")[0] || currentYear.toString()
@@ -156,10 +221,12 @@ export default function PaymentIndex({ payments, filters }: Props) {
         year,
         month,
         status,
+        currency,
     }: {
         year: string;
         month: string;
         status: string;
+        currency: string;
     }) => {
         const paymentMonth =
             year === "All" ? "" : month ? `${year}-${month}` : `${year}-01`; // Default to January if no month
@@ -169,6 +236,7 @@ export default function PaymentIndex({ payments, filters }: Props) {
             {
                 status: status || null,
                 payment_month: paymentMonth || null,
+                currency_code: currency || null,
             },
             {
                 preserveScroll: true,
@@ -190,13 +258,15 @@ export default function PaymentIndex({ payments, filters }: Props) {
             year: selectedYear,
             month: selectedMonth,
             status: status,
+            currency: selectedCurrency,
         });
-    }, [selectedYear, selectedMonth, status]);
+    }, [selectedYear, selectedMonth, status, selectedCurrency]);
 
     const resetFilters = () => {
         setStatus("");
         setSelectedYear(currentYear.toString());
         setSelectedMonth("");
+        setSelectedCurrency("");
         router.get(
             route("organization.payments.index"),
             {},
@@ -212,6 +282,125 @@ export default function PaymentIndex({ payments, filters }: Props) {
         <AuthenticatedLayout header="Payments">
             <Head title="Payments" />
             <div className="container mx-auto py-10 space-y-6">
+                {/* Stats Cards */}
+                <div>
+                    <h2 className="text-lg font-semibold mb-4 text-muted-foreground">
+                        Payment Overview
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20 col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
+                                    Total Revenue
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <DollarSign className="h-6 w-6 text-primary" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold group-hover:text-primary transition-colors">
+                                    <div className="space-y-1">
+                                        <div>
+                                            {defaultCurrencyCode === "MYR"
+                                                ? "RM"
+                                                : defaultCurrencyCode}{" "}
+                                            {formatAmount(
+                                                amountsByCurrency[
+                                                    defaultCurrencyCode
+                                                ] || 0,
+                                                defaultCurrencyCode
+                                            )}
+                                        </div>
+                                        {Object.keys(amountsByCurrency).length >
+                                            1 && (
+                                            <div className="text-xs text-muted-foreground space-y-1">
+                                                {Object.entries(
+                                                    amountsByCurrency
+                                                )
+                                                    .filter(
+                                                        ([code]) =>
+                                                            code !==
+                                                            defaultCurrencyCode
+                                                    )
+                                                    .map(([code, amount]) => (
+                                                        <div
+                                                            key={code}
+                                                            className="flex justify-between"
+                                                        >
+                                                            <span>{code}:</span>
+                                                            <span>
+                                                                {formatAmount(
+                                                                    amount,
+                                                                    code
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
+                                    Total Payments
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <DollarSign className="h-6 w-6 text-primary" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold group-hover:text-primary transition-colors">
+                                    {payments.length}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
+                                    Paid
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <BadgeCheck className="h-6 w-6 text-green-600" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold group-hover:text-primary transition-colors">
+                                    {
+                                        payments.filter(
+                                            (p) => p.status === "paid"
+                                        ).length
+                                    }
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
+                                    Pending
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <Hourglass className="h-6 w-6 text-yellow-500" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold group-hover:text-primary transition-colors">
+                                    {
+                                        payments.filter(
+                                            (p) => p.status === "pending"
+                                        ).length
+                                    }
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+
                 {/* Filters Card */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -291,6 +480,35 @@ export default function PaymentIndex({ payments, filters }: Props) {
                                         <SelectItem value="unpaid">
                                             Unpaid
                                         </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Currency Filter */}
+                            <div className="flex flex-col w-[160px]">
+                                <Label className="text-sm mb-1">Currency</Label>
+                                <Select
+                                    value={selectedCurrency}
+                                    onValueChange={(val) =>
+                                        setSelectedCurrency(
+                                            val === "all" ? "" : val
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Currencies" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All</SelectItem>
+                                        {currencies.map((currency) => (
+                                            <SelectItem
+                                                key={currency.code}
+                                                value={currency.code}
+                                            >
+                                                {currency.code} -{" "}
+                                                {currency.symbol}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

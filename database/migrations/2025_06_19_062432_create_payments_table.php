@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -21,6 +20,8 @@ return new class extends Migration
             $table->date('pay_at')->nullable();
             $table->text('notes')->nullable();
             $table->string('transaction_id')->nullable();
+            $table->string('currency_code', 3)->default('MYR');
+
             $table->timestamps();
         });
     }

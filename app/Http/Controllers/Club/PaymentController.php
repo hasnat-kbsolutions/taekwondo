@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $query = Payment::with('student')
+        $query = Payment::with(['student', 'currency'])
             ->whereHas('student', function ($query) use ($user) {
                 $query->where('organization_id', $user->userable->organization_id)
                     ->where('club_id', $user->userable_id);
@@ -57,6 +58,8 @@ class PaymentController extends Controller
 
         return Inertia::render('Club/Payments/Create', [
             'students' => $students,
+            'currencies' => Currency::getActive(),
+            'defaultCurrency' => $user->userable->default_currency ?? 'MYR',
         ]);
     }
 
@@ -65,6 +68,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric',
+            'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
             'status' => 'required|in:unpaid,pending,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
@@ -82,8 +86,6 @@ class PaymentController extends Controller
 
     public function edit(Payment $payment)
     {
-
-
         $user = Auth::user();
         if ($user->role !== 'club') {
             abort(403, 'Unauthorized');
@@ -94,6 +96,7 @@ class PaymentController extends Controller
         return Inertia::render('Club/Payments/Edit', [
             'payment' => $payment,
             'students' => $students,
+            'currencies' => Currency::getActive(),
         ]);
     }
 
@@ -102,6 +105,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric',
+            'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
             'status' => 'required|in:unpaid,pending,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
@@ -117,14 +121,13 @@ class PaymentController extends Controller
         return redirect()->route('club.payments.index')->with('success', 'Payment updated successfully');
     }
 
-
     public function invoice(Payment $payment)
     {
         $user = Auth::user();
         if ($user->role !== 'club') {
             abort(403, 'Unauthorized');
         }
-        $payment->load(['student.club', 'student.organization']);
+        $payment->load(['student.club', 'student.organization', 'currency']);
         return Inertia::render('Club/Payments/Invoice', [
             'payment' => $payment,
         ]);

@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,11 +13,16 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['student.club', 'student.organization']);
+        $query = Payment::with(['student.club', 'student.organization', 'currency']);
 
         // Filter by status
         if ($request->status) {
             $query->where('status', $request->status);
+        }
+
+        // Filter by currency
+        if ($request->currency_code) {
+            $query->where('currency_code', $request->currency_code);
         }
 
         // Filter by payment_month (support year-only or full YYYY-MM)
@@ -33,26 +39,24 @@ class PaymentController extends Controller
 
         return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
-            'filters' => $request->only(['status', 'payment_month']),
+            'filters' => $request->only(['status', 'payment_month', 'currency_code']),
+            'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
 
     public function invoice(Payment $payment)
     {
-        $payment->load(['student.club', 'student.organization']);
+        $payment->load(['student.club', 'student.organization', 'currency']);
         return Inertia::render('Admin/Payments/Invoice', [
             'payment' => $payment,
         ]);
     }
 
-
-
-
-
     public function create()
     {
         return Inertia::render('Admin/Payments/Create', [
             'students' => Student::all(),
+            'currencies' => Currency::getActive(),
         ]);
     }
 
@@ -61,6 +65,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric|min:0',
+            'currency_code' => 'required|exists:currencies,code',
             'status' => 'required|in:paid,unpaid',
             'method' => 'required|in:cash,stripe',
             'payment_month' => 'required|string|size:2',
@@ -75,6 +80,7 @@ class PaymentController extends Controller
         Payment::create([
             'student_id' => $validated['student_id'],
             'amount' => $validated['amount'],
+            'currency_code' => $validated['currency_code'],
             'status' => $validated['status'],
             'method' => $validated['method'],
             'payment_month' => $payment_month,
@@ -90,6 +96,7 @@ class PaymentController extends Controller
         return Inertia::render('Admin/Payments/Edit', [
             'payment' => $payment,
             'students' => Student::all(),
+            'currencies' => Currency::getActive(),
         ]);
     }
 
@@ -98,6 +105,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'amount' => 'required|numeric|min:0',
+            'currency_code' => 'required|exists:currencies,code',
             'status' => 'required|in:paid,unpaid',
             'method' => 'required|in:cash,stripe',
             'payment_month' => 'required|string|size:2',
@@ -112,6 +120,7 @@ class PaymentController extends Controller
         $payment->update([
             'student_id' => $validated['student_id'],
             'amount' => $validated['amount'],
+            'currency_code' => $validated['currency_code'],
             'status' => $validated['status'],
             'method' => $validated['method'],
             'payment_month' => $payment_month,

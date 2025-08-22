@@ -41,35 +41,5 @@ class Instructor extends Model
         return $this->belongsToMany(\App\Models\Student::class, 'instructor_student');
     }
 
-    /**
-     * Get ratings given by this instructor
-     */
-    public function ratingsGiven()
-    {
-        return $this->morphMany(Rating::class, 'rater');
-    }
 
-    /**
-     * Get ratings received by this instructor
-     */
-    public function ratingsReceived()
-    {
-        return $this->morphMany(Rating::class, 'rated');
-    }
-
-    /**
-     * Get average rating received by this instructor
-     */
-    public function getAverageRatingAttribute()
-    {
-        return Rating::getAverageRating($this->id, 'App\Models\Instructor');
-    }
-
-    /**
-     * Get total ratings received by this instructor
-     */
-    public function getTotalRatingsAttribute()
-    {
-        return Rating::getTotalRatings($this->id, 'App\Models\Instructor');
-    }
 }

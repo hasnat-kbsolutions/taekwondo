@@ -18,27 +18,20 @@ import {
 import { toast } from "sonner";
 
 interface Props {
-    clubs: any[];
-    organizations: any[];
     student: any;
 }
 
-export default function Edit({ clubs, organizations, student }: Props) {
+export default function Edit({ student }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        _method: "put",
         ...student,
-        profile_image: null,
-        id_passport_image: null,
-        signature_image: null,
+        _method: "put",
+        profile_image: null as File | null,
+        identification_document: null as File | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("club.students.update", student.id), {
-            onSuccess: () => toast.success("Student updated successfully"),
-            onError: () =>
-                toast.error("Please fix the form errors and try again."),
-        });
+        post(route("club.students.update", student.id));
     };
 
     const renderError = (field: keyof typeof errors) =>
@@ -51,19 +44,6 @@ export default function Edit({ clubs, organizations, student }: Props) {
             <Head title="Edit Student" />
             <div className="container mx-auto py-10">
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
-                
-
-                    {/* Optional: Code */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Code</Label>
-                        <Input
-                            placeholder="Code"
-                            value={data.code}
-                            onChange={(e) => setData("code", e.target.value)}
-                        />
-                        {renderError("code")}
-                    </div>
-
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>
@@ -103,9 +83,7 @@ export default function Edit({ clubs, organizations, student }: Props) {
 
                     {/* Required: Password */}
                     <div className="w-[33.33%] px-2 mt-3">
-                        <Label>
-                            Password 
-                        </Label>
+                        <Label>Password</Label>
                         <Input
                             type="password"
                             placeholder="Password"
@@ -291,8 +269,6 @@ export default function Edit({ clubs, organizations, student }: Props) {
                         {renderError("id_passport")}
                     </div>
 
-               
-
                     {/* Optional: Website */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>Website</Label>
@@ -384,31 +360,21 @@ export default function Edit({ clubs, organizations, student }: Props) {
                     </div>
 
                     <div className="w-full px-2 mt-3">
-                        <Label>Upload ID/Passport Image</Label>
+                        <Label>Upload Identification Document</Label>
                         <Input
                             type="file"
                             onChange={(e) =>
                                 setData(
-                                    "id_passport_image",
+                                    "identification_document",
                                     e.target.files?.[0] ?? null
                                 )
                             }
                         />
-                        {renderError("id_passport_image")}
-                    </div>
-
-                    <div className="w-full px-2 mt-3">
-                        <Label>Upload Signature</Label>
-                        <Input
-                            type="file"
-                            onChange={(e) =>
-                                setData(
-                                    "signature_image",
-                                    e.target.files?.[0] ?? null
-                                )
-                            }
-                        />
-                        {renderError("signature_image")}
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Please upload ID card and Passport together in a
+                            single PDF file (Maximum file size: 2 MB).
+                        </p>
+                        {renderError("identification_document")}
                     </div>
 
                     <div className="w-full px-2 mt-5">

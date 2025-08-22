@@ -30,6 +30,7 @@ import {
     DialogDescription,
     DialogHeader,
 } from "@/components/ui/dialog";
+import { FileText } from "lucide-react";
 
 interface Club {
     id: number;
@@ -43,14 +44,13 @@ export type Student = {
     name: string;
     surname: string;
     nationality: string;
-    dob: string | null;
+    dob: string;
     dod: string | null;
     grade: string;
     gender: string;
     id_passport: string;
     profile_image: string | null;
-    id_passport_image: string | null;
-    signature_image: string | null;
+    identification_document: string | null;
     email: string;
     phone: string;
     website: string;
@@ -87,22 +87,67 @@ export const columns = (
     {
         id: "profile_image",
         header: "Photo",
-        cell: ({ row }) =>
-            row.original.profile_image ? (
-                <img
-                    src={row.original.profile_image}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                />
-            ) : (
-                <span className="text-gray-400 italic">No image</span>
-            ),
+        cell: ({ row }) => {
+            const imageUrl = row.original.profile_image;
+            if (imageUrl) {
+                // Handle both relative paths and full URLs
+                const fullUrl = imageUrl.startsWith("http")
+                    ? imageUrl
+                    : `/storage/${imageUrl}`;
+                return (
+                    <div className="relative">
+                        <img
+                            src={fullUrl}
+                            alt="Profile"
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                e.currentTarget.nextElementSibling?.classList.remove(
+                                    "hidden"
+                                );
+                            }}
+                        />
+                        <span className="text-gray-400 italic text-xs hidden absolute inset-0 flex items-center justify-center">
+                            No image
+                        </span>
+                    </div>
+                );
+            }
+            return <span className="text-gray-400 italic">No image</span>;
+        },
     },
     { accessorKey: "code", header: "Code" },
     { accessorKey: "name", header: "Name" },
     { accessorKey: "surname", header: "Surname" },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },
+    {
+        id: "identification_document",
+        header: "Documents",
+        cell: ({ row }) => {
+            const docUrl = row.original.identification_document;
+            if (docUrl) {
+                // Handle both relative paths and full URLs
+                const fullUrl = docUrl.startsWith("http")
+                    ? docUrl
+                    : `/storage/${docUrl}`;
+                return (
+                    <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-blue-500" />
+                        <a
+                            href={fullUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-xs underline"
+                        >
+                            View Doc
+                        </a>
+                    </div>
+                );
+            }
+            return <span className="text-gray-400 italic text-xs">No doc</span>;
+        },
+    },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
     {
@@ -390,11 +435,29 @@ export default function Index({
                             <div className="flex justify-center">
                                 <div className="flex flex-col items-center gap-2">
                                     {selectedStudent.profile_image ? (
-                                        <img
-                                            src={selectedStudent.profile_image}
-                                            alt="Profile"
-                                            className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
-                                        />
+                                        <div className="relative">
+                                            <img
+                                                src={
+                                                    selectedStudent.profile_image.startsWith(
+                                                        "http"
+                                                    )
+                                                        ? selectedStudent.profile_image
+                                                        : `/storage/${selectedStudent.profile_image}`
+                                                }
+                                                alt="Profile"
+                                                className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display =
+                                                        "none";
+                                                    e.currentTarget.nextElementSibling?.classList.remove(
+                                                        "hidden"
+                                                    );
+                                                }}
+                                            />
+                                            <div className="w-32 h-32 hidden flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
+                                                No Image
+                                            </div>
+                                        </div>
                                     ) : (
                                         <div className="w-32 h-32 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
                                             No Image
@@ -448,8 +511,55 @@ export default function Index({
                                             : "Not specified",
                                     },
                                     {
+                                        label: "Date of Death",
+                                        value: selectedStudent.dod
+                                            ? new Date(
+                                                  selectedStudent.dod
+                                              ).toLocaleDateString()
+                                            : "Not specified",
+                                    },
+                                    {
                                         label: "ID/Passport",
                                         value: selectedStudent.id_passport,
+                                    },
+                                    {
+                                        label: "Identification Document",
+                                        value: selectedStudent.identification_document ? (
+                                            <a
+                                                href={
+                                                    selectedStudent.identification_document.startsWith(
+                                                        "http"
+                                                    )
+                                                        ? selectedStudent.identification_document
+                                                        : `/storage/${selectedStudent.identification_document}`
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 underline"
+                                            >
+                                                View Document
+                                            </a>
+                                        ) : (
+                                            "No document uploaded"
+                                        ),
+                                    },
+                                    {
+                                        label: "Website",
+                                        value:
+                                            selectedStudent.website ||
+                                            "Not specified",
+                                    },
+                                    {
+                                        label: "Street",
+                                        value:
+                                            selectedStudent.street ||
+                                            "Not specified",
+                                    },
+                                    {
+                                        label: "Postal Code",
+                                        value:
+                                            selectedStudent.postal_code ||
+                                            "Not specified",
                                     },
                                     {
                                         label: "City",
@@ -519,45 +629,62 @@ export default function Index({
                                     Attachments
                                 </h4>
                                 <div className="grid grid-cols-2 gap-6">
-                                    {/* ID/Passport Image */}
+                                    {/* Profile Image */}
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium text-muted-foreground">
-                                            ID/Passport Image
+                                            Profile Image
                                         </Label>
                                         <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
-                                            {selectedStudent.id_passport_image ? (
+                                            {selectedStudent.profile_image ? (
                                                 <img
                                                     src={
-                                                        selectedStudent.id_passport_image
+                                                        selectedStudent.profile_image.startsWith(
+                                                            "http"
+                                                        )
+                                                            ? selectedStudent.profile_image
+                                                            : `/storage/${selectedStudent.profile_image}`
                                                     }
-                                                    alt="ID/Passport"
+                                                    alt="Profile"
                                                     className="max-w-full max-h-48 object-contain rounded"
                                                 />
                                             ) : (
                                                 <span className="text-gray-400 italic">
-                                                    No ID/Passport image
+                                                    No profile image
                                                 </span>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Signature Image */}
+                                    {/* Identification Document */}
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium text-muted-foreground">
-                                            Signature Image
+                                            Identification Document
                                         </Label>
                                         <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
-                                            {selectedStudent.signature_image ? (
-                                                <img
-                                                    src={
-                                                        selectedStudent.signature_image
-                                                    }
-                                                    alt="Signature"
-                                                    className="max-w-full max-h-48 object-contain rounded"
-                                                />
+                                            {selectedStudent.identification_document ? (
+                                                <div className="text-center">
+                                                    <FileText className="w-12 h-12 text-blue-500 mx-auto mb-2" />
+                                                    <p className="text-sm text-gray-600">
+                                                        PDF Document Available
+                                                    </p>
+                                                    <a
+                                                        href={
+                                                            selectedStudent.identification_document.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? selectedStudent.identification_document
+                                                                : `/storage/${selectedStudent.identification_document}`
+                                                        }
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:text-blue-800 text-sm underline mt-1 inline-block"
+                                                    >
+                                                        View Document
+                                                    </a>
+                                                </div>
                                             ) : (
                                                 <span className="text-gray-400 italic">
-                                                    No signature image
+                                                    No identification document
                                                 </span>
                                             )}
                                         </div>

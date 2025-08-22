@@ -58,6 +58,14 @@ class StudentController extends Controller
                     'club' => $student->club,
                     'average_rating' => $student->average_rating,
                     'total_ratings' => $student->total_ratings,
+                    'profile_image' => $student->profile_image,
+                    'identification_document' => $student->identification_document,
+                    'dob' => $student->dob,
+                    'dod' => $student->dod,
+                    'city' => $student->city,
+                    'postal_code' => $student->postal_code,
+                    'street' => $student->street,
+                    'website' => $student->website,
                 ];
             });
 
@@ -107,14 +115,12 @@ class StudentController extends Controller
             'gender' => 'required|string',
             'nationality' => 'required|string',
             'grade' => 'required|string',
-            'id_passport' => 'required|string',
 
             // Optional fields
             'surname' => 'nullable|string',
             'dod' => 'nullable|date',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'identification_document' => 'nullable|mimes:pdf|max:2048',
             'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
@@ -130,11 +136,14 @@ class StudentController extends Controller
         $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
         $validated['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
-        // Upload files if present
-        foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
+        // Handle file uploads
+        foreach (['profile_image', 'identification_document'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = asset("storage/" . $relativePath); // Full URL (uses ASSET_URL if set)
+                $validated[$field] = $relativePath; // Store relative path only
+            } else {
+                // Remove from validated to prevent overwriting existing file with null
+                unset($validated[$field]);
             }
         }
 
@@ -183,7 +192,6 @@ class StudentController extends Controller
             'gender' => 'required|string',
             'nationality' => 'required|string',
             'grade' => 'required|string',
-            'id_passport' => 'required|string',
 
             // Password is optional
             'password' => 'nullable|string|min:6',
@@ -192,8 +200,7 @@ class StudentController extends Controller
             'surname' => 'nullable|string',
             'dod' => 'nullable|date',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'identification_document' => 'nullable|mimes:pdf|max:2048',
             'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
@@ -202,12 +209,12 @@ class StudentController extends Controller
             'status' => 'required|boolean',
         ]);
         // Handle image uploads
-        foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
+        foreach (['profile_image', 'identification_document'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = "/storage/" . $relativePath;
+                $validated[$field] = $relativePath; // Store relative path only
             } else {
-                // Remove from validated to prevent overwriting existing image with null
+                // Remove from validated to prevent overwriting existing file with null
                 unset($validated[$field]);
             }
         }
@@ -252,11 +259,8 @@ class StudentController extends Controller
         if ($student->profile_image) {
             Storage::disk('public')->delete($student->profile_image);
         }
-        if ($student->id_passport_image) {
-            Storage::disk('public')->delete($student->id_passport_image);
-        }
-        if ($student->signature_image) {
-            Storage::disk('public')->delete($student->signature_image);
+        if ($student->identification_document) {
+            Storage::disk('public')->delete($student->identification_document);
         }
 
         // Then delete the student
@@ -272,4 +276,3 @@ class StudentController extends Controller
     }
 
 }
-

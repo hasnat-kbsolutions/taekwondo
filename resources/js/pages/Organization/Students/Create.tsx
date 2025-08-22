@@ -37,8 +37,7 @@ export default function Create({ clubs, organizations }: Props) {
         gender: "",
         id_passport: "",
         profile_image: null as File | null,
-        id_passport_image: null as File | null,
-        signature_image: null as File | null,
+        identification_document: null as File | null,
         website: "",
         city: "",
         postal_code: "",
@@ -92,10 +91,6 @@ export default function Create({ clubs, organizations }: Props) {
                         </Select>
                         {renderError("club_id")}
                     </div>
-
-      
-
-    
 
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">
@@ -324,8 +319,6 @@ export default function Create({ clubs, organizations }: Props) {
                         {renderError("id_passport")}
                     </div>
 
-                 
-
                     {/* Optional: Website */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>Website</Label>
@@ -417,31 +410,21 @@ export default function Create({ clubs, organizations }: Props) {
                     </div>
 
                     <div className="w-full px-2 mt-3">
-                        <Label>Upload ID/Passport Image</Label>
+                        <Label>Upload Identification Document</Label>
                         <Input
                             type="file"
                             onChange={(e) =>
                                 setData(
-                                    "id_passport_image",
+                                    "identification_document",
                                     e.target.files?.[0] ?? null
                                 )
                             }
                         />
-                        {renderError("id_passport_image")}
-                    </div>
-
-                    <div className="w-full px-2 mt-3">
-                        <Label>Upload Signature</Label>
-                        <Input
-                            type="file"
-                            onChange={(e) =>
-                                setData(
-                                    "signature_image",
-                                    e.target.files?.[0] ?? null
-                                )
-                            }
-                        />
-                        {renderError("signature_image")}
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Please upload ID card and Passport together in a
+                            single PDF file (Maximum file size: 2 MB).
+                        </p>
+                        {renderError("identification_document")}
                     </div>
 
                     <div className="w-full px-2 mt-5">

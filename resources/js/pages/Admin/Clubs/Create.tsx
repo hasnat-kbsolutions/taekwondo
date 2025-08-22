@@ -24,9 +24,15 @@ interface Organization {
 
 interface Props {
     organizations: Organization[];
+    currencies: Array<{
+        code: string;
+        name: string;
+        symbol: string;
+        is_default: boolean;
+    }>;
 }
 
-export default function Create({ organizations }: Props) {
+export default function Create({ organizations, currencies }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: "",
         email: "",
@@ -45,6 +51,7 @@ export default function Create({ organizations }: Props) {
         country: "",
         street: "",
         postal_code: "",
+        default_currency: "MYR",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -174,8 +181,6 @@ export default function Create({ organizations }: Props) {
                                 />
                                 {renderError("phone")}
                             </div>
-
-                     
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Notification Emails</Label>
@@ -307,6 +312,38 @@ export default function Create({ organizations }: Props) {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Default Currency
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={data.default_currency}
+                                    onValueChange={(value) =>
+                                        setData("default_currency", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Currency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {currencies.map((currency) => (
+                                            <SelectItem
+                                                key={currency.code}
+                                                value={currency.code}
+                                            >
+                                                {currency.code} -{" "}
+                                                {currency.symbol}{" "}
+                                                {currency.name}
+                                                {currency.is_default &&
+                                                    " (Default)"}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {renderError("default_currency")}
                             </div>
 
                             <div className="w-full px-2 mt-4">

@@ -13,10 +13,14 @@ class DashboardController extends Controller
         $instructor = Auth::user()->userable;
         $studentsCount = $instructor->students()->count();
 
+        // Get today's attendance count
+        $todayAttendance = \App\Models\Attendance::whereHas('student.instructors', function ($q) use ($instructor) {
+            $q->where('instructor_id', $instructor->id);
+        })->whereDate('date', now())->count();
+
         return Inertia::render('Instructor/Dashboard', [
             'studentsCount' => $studentsCount,
-            'averageRating' => $instructor->average_rating,
-            'totalRatings' => $instructor->total_ratings,
+            'todayAttendance' => $todayAttendance,
         ]);
     }
 }

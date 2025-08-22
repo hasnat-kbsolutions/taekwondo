@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
-
 interface Role {
     id: number;
     name: string;
@@ -34,7 +33,7 @@ export default function EditRole({ role, permissions }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route("roles.update", role.id));
+        put(route("admin.roles.update", role.id));
     };
 
     return (

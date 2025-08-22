@@ -24,6 +24,11 @@ class Club extends Model
         'street',
         'country',
         'status',
+        'default_currency',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function organization(): BelongsTo
@@ -49,6 +54,22 @@ class Club extends Model
     public function supporters(): HasMany
     {
         return $this->hasMany(Supporter::class);
+    }
+
+    /**
+     * Get the default currency for this club
+     */
+    public function defaultCurrency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'default_currency', 'code');
+    }
+
+    /**
+     * Get the currency symbol for this club
+     */
+    public function getCurrencySymbolAttribute(): string
+    {
+        return $this->defaultCurrency ? $this->defaultCurrency->symbol : 'RM';
     }
 
     /**

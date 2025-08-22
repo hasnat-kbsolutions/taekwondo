@@ -35,15 +35,22 @@ interface Club {
     notification_emails?: string;
     website?: string;
     status: boolean;
+    default_currency?: string;
     logo_url?: string;
 }
 
 interface Props {
     club: Club;
     organizations: Organization[];
+    currencies: Array<{
+        code: string;
+        name: string;
+        symbol: string;
+        is_default: boolean;
+    }>;
 }
 
-export default function Edit({ club, organizations }: Props) {
+export default function Edit({ club, organizations, currencies }: Props) {
     const [logoPreview, setLogoPreview] = useState<string | null>(
         club.logo_url || null
     );
@@ -68,23 +75,14 @@ export default function Edit({ club, organizations }: Props) {
         notification_emails: club.notification_emails ?? "",
         website: club.website ?? "",
         status: club.status ?? false,
+        default_currency: club.default_currency || "MYR",
         logo: null as File | null,
     });
-    
-    
 
     const handleSubmit = (e: React.FormEvent) => {
-        
         e.preventDefault();
         post(route("admin.clubs.update", club.id));
     };
-
-
-    
-
-
-
-
 
     const renderError = (field: keyof typeof errors) =>
         errors[field] && (
@@ -201,8 +199,6 @@ export default function Edit({ club, organizations }: Props) {
                                 />
                                 {renderError("phone")}
                             </div>
-
-               
 
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Notification Emails</Label>
@@ -350,6 +346,38 @@ export default function Edit({ club, organizations }: Props) {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Default Currency
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={data.default_currency}
+                                    onValueChange={(value) =>
+                                        setData("default_currency", value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Currency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {currencies.map((currency) => (
+                                            <SelectItem
+                                                key={currency.code}
+                                                value={currency.code}
+                                            >
+                                                {currency.code} -{" "}
+                                                {currency.symbol}{" "}
+                                                {currency.name}
+                                                {currency.is_default &&
+                                                    " (Default)"}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {renderError("default_currency")}
                             </div>
 
                             <div className="w-full px-2 mt-4">

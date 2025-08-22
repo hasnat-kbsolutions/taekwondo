@@ -55,38 +55,6 @@ class RatingController extends Controller
                         'rated_type' => class_basename($rating->rated_type),
                     ];
                 });
-        } elseif ($userable instanceof Instructor) {
-            $ratingsReceived = Rating::with(['rater'])
-                ->where('rated_id', $userable->id)
-                ->where('rated_type', 'App\Models\Instructor')
-                ->latest()
-                ->get()
-                ->map(function ($rating) {
-                    return [
-                        'id' => $rating->id,
-                        'rating' => $rating->rating,
-                        'comment' => $rating->comment,
-                        'created_at' => $rating->created_at->format('Y-m-d H:i:s'),
-                        'rater_name' => $rating->rater->name ?? 'Unknown',
-                        'rater_type' => class_basename($rating->rater_type),
-                    ];
-                });
-
-            $ratingsGiven = Rating::with(['rated'])
-                ->where('rater_id', $userable->id)
-                ->where('rater_type', 'App\Models\Instructor')
-                ->latest()
-                ->get()
-                ->map(function ($rating) {
-                    return [
-                        'id' => $rating->id,
-                        'rating' => $rating->rating,
-                        'comment' => $rating->comment,
-                        'created_at' => $rating->created_at->format('Y-m-d H:i:s'),
-                        'rated_name' => $rating->rated->name ?? 'Unknown',
-                        'rated_type' => class_basename($rating->rated_type),
-                    ];
-                });
         }
 
         return Inertia::render('Ratings/Index', [
@@ -107,7 +75,7 @@ class RatingController extends Controller
         try {
             $request->validate([
                 'rated_id' => 'required',
-                'rated_type' => 'required|in:App\Models\Student,App\Models\Instructor',
+                'rated_type' => 'required|in:App\Models\Student',
                 'rating' => 'required|integer|between:1,5',
                 'comment' => 'nullable|string|max:1000',
             ]);
@@ -119,9 +87,9 @@ class RatingController extends Controller
         $user = Auth::user();
         $userable = $user->userable;
 
-        // Prevent organizations from creating ratings
-        if ($userable instanceof \App\Models\Organization) {
-            return back()->withErrors(['error' => 'Organizations cannot create ratings.']);
+        // Prevent organizations and instructors from creating ratings
+        if ($userable instanceof \App\Models\Organization || $userable instanceof \App\Models\Instructor) {
+            return back()->withErrors(['error' => 'Organizations and instructors cannot create ratings.']);
         }
 
         // Convert rated_id to integer
@@ -323,7 +291,6 @@ class RatingController extends Controller
             'total_ratings' => $ratings->count(),
             'average_rating' => $ratings->avg('rating') ?? 0,
             'students_rated' => $ratings->where('rated_type', 'Student')->unique('rated_name')->count(),
-            'instructors_rated' => $ratings->where('rated_type', 'Instructor')->unique('rated_name')->count(),
             'rating_distribution' => [
                 '5_stars' => $ratings->where('rating', 5)->count(),
                 '4_stars' => $ratings->where('rating', 4)->count(),
@@ -354,17 +321,17 @@ class RatingController extends Controller
         // Get all ratings first, then filter in PHP for better polymorphic handling
         $ratings = Rating::with(['rater', 'rated'])->latest()->get();
 
-        // Filter ratings that belong to this club
+        // Filter ratings that belong to this club (only students)
         $clubRatings = $ratings->filter(function ($rating) use ($userable) {
             // Check if rater belongs to this club
-            if ($rating->rater && in_array($rating->rater_type, ['App\Models\Student', 'App\Models\Instructor'])) {
+            if ($rating->rater && $rating->rater_type === 'App\Models\Student') {
                 if ($rating->rater->club_id == $userable->id) {
                     return true;
                 }
             }
 
             // Check if rated entity belongs to this club
-            if ($rating->rated && in_array($rating->rated_type, ['App\Models\Student', 'App\Models\Instructor'])) {
+            if ($rating->rated && $rating->rated_type === 'App\Models\Student') {
                 if ($rating->rated->club_id == $userable->id) {
                     return true;
                 }
@@ -391,7 +358,6 @@ class RatingController extends Controller
             'total_ratings' => $ratings->count(),
             'average_rating' => $ratings->avg('rating') ?? 0,
             'students_rated' => $ratings->where('rated_type', 'Student')->unique('rated_name')->count(),
-            'instructors_rated' => $ratings->where('rated_type', 'Instructor')->unique('rated_name')->count(),
             'rating_distribution' => [
                 '5_stars' => $ratings->where('rating', 5)->count(),
                 '4_stars' => $ratings->where('rating', 4)->count(),

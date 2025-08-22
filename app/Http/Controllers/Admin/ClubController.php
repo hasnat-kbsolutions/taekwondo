@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Club;
 use App\Models\Organization;
+use App\Models\Currency;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Attendance;
@@ -43,10 +44,18 @@ class ClubController extends Controller
             // Get student IDs for this club
             $studentIds = $club->students->pluck('id');
 
-            // Payment statistics
-            $payments = \App\Models\Payment::whereIn('student_id', $studentIds);
+            // Payment statistics with currency breakdown
+            $payments = \App\Models\Payment::whereIn('student_id', $studentIds)->with('currency');
             $totalPayments = $payments->count();
-            $totalAmount = $payments->sum('amount');
+
+            // Calculate amounts by currency
+            $amountsByCurrency = $payments->get()->groupBy('currency_code')
+                ->map(function ($currencyPayments) {
+                    return (float) $currencyPayments->sum('amount');
+                });
+
+            $defaultCurrencyCode = $club->default_currency ?? 'MYR';
+            $totalAmount = $amountsByCurrency[$defaultCurrencyCode] ?? 0;
 
             $club->payment_stats = [
                 'total_payments' => $totalPayments,
@@ -54,6 +63,8 @@ class ClubController extends Controller
                 'pending_count' => $payments->where('status', 'pending')->count(),
                 'total_amount' => $totalAmount,
                 'average_amount' => $totalPayments > 0 ? round($totalAmount / $totalPayments, 2) : 0,
+                'amounts_by_currency' => $amountsByCurrency,
+                'default_currency_code' => $defaultCurrencyCode,
             ];
 
             // Attendance statistics
@@ -100,7 +111,8 @@ class ClubController extends Controller
     public function create()
     {
         return Inertia::render('Admin/Clubs/Create', [
-            'organizations' => Organization::select('id', 'name')->get()
+            'organizations' => Organization::select('id', 'name')->get(),
+            'currencies' => Currency::where('is_active', true)->get()
         ]);
     }
 
@@ -122,6 +134,7 @@ class ClubController extends Controller
             'tax_number' => 'nullable|string|max:255',
             'invoice_prefix' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'default_currency' => 'required|string|exists:currencies,code',
             'logo' => 'nullable|image|max:2048',
         ]);
         if ($request->hasFile('logo')) {
@@ -145,6 +158,7 @@ class ClubController extends Controller
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
+            'default_currency' => $validated['default_currency'],
             'logo' => $validated['logo'],
         ]);
 
@@ -167,6 +181,7 @@ class ClubController extends Controller
         return Inertia::render('Admin/Clubs/Edit', [
             'club' => $club,
             'organizations' => Organization::select('id', 'name')->get(),
+            'currencies' => Currency::where('is_active', true)->get()
         ]);
     }
 
@@ -190,6 +205,7 @@ class ClubController extends Controller
             'tax_number' => 'nullable|string|max:255',
             'invoice_prefix' => 'nullable|string|max:255',
             'status' => 'boolean',
+            'default_currency' => 'required|string|exists:currencies,code',
             'logo' => 'nullable|image|max:2048',
         ]);
 
@@ -219,6 +235,7 @@ class ClubController extends Controller
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
             'status' => $validated['status'] ?? false,
+            'default_currency' => $validated['default_currency'],
         ];
 
         // ✅ Only include logo if uploaded

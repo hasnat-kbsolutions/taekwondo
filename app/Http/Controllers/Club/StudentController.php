@@ -46,6 +46,15 @@ class StudentController extends Controller
                     'club' => $student->club,
                     'average_rating' => $student->average_rating,
                     'total_ratings' => $student->total_ratings,
+                    'profile_image' => $student->profile_image,
+                    'identification_document' => $student->identification_document,
+                    'dob' => $student->dob,
+                    'dod' => $student->dod,
+                    'id_passport' => $student->id_passport,
+                    'city' => $student->city,
+                    'postal_code' => $student->postal_code,
+                    'street' => $student->street,
+                    'website' => $student->website,
                 ];
             });
 
@@ -72,26 +81,19 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        // Validate required fields
         $validated = $request->validate([
-
-            // Required fields
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
             'password' => 'required|string|min:6',
-            'dob' => 'required|date',
-            'gender' => 'required|string',
-            'nationality' => 'required|string',
-            'grade' => 'required|string',
-            'id_passport' => 'required|string',
-
-            // Optional fields
+            'phone' => 'required|string',
             'surname' => 'nullable|string',
+            'nationality' => 'required|string',
+            'dob' => 'required|date',
             'dod' => 'nullable|date',
+            'grade' => 'required|string',
+            'gender' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'identification_document' => 'nullable|mimes:pdf|max:2048',
             'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
@@ -100,24 +102,25 @@ class StudentController extends Controller
             'status' => 'required|boolean',
         ]);
 
-
-
+        // Generate UID
         $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
         $validated['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
+        // Handle image uploads
+        foreach (['profile_image', 'identification_document'] as $field) {
+            if ($request->hasFile($field)) {
+                $relativePath = $request->file($field)->store("students", "public");
+                $validated[$field] = $relativePath; // Store relative path only
+            } else {
+                // Remove from validated to prevent overwriting existing file with null
+                unset($validated[$field]);
+            }
+        }
 
         // Inject organization_id if the logged-in user is an organization
         if (Auth::user()->role === 'club') {
             $validated['club_id'] = Auth::user()->userable_id;
             $validated['organization_id'] = Auth::user()->userable->organization_id;
-        }
-
-        // Upload images if present
-        foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
-            if ($request->hasFile($field)) {
-                $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = asset("storage/" . $relativePath); // Full URL with ASSET_URL
-            }
         }
 
         // Create student profile
@@ -138,40 +141,25 @@ class StudentController extends Controller
 
     public function edit(Student $student)
     {
-
-
-
-
         return Inertia::render('Club/Students/Edit', [
             'student' => $student,
-
-
         ]);
     }
 
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-
-            // Required fields
             'name' => 'required|string',
             'email' => 'required|email',
             'phone' => 'required|string',
-            'dob' => 'required|date',
-            'gender' => 'required|string',
-            'nationality' => 'required|string',
-            'grade' => 'required|string',
-            'id_passport' => 'required|string',
-
-            // Password is optional
-            'password' => 'nullable|string|min:6',
-
-            // Optional fields
             'surname' => 'nullable|string',
+            'nationality' => 'required|string',
+            'dob' => 'required|date',
             'dod' => 'nullable|date',
+            'grade' => 'required|string',
+            'gender' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_passport_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'signature_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'identification_document' => 'nullable|mimes:pdf|max:2048',
             'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
@@ -181,12 +169,12 @@ class StudentController extends Controller
         ]);
 
         // Handle image uploads
-        foreach (['profile_image', 'id_passport_image', 'signature_image'] as $field) {
+        foreach (['profile_image', 'identification_document'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = "/storage/" . $relativePath;
+                $validated[$field] = $relativePath; // Store relative path only
             } else {
-                // Remove from validated to prevent overwriting existing image with null
+                // Remove from validated to prevent overwriting existing file with null
                 unset($validated[$field]);
             }
         }
@@ -230,11 +218,8 @@ class StudentController extends Controller
         if ($student->profile_image) {
             Storage::disk('public')->delete($student->profile_image);
         }
-        if ($student->id_passport_image) {
-            Storage::disk('public')->delete($student->id_passport_image);
-        }
-        if ($student->signature_image) {
-            Storage::disk('public')->delete($student->signature_image);
+        if ($student->identification_document) {
+            Storage::disk('public')->delete($student->identification_document);
         }
 
         // Then delete the student

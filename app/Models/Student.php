@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Str;
+
 class Student extends Model
 {
 
@@ -21,8 +23,7 @@ class Student extends Model
         'gender',
         'id_passport',
         'profile_image',
-        'id_passport_image',
-        'signature_image',
+        'identification_document',
         'email',
         'phone',
         'website',
@@ -95,5 +96,68 @@ class Student extends Model
     public function getTotalRatingsAttribute()
     {
         return Rating::getTotalRatings($this->id, 'App\Models\Student');
+    }
+
+    /**
+     * Boot the model and add event listeners
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Before saving, sanitize and validate data
+        static::saving(function ($student) {
+            // Sanitize string fields
+            $student->name = trim($student->name);
+            $student->surname = trim($student->surname ?? '');
+            $student->email = strtolower(trim($student->email));
+            $student->phone = trim($student->phone);
+            $student->nationality = trim($student->nationality);
+            $student->grade = trim($student->grade);
+            $student->id_passport = trim($student->id_passport);
+            $student->city = trim($student->city ?? '');
+            $student->postal_code = trim($student->postal_code ?? '');
+            $student->street = trim($student->street ?? '');
+            $student->country = trim($student->country ?? '');
+
+            // Ensure status is boolean
+            $student->status = (bool) $student->status;
+        });
+    }
+
+    /**
+     * Get the student's full name
+     */
+    public function getFullNameAttribute()
+    {
+        return trim($this->name . ' ' . ($this->surname ?? ''));
+    }
+
+    /**
+     * Get the student's age
+     */
+    public function getAgeAttribute()
+    {
+        if (!$this->dob) {
+            return null;
+        }
+
+        return now()->diffInYears($this->dob);
+    }
+
+    /**
+     * Check if student is active
+     */
+    public function isActive()
+    {
+        return $this->status === true;
+    }
+
+    /**
+     * Check if student is underage (under 18)
+     */
+    public function isUnderage()
+    {
+        return $this->age < 18;
     }
 }

@@ -57,7 +57,7 @@ export default function CreateOrEditUser({
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (isEdit) {
-            put(route("users.update", user?.id));
+            put(route("admin.users.update", user?.id));
         } else {
             post(route("admin.users.store"));
         }

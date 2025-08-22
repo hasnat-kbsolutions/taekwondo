@@ -233,13 +233,13 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: SquareTerminal,
         },
         {
-            title: "Profile",
-            url: "/instructor/profile",
+            title: "Attendances",
+            url: "/instructor/attendances",
             icon: SquareTerminal,
         },
         {
-            title: "Ratings",
-            url: "/instructor/ratings",
+            title: "Profile",
+            url: "/instructor/profile",
             icon: SquareTerminal,
         },
     ],

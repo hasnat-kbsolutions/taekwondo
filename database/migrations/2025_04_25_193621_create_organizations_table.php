@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,30 +12,31 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
-        
+
             // Identity
             $table->string('name');
             $table->string('code')->nullable(); // e.g., unique org code (ORG001)
             $table->string('logo')->nullable();
-        
+
             // Contact Info
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
-        
+
             // Address Info
             $table->string('country')->nullable();
             $table->string('city')->nullable();
             $table->string('street')->nullable();
             $table->string('postal_code')->nullable();
-        
+
             // Flags
             $table->boolean('status')->default(true); // Active/Inactive
             $table->boolean('is_verified')->default(false); // Verified organization
-        
+            $table->string('default_currency', 3)->default('MYR');
+
             $table->timestamps();
         });
-        
+
     }
 
     /**

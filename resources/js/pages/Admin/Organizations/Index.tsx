@@ -58,6 +58,7 @@ interface Organization {
     street?: string;
     postal_code?: string;
     status: boolean;
+    default_currency?: string;
     students: Student[];
     supporters: Supporter[];
     clubs: Club[];
@@ -143,6 +144,20 @@ export default function Index({ organizations, student, supporter }: Props) {
             ),
         },
         {
+            header: "Default Currency",
+            accessorKey: "default_currency",
+            cell: ({ row }) => {
+                const currency = row.original.default_currency;
+                return currency ? (
+                    <Badge variant="outline" className="font-mono">
+                        {currency}
+                    </Badge>
+                ) : (
+                    <span className="text-gray-400">Not set</span>
+                );
+            },
+        },
+        {
             header: "Actions",
             cell: ({ row }) => (
                 <DropdownMenu>
@@ -220,7 +235,10 @@ export default function Index({ organizations, student, supporter }: Props) {
                                             safeOrganizations.reduce(
                                                 (total, org) =>
                                                     total +
-                                                    Number(org.students?.length || 0),
+                                                    Number(
+                                                        org.students?.length ||
+                                                            0
+                                                    ),
                                                 0
                                             )
                                         )}
@@ -257,7 +275,10 @@ export default function Index({ organizations, student, supporter }: Props) {
                                             safeOrganizations.reduce(
                                                 (total, org) =>
                                                     total +
-                                                    Number(org.instructors?.length || 0),
+                                                    Number(
+                                                        org.instructors
+                                                            ?.length || 0
+                                                    ),
                                                 0
                                             )
                                         )}
@@ -294,7 +315,9 @@ export default function Index({ organizations, student, supporter }: Props) {
                                             safeOrganizations.reduce(
                                                 (total, org) =>
                                                     total +
-                                                    Number(org.clubs?.length || 0),
+                                                    Number(
+                                                        org.clubs?.length || 0
+                                                    ),
                                                 0
                                             )
                                         )}
@@ -331,7 +354,10 @@ export default function Index({ organizations, student, supporter }: Props) {
                                             safeOrganizations.reduce(
                                                 (total, org) =>
                                                     total +
-                                                    Number(org.supporters?.length || 0),
+                                                    Number(
+                                                        org.supporters
+                                                            ?.length || 0
+                                                    ),
                                                 0
                                             )
                                         )}

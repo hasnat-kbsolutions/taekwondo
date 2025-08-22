@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -19,6 +20,11 @@ class Organization extends Model
         'street',
         'postal_code',
         'status',
+        'default_currency',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function instructors(): HasMany
@@ -44,6 +50,22 @@ class Organization extends Model
     public function user(): MorphOne
     {
         return $this->morphOne(User::class, 'userable');
+    }
+
+    /**
+     * Get the default currency for this organization
+     */
+    public function defaultCurrency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'default_currency', 'code');
+    }
+
+    /**
+     * Get the currency symbol for this organization
+     */
+    public function getCurrencySymbolAttribute(): string
+    {
+        return $this->defaultCurrency ? $this->defaultCurrency->symbol : 'RM';
     }
 
     /**

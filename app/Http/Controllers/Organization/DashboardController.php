@@ -12,6 +12,8 @@ use App\Models\Organization;
 use App\Models\Club;
 use App\Models\Instructor;
 use App\Models\Rating;
+use App\Models\Attendance;
+use App\Models\Certification;
 
 use App\Models\Supporter;
 use Illuminate\Support\Facades\Auth;
@@ -27,13 +29,21 @@ class DashboardController extends Controller
         $studentIds = $organization->students()->pluck('id');
         $instructorIds = $organization->instructors()->pluck('id');
 
-        // Get payment statistics
-        $payments = Payment::whereIn('student_id', $studentIds);
+        // Get payment statistics with currency breakdown
+        $payments = Payment::whereIn('student_id', $studentIds)->with('currency');
 
         $paymentsCount = $payments->count();
-        $paidCount = $payments->where('status', 'paid')->count();
-        $pendingCount = $payments->where('status', 'pending')->count();
-        $totalAmount = $payments->sum('amount');
+        $paidCount = Payment::whereIn('student_id', $studentIds)->where('status', 'paid')->count();
+        $pendingCount = Payment::whereIn('student_id', $studentIds)->where('status', 'pending')->count();
+
+        // Calculate amounts by currency
+        $amountsByCurrency = $payments->get()->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        $defaultCurrencyCode = $organization->default_currency ?? 'MYR';
+        $totalAmount = $amountsByCurrency[$defaultCurrencyCode] ?? 0;
 
         // Get rating statistics
         $studentRatings = Rating::whereIn('rated_id', $studentIds)
@@ -46,6 +56,21 @@ class DashboardController extends Controller
         $avgInstructorRating = $instructorRatings->count() > 0 ? $instructorRatings->avg('rating') : 0;
         $totalRatings = $studentRatings->count() + $instructorRatings->count();
 
+        // Get attendance statistics for current month
+        $currentMonth = now()->startOfMonth();
+        $attendances = \App\Models\Attendance::whereIn('student_id', $studentIds)
+            ->whereMonth('date', $currentMonth->month)
+            ->whereYear('date', $currentMonth->year)
+            ->get();
+
+        $totalAttendanceDays = $attendances->count();
+        $presentDays = $attendances->where('status', 'present')->count();
+        $absentDays = $attendances->where('status', 'absent')->count();
+        $attendanceRate = $totalAttendanceDays > 0 ? round(($presentDays / $totalAttendanceDays) * 100, 1) : 0;
+
+        // Get certification statistics
+        $certificationsCount = \App\Models\Certification::whereIn('student_id', $studentIds)->count();
+
         return Inertia::render('Organization/Dashboard', [
             'studentsCount' => $organization->students()->count(),
             'clubsCount' => $organization->clubs()->count(),
@@ -54,9 +79,16 @@ class DashboardController extends Controller
             'paidCount' => $paidCount,
             'pendingCount' => $pendingCount,
             'totalAmount' => $totalAmount,
+            'amountsByCurrency' => $amountsByCurrency,
+            'defaultCurrencyCode' => $defaultCurrencyCode,
             'avgStudentRating' => round($avgStudentRating, 1),
             'avgInstructorRating' => round($avgInstructorRating, 1),
             'totalRatings' => $totalRatings,
+            'totalAttendanceDays' => $totalAttendanceDays,
+            'presentDays' => $presentDays,
+            'absentDays' => $absentDays,
+            'attendanceRate' => $attendanceRate,
+            'certificationsCount' => $certificationsCount,
         ]);
     }
 }

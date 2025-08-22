@@ -124,8 +124,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Admin\PaymentController::class, 'invoice'])->name('payments.invoice');
 
+    // Admin Currency Management
+    Route::get('/currencies', [App\Http\Controllers\Admin\CurrencyController::class, 'index'])->name('currencies.index');
+    Route::get('/currencies/create', [App\Http\Controllers\Admin\CurrencyController::class, 'create'])->name('currencies.create');
+    Route::post('/currencies', [App\Http\Controllers\Admin\CurrencyController::class, 'store'])->name('currencies.store');
+    Route::get('/currencies/{currency}/edit', [App\Http\Controllers\Admin\CurrencyController::class, 'edit'])->name('currencies.edit');
+    Route::put('/currencies/{currency}', [App\Http\Controllers\Admin\CurrencyController::class, 'update'])->name('currencies.update');
+    Route::delete('/currencies/{currency}', [App\Http\Controllers\Admin\CurrencyController::class, 'destroy'])->name('currencies.destroy');
+    Route::patch('/currencies/{currency}/toggle-active', [App\Http\Controllers\Admin\CurrencyController::class, 'toggleActive'])->name('currencies.toggle-active');
+    Route::patch('/currencies/{currency}/set-default', [App\Http\Controllers\Admin\CurrencyController::class, 'setDefault'])->name('currencies.set-default');
+
     // Admin Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
+
+    // Admin Reports
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/{type}', [App\Http\Controllers\Admin\ReportController::class, 'exportReport'])->name('reports.export');
 });
 
 // Organization routes
@@ -271,8 +285,14 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('/profile/instructor/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');
     Route::get('/profile/student/{id}', [App\Http\Controllers\Instructor\ProfileController::class, 'showStudent'])->name('profile.show-student');
 
-    // Instructor Ratings
-    Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
+    // Instructor Attendances
+    Route::get('/attendances', [App\Http\Controllers\Instructor\AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('/attendances/create', [App\Http\Controllers\Instructor\AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('/attendances', [App\Http\Controllers\Instructor\AttendanceController::class, 'store'])->name('attendances.store');
+    Route::get('/attendances/{attendance}/edit', [App\Http\Controllers\Instructor\AttendanceController::class, 'edit'])->name('attendances.edit');
+    Route::put('/attendances/{attendance}', [App\Http\Controllers\Instructor\AttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('/attendances/{attendance}', [App\Http\Controllers\Instructor\AttendanceController::class, 'destroy'])->name('attendances.destroy');
+    Route::post('/attendances/toggle', [App\Http\Controllers\Instructor\AttendanceController::class, 'toggle'])->name('attendances.toggle');
 });
 
 // Rating routes (accessible by all authenticated users)

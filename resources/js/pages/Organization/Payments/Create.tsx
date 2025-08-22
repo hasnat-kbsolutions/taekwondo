@@ -22,11 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 export default function Create() {
-    const { students, errors } = usePage().props as any;
+    const { students, currencies, defaultCurrency, errors } = usePage()
+        .props as any;
 
     const [form, setForm] = useState({
         student_id: "",
         amount: "",
+        currency_code: defaultCurrency || "MYR",
         status: "paid",
         method: "cash",
         pay_at: "",
@@ -101,6 +103,35 @@ export default function Create() {
                                         }
                                     />
                                     {renderError("amount")}
+                                </div>
+                                <div>
+                                    <Label>
+                                        Currency
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={form.currency_code}
+                                        onValueChange={(value) =>
+                                            handleChange("currency_code", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Currency" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {currencies.map((currency: any) => (
+                                                <SelectItem
+                                                    key={currency.code}
+                                                    value={currency.code}
+                                                >
+                                                    {currency.code} -{" "}
+                                                    {currency.symbol}{" "}
+                                                    {currency.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {renderError("currency_code")}
                                 </div>
                                 <div>
                                     <Label>

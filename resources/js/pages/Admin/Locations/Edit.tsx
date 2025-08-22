@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Location } from "@/components/columns";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
-
 interface Props {
     location: Location;
 }
@@ -23,7 +22,7 @@ export default function Edit({ location }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route("locations.update", location.id));
+        put(route("admin.locations.update", location.id));
     };
 
     return (
@@ -35,10 +34,14 @@ export default function Edit({ location }: Props) {
                         <CardTitle>Edit Location</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-wrap">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
+                        >
                             <div className="w-[50%] px-2">
-                                 <Label className="block text-sm mb-1">
-                                                      Name </Label>
+                                <Label className="block text-sm mb-1">
+                                    Name{" "}
+                                </Label>
                                 <Input
                                     placeholder="Name"
                                     value={data.name}
@@ -53,8 +56,9 @@ export default function Edit({ location }: Props) {
                                 )}
                             </div>
                             <div className="w-[50%] px-2">
-                                 <Label className="block text-sm mb-1">
-                                                     Description</Label>
+                                <Label className="block text-sm mb-1">
+                                    Description
+                                </Label>
                                 <Input
                                     placeholder="Description"
                                     value={data.description}
@@ -70,7 +74,8 @@ export default function Edit({ location }: Props) {
                             </div>
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                     Longitude </Label>
+                                    Longitude{" "}
+                                </Label>
                                 <Input
                                     type="number"
                                     placeholder="Longitude"
@@ -87,7 +92,8 @@ export default function Edit({ location }: Props) {
                             </div>
                             <div className="w-[50%] px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                                    Latitude </Label>
+                                    Latitude{" "}
+                                </Label>
                                 <Input
                                     type="number"
                                     placeholder="Latitude"
@@ -104,7 +110,8 @@ export default function Edit({ location }: Props) {
                             </div>
                             <div className="w-full px-2 mt-3">
                                 <Label className="block text-sm mb-1">
-                                            Files </Label>
+                                    Files{" "}
+                                </Label>
                                 <Input
                                     type="file"
                                     multiple
@@ -122,11 +129,11 @@ export default function Edit({ location }: Props) {
                                 )}
                             </div>
 
-                             <div className="w-full px-2 mt-3">
-                                    <Button type="submit" disabled={processing}>
-                                        Update
-                                    </Button>
-                                    </div>
+                            <div className="w-full px-2 mt-3">
+                                <Button type="submit" disabled={processing}>
+                                    Update
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>
