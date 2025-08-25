@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { Link } from "@inertiajs/react";
 
 export default function Create() {
     const [form, setForm] = useState({
@@ -32,163 +30,141 @@ export default function Create() {
         <AuthenticatedLayout header="Create Currency">
             <Head title="Create Currency" />
 
-            <div className="py-12">
-                <div className="max-w-2xl mx-auto sm:px-6 lg:px-8">
-                    <div className="mb-6">
-                        <Link
-                            href={route("admin.currencies.index")}
-                            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            <div className="container mx-auto py-10">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Create Currency</CardTitle>
+                        <p className="text-muted-foreground text-sm">
+                            Fields marked with * are required.
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex flex-wrap"
                         >
-                            <ArrowLeftIcon className="w-4 h-4 mr-1" />
-                            Back to Currencies
-                        </Link>
-                    </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Currency Code{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="text"
+                                    value={form.code}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "code",
+                                            e.target.value.toUpperCase()
+                                        )
+                                    }
+                                    placeholder="USD"
+                                    maxLength={3}
+                                    required
+                                />
+                                <p className="text-sm text-gray-500 mt-1">
+                                    ISO 4217 code (e.g., USD, EUR, MYR)
+                                </p>
+                            </div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Add New Currency</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="code">
-                                            Currency Code *
-                                        </Label>
-                                        <Input
-                                            id="code"
-                                            type="text"
-                                            value={form.code}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    "code",
-                                                    e.target.value.toUpperCase()
-                                                )
-                                            }
-                                            placeholder="USD"
-                                            maxLength={3}
-                                            required
-                                            className="mt-1"
-                                        />
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            ISO 4217 code (e.g., USD, EUR, MYR)
-                                        </p>
-                                    </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Symbol{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="text"
+                                    value={form.symbol}
+                                    onChange={(e) =>
+                                        handleChange("symbol", e.target.value)
+                                    }
+                                    placeholder="$"
+                                    maxLength={10}
+                                    required
+                                />
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Currency symbol (e.g., $, €, RM)
+                                </p>
+                            </div>
 
-                                    <div>
-                                        <Label htmlFor="symbol">Symbol *</Label>
-                                        <Input
-                                            id="symbol"
-                                            type="text"
-                                            value={form.symbol}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    "symbol",
-                                                    e.target.value
-                                                )
-                                            }
-                                            placeholder="$"
-                                            maxLength={10}
-                                            required
-                                            className="mt-1"
-                                        />
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            Currency symbol (e.g., $, €, RM)
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Currency Name{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="text"
+                                    value={form.name}
+                                    onChange={(e) =>
+                                        handleChange("name", e.target.value)
+                                    }
+                                    placeholder="US Dollar"
+                                    required
+                                />
+                            </div>
 
-                                <div>
-                                    <Label htmlFor="name">
-                                        Currency Name *
-                                    </Label>
-                                    <Input
-                                        id="name"
-                                        type="text"
-                                        value={form.name}
-                                        onChange={(e) =>
-                                            handleChange("name", e.target.value)
-                                        }
-                                        placeholder="US Dollar"
-                                        required
-                                        className="mt-1"
-                                    />
-                                </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <Label>
+                                    Decimal Places{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="number"
+                                    value={form.decimal_places}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "decimal_places",
+                                            parseInt(e.target.value)
+                                        )
+                                    }
+                                    min={0}
+                                    max={4}
+                                    required
+                                />
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Number of decimal places (0-4)
+                                </p>
+                            </div>
 
-                                <div>
-                                    <Label htmlFor="decimal_places">
-                                        Decimal Places *
-                                    </Label>
-                                    <Input
-                                        id="decimal_places"
-                                        type="number"
-                                        value={form.decimal_places}
-                                        onChange={(e) =>
+                            <div className="w-[25%] px-2 mt-3">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="is_active"
+                                        checked={form.is_active}
+                                        onCheckedChange={(checked) =>
                                             handleChange(
-                                                "decimal_places",
-                                                parseInt(e.target.value)
+                                                "is_active",
+                                                checked as boolean
                                             )
                                         }
-                                        min={0}
-                                        max={4}
-                                        required
-                                        className="mt-1"
                                     />
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        Number of decimal places (0-4)
-                                    </p>
+                                    <Label htmlFor="is_active">Active</Label>
                                 </div>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="is_active"
-                                            checked={form.is_active}
-                                            onCheckedChange={(checked) =>
-                                                handleChange(
-                                                    "is_active",
-                                                    checked as boolean
-                                                )
-                                            }
-                                        />
-                                        <Label htmlFor="is_active">
-                                            Active
-                                        </Label>
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="is_default"
-                                            checked={form.is_default}
-                                            onCheckedChange={(checked) =>
-                                                handleChange(
-                                                    "is_default",
-                                                    checked as boolean
-                                                )
-                                            }
-                                        />
-                                        <Label htmlFor="is_default">
-                                            Set as Default Currency
-                                        </Label>
-                                    </div>
+                            <div className="w-[25%] px-2 mt-3">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="is_default"
+                                        checked={form.is_default}
+                                        onCheckedChange={(checked) =>
+                                            handleChange(
+                                                "is_default",
+                                                checked as boolean
+                                            )
+                                        }
+                                    />
+                                    <Label htmlFor="is_default">
+                                        Set as Default Currency
+                                    </Label>
                                 </div>
+                            </div>
 
-                                <div className="flex justify-end space-x-3">
-                                    <Link
-                                        href={route("admin.currencies.index")}
-                                    >
-                                        <Button variant="outline" type="button">
-                                            Cancel
-                                        </Button>
-                                    </Link>
-                                    <Button type="submit">
-                                        Create Currency
-                                    </Button>
-                                </div>
-                            </form>
-                        </CardContent>
-                    </Card>
-                </div>
+                            <div className="w-full px-2 mt-4">
+                                <Button type="submit">Submit</Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </AuthenticatedLayout>
     );

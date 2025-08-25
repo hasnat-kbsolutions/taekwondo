@@ -52,20 +52,15 @@ export default function Index({ currencies }: Props) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-semibold text-gray-900">
-                            Currencies
-                        </h2>
-                        <Link href={route("admin.currencies.create")}>
-                            <Button>
-                                <PlusIcon className="w-4 h-4 mr-2" />
-                                Add Currency
-                            </Button>
-                        </Link>
+                        <h2 className="text-2xl font-semibold text-gray-900"></h2>
                     </div>
 
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Manage System Currencies</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>Currencies</CardTitle>
+                            <Link href={route("admin.currencies.create")}>
+                                <Button>Add Currency</Button>
+                            </Link>
                         </CardHeader>
                         <CardContent>
                             <DataTable

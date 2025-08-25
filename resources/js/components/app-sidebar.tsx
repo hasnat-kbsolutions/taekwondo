@@ -128,6 +128,15 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/admin/reports",
             icon: SquareTerminal,
         },
+               {
+            title: "Settings",
+            url: "#",
+            icon: SquareTerminal,
+            isActive: false,
+            items: [
+                { title: "Currencies", url: "/admin/currencies" },
+            ],
+        },
     ],
 
     organization: [
@@ -237,11 +246,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/instructor/attendances",
             icon: SquareTerminal,
         },
-        {
-            title: "Profile",
-            url: "/instructor/profile",
-            icon: SquareTerminal,
-        },
+    
     ],
 };
 
@@ -280,13 +285,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={navMain} />
-                <NavSecondary
+                {/* <NavSecondary
                     items={[
                         { title: "Support", url: "#", icon: LifeBuoy },
                         { title: "Feedback", url: "#", icon: Send },
                     ]}
                     className="mt-auto"
-                />
+                /> */}
             </SidebarContent>
             <SidebarFooter>
                 {auth.user && <NavUser user={auth.user} />}

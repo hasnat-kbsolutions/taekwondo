@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\Payment;
+use App\Models\Currency;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -30,16 +31,35 @@ class DashboardController extends Controller
         $absentDays = $attendances->where('status', 'absent')->count();
         $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 1) : 0;
 
-        // Get payment statistics for the year
+        // Get payment statistics for the year with currency support
         $payments = $student->payments()
             ->whereYear('payment_month', $year)
+            ->with('currency')
             ->get();
 
         $totalPayments = $payments->count();
         $paidPayments = $payments->where('status', 'paid')->count();
         $pendingPayments = $payments->where('status', 'pending')->count();
-        $totalAmount = $payments->sum('amount');
-        $paidAmount = $payments->where('status', 'paid')->sum('amount');
+
+        // Calculate amounts by currency
+        $amountsByCurrency = $payments->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        $paidAmountsByCurrency = $payments->where('status', 'paid')
+            ->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        // Get default currency from student's club or organization
+        $defaultCurrencyCode = $student->club->default_currency ??
+            $student->organization->default_currency ??
+            'MYR';
+
+        $totalAmount = $amountsByCurrency[$defaultCurrencyCode] ?? 0;
+        $paidAmount = $paidAmountsByCurrency[$defaultCurrencyCode] ?? 0;
 
         // Get rating statistics
         $averageRating = $student->average_rating ?? 0;
@@ -68,6 +88,9 @@ class DashboardController extends Controller
                 'averageRating' => $averageRating,
                 'totalRatings' => $totalRatings,
             ],
+            'amountsByCurrency' => $amountsByCurrency,
+            'paidAmountsByCurrency' => $paidAmountsByCurrency,
+            'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
     }
 }

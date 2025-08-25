@@ -33,6 +33,10 @@ export const columns: (actions: ActionsProps) => ColumnDef<Currency>[] = ({
     onDelete,
 }) => [
     {
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+    },
+    {
         accessorKey: "code",
         header: "Code",
         cell: ({ row }) => (

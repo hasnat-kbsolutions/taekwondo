@@ -120,16 +120,7 @@ export function NavUser({ user }: { user: User }) {
                                 </>
                             )}
 
-                            {role === "organization" && (
-                                <>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={route("club.profile.show")}>
-                                            <Building2 />
-                                            Club Profile
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </>
-                            )}
+               
 
                             {role === "branch" && (
                                 <>
