@@ -16,6 +16,7 @@ use App\Models\Attendance;
 use App\Models\Certification;
 
 use App\Models\Supporter;
+use App\Models\Currency;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
 
@@ -29,8 +30,8 @@ class DashboardController extends Controller
         $studentIds = $club->students()->pluck('id');
         $instructorIds = $club->instructors()->pluck('id');
 
-        // Fetch payments for these students
-        $payments = Payment::whereIn('student_id', $studentIds)->get();
+        // Fetch payments for these students with currency support
+        $payments = Payment::whereIn('student_id', $studentIds)->with('currency')->get();
 
         // Get rating statistics
         $studentRatings = Rating::whereIn('rated_id', $studentIds)
@@ -58,11 +59,20 @@ class DashboardController extends Controller
         // Get certification statistics
         $certificationsCount = \App\Models\Certification::whereIn('student_id', $studentIds)->count();
 
+        // Calculate amounts by currency
+        $amountsByCurrency = $payments->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        $defaultCurrencyCode = $club->default_currency ?? 'MYR';
+        $totalAmount = $amountsByCurrency[$defaultCurrencyCode] ?? 0;
+
         return Inertia::render('Club/Dashboard', [
             'studentsCount' => $club->students()->count(),
             'instructorsCount' => $club->instructors()->count(),
             'paymentsCount' => $payments->count(),
-            'totalAmount' => $payments->sum('amount'),
+            'totalAmount' => $totalAmount,
             'paidCount' => $payments->where('status', 'paid')->count(),
             'pendingCount' => $payments->where('status', 'pending')->count(),
             'recentPayments' => $payments->sortByDesc('pay_at')->take(5)->values(),
@@ -74,6 +84,8 @@ class DashboardController extends Controller
             'absentDays' => $absentDays,
             'attendanceRate' => $attendanceRate,
             'certificationsCount' => $certificationsCount,
+            'amountsByCurrency' => $amountsByCurrency,
+            'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
     }
 }

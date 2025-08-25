@@ -29,7 +29,19 @@ interface Props {
     absentDays: number;
     attendanceRate: number;
     certificationsCount: number;
+    amountsByCurrency?: Record<string, number>;
+    defaultCurrencyCode?: string;
 }
+
+// Utility function to safely format amounts
+const formatAmount = (amount: any, currencyCode: string = "MYR") => {
+    const numAmount = Number(amount) || 0;
+    if (currencyCode === "JPY") {
+        return numAmount.toLocaleString();
+    } else {
+        return numAmount.toFixed(2);
+    }
+};
 
 export default function DashboardCards({
     studentsCount,
@@ -46,6 +58,8 @@ export default function DashboardCards({
     absentDays,
     attendanceRate,
     certificationsCount,
+    amountsByCurrency,
+    defaultCurrencyCode,
 }: Props) {
     const stats = [
         {
@@ -80,7 +94,40 @@ export default function DashboardCards({
         },
         {
             label: "Total Amount",
-            count: `RM ${totalAmount.toFixed(2)}`,
+            count: (
+                <div className="space-y-1 w-full">
+                    <div className="text-lg font-bold">
+                        {defaultCurrencyCode === "MYR"
+                            ? "RM"
+                            : defaultCurrencyCode}{" "}
+                        {formatAmount(
+                            amountsByCurrency?.[defaultCurrencyCode || "MYR"] ||
+                                0,
+                            defaultCurrencyCode || "MYR"
+                        )}
+                    </div>
+                    {amountsByCurrency &&
+                        Object.keys(amountsByCurrency).length > 1 && (
+                            <div className="text-xs text-muted-foreground space-y-1">
+                                {Object.entries(amountsByCurrency)
+                                    .filter(
+                                        ([code]) => code !== defaultCurrencyCode
+                                    )
+                                    .map(([code, amount]) => (
+                                        <div
+                                            key={code}
+                                            className="flex justify-between"
+                                        >
+                                            <span>{code}:</span>
+                                            <span>
+                                                {formatAmount(amount, code)}
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                </div>
+            ),
             icon: <DollarSign className="h-6 w-6 text-primary" />,
             url: route("club.payments.index"),
         },
@@ -124,7 +171,11 @@ export default function DashboardCards({
                             <Link
                                 key={item.label}
                                 href={item.url}
-                                className="block group"
+                                className={`block group ${
+                                    item.label === "Total Amount"
+                                        ? "col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4"
+                                        : ""
+                                }`}
                             >
                                 <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

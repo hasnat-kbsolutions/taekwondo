@@ -41,9 +41,26 @@ class PaymentController extends Controller
 
         $payments = $query->latest()->get();
 
+        // Calculate payment statistics with currency breakdown
+        $totalPayments = $payments->count();
+        $paidPayments = $payments->where('status', 'paid')->count();
+        $pendingPayments = $payments->where('status', 'pending')->count();
+
+        $amountsByCurrency = $payments->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        $defaultCurrencyCode = $user->userable->default_currency ?? 'MYR';
+
         return Inertia::render('Club/Payments/Index', [
             'payments' => $payments,
             'filters' => $request->only(['status', 'payment_month']),
+            'totalPayments' => $totalPayments,
+            'paidPayments' => $paidPayments,
+            'pendingPayments' => $pendingPayments,
+            'amountsByCurrency' => $amountsByCurrency,
+            'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
     }
 

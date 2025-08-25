@@ -15,7 +15,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Edit, Trash2, FileText } from "lucide-react";
+import {
+    MoreHorizontal,
+    Edit,
+    Trash2,
+    FileText,
+    DollarSign,
+    BadgeCheck,
+    Hourglass,
+} from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -36,6 +44,11 @@ interface Payment {
     payment_month: string;
     pay_at: string;
     notes?: string;
+    currency_code?: string;
+    currency?: {
+        code: string;
+        symbol: string;
+    };
 }
 
 interface Props {
@@ -44,7 +57,22 @@ interface Props {
         status?: string;
         payment_month?: string;
     };
+    totalPayments?: number;
+    paidPayments?: number;
+    pendingPayments?: number;
+    amountsByCurrency?: Record<string, number>;
+    defaultCurrencyCode?: string;
 }
+
+// Utility function to safely format amounts
+const formatAmount = (amount: any, currencyCode: string = "MYR") => {
+    const numAmount = Number(amount) || 0;
+    if (currencyCode === "JPY") {
+        return numAmount.toLocaleString();
+    } else {
+        return numAmount.toFixed(2);
+    }
+};
 
 const columns: ColumnDef<Payment>[] = [
     {
@@ -55,7 +83,17 @@ const columns: ColumnDef<Payment>[] = [
         header: "Student",
         cell: ({ row }) => row.original.student?.name || "-",
     },
-    { header: "Amount", accessorKey: "amount" },
+    {
+        header: "Amount",
+        cell: ({ row }) => {
+            const currencySymbol = row.original.currency?.symbol || "RM";
+            const currencyCode = row.original.currency_code || "MYR";
+            return `${currencySymbol} ${formatAmount(
+                row.original.amount,
+                currencyCode
+            )}`;
+        },
+    },
     {
         header: "Status",
         cell: ({ row }) => (
@@ -139,7 +177,15 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-export default function PaymentIndex({ payments, filters }: Props) {
+export default function PaymentIndex({
+    payments,
+    filters,
+    totalPayments,
+    paidPayments,
+    pendingPayments,
+    amountsByCurrency,
+    defaultCurrencyCode,
+}: Props) {
     const [status, setStatus] = useState(filters.status || "");
 
     const [selectedYear, setSelectedYear] = useState(
@@ -304,6 +350,101 @@ export default function PaymentIndex({ payments, filters }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Payments
+                            </CardTitle>
+                            <DollarSign className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {totalPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Paid
+                            </CardTitle>
+                            <BadgeCheck className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {paidPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Pending
+                            </CardTitle>
+                            <Hourglass className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-yellow-500">
+                                {pendingPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Revenue
+                            </CardTitle>
+                            <DollarSign className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-1 w-full">
+                                <div className="text-lg font-bold">
+                                    {defaultCurrencyCode === "MYR"
+                                        ? "RM"
+                                        : defaultCurrencyCode}{" "}
+                                    {formatAmount(
+                                        amountsByCurrency?.[
+                                            defaultCurrencyCode || "MYR"
+                                        ] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </div>
+                                {amountsByCurrency &&
+                                    Object.keys(amountsByCurrency).length >
+                                        1 && (
+                                        <div className="text-xs text-muted-foreground space-y-1">
+                                            {Object.entries(amountsByCurrency)
+                                                .filter(
+                                                    ([code]) =>
+                                                        code !==
+                                                        defaultCurrencyCode
+                                                )
+                                                .map(([code, amount]) => (
+                                                    <div
+                                                        key={code}
+                                                        className="flex justify-between"
+                                                    >
+                                                        <span>{code}:</span>
+                                                        <span>
+                                                            {formatAmount(
+                                                                amount,
+                                                                code
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Payments Table */}
                 <Card>
