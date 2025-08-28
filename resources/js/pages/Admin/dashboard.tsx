@@ -91,13 +91,13 @@ export default function DashboardCards({
                     )}
                 </div>
             ),
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            // icon: <DollarSign className="h-6 w-6 text-primary" />,
             url: route("admin.payments.index"),
         },
         {
             label: "Total Payments",
             count: paymentsCount,
-            icon: <DollarSign className="h-6 w-6 text-primary w-100" />,
+            // icon: <DollarSign className="h-6 w-6 text-primary w-100" />,
             url: route("admin.payments.index"),
         },
 
