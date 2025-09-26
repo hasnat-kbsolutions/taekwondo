@@ -1,28 +1,34 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import AuthenticatedLayout from '@/layouts/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Head } from "@inertiajs/react";
+import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
-import RatingStars from '@/components/RatingStars';
-import { 
-    User, 
-    Users, 
-    Building2, 
-    MapPin, 
-    Globe, 
-    Phone, 
-    Mail, 
-    Star, 
-    Calendar, 
-    Award, 
+import RatingStars from "@/components/RatingStars";
+import {
+    User,
+    Users,
+    Building2,
+    MapPin,
+    Globe,
+    Phone,
+    Mail,
+    Star,
+    Calendar,
+    Award,
     CreditCard,
     TrendingUp,
     Users2,
-    GraduationCap
-} from 'lucide-react';
+    GraduationCap,
+} from "lucide-react";
 
 interface Club {
     id: number;
@@ -83,25 +89,23 @@ interface Props {
     };
 }
 
-export default function Show({ 
-    club, 
-    ratingsReceived = [], 
-    students = [], 
+export default function Show({
+    club,
+    ratingsReceived = [],
+    students = [],
     instructors = [],
     stats = {
         students_count: 0,
         instructors_count: 0,
         certifications_count: 0,
         attendances_count: 0,
-        payments_count: 0
-    }
+        payments_count: 0,
+    },
 }: Props) {
-
-
     return (
         <AuthenticatedLayout header="Club Profile">
             <Head title="Club Profile" />
-            
+
             <div className="container mx-auto py-10">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Profile Information */}
@@ -116,22 +120,51 @@ export default function Show({
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2">
+                                        <Label className="text-sm font-medium text-muted-foreground">
+                                            Logo
+                                        </Label>
+                                        <div className="mt-2">
+                                            {club.logo ? (
+                                                <img
+                                                    src={`/storage/${club.logo}`}
+                                                    alt={`${club.name} Logo`}
+                                                    className="w-20 h-20 object-cover rounded-lg border"
+                                                />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-lg border bg-muted flex items-center justify-center">
+                                                    <span className="text-2xl font-bold text-muted-foreground">
+                                                        {club.name.charAt(0)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Name
                                         </Label>
-                                        <p className="text-lg font-semibold">{club.name}</p>
+                                        <p className="text-lg font-semibold">
+                                            {club.name}
+                                        </p>
                                     </div>
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Status
                                         </Label>
-                                        <Badge variant={club.status === 'active' ? 'default' : 'secondary'}>
+                                        <Badge
+                                            variant={
+                                                club.status === "active"
+                                                    ? "default"
+                                                    : "secondary"
+                                            }
+                                        >
                                             {club.status}
                                         </Badge>
                                     </div>
-                                    
+
                                     {club.organization && (
                                         <div>
                                             <Label className="text-sm font-medium text-muted-foreground">
@@ -142,7 +175,7 @@ export default function Show({
                                             </p>
                                         </div>
                                     )}
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Email
@@ -152,7 +185,7 @@ export default function Show({
                                             {club.email}
                                         </p>
                                     </div>
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Phone
@@ -162,7 +195,7 @@ export default function Show({
                                             {club.phone}
                                         </p>
                                     </div>
-                                    
+
                                     {club.website && (
                                         <div>
                                             <Label className="text-sm font-medium text-muted-foreground">
@@ -170,9 +203,9 @@ export default function Show({
                                             </Label>
                                             <p className="text-lg flex items-center gap-2">
                                                 <Globe className="h-4 w-4" />
-                                                <a 
-                                                    href={club.website} 
-                                                    target="_blank" 
+                                                <a
+                                                    href={club.website}
+                                                    target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-600 hover:underline"
                                                 >
@@ -181,22 +214,26 @@ export default function Show({
                                             </p>
                                         </div>
                                     )}
-                                    
+
                                     {club.tax_number && (
                                         <div>
                                             <Label className="text-sm font-medium text-muted-foreground">
                                                 Tax Number
                                             </Label>
-                                            <p className="text-lg">{club.tax_number}</p>
+                                            <p className="text-lg">
+                                                {club.tax_number}
+                                            </p>
                                         </div>
                                     )}
-                                    
+
                                     {club.invoice_prefix && (
                                         <div>
                                             <Label className="text-sm font-medium text-muted-foreground">
                                                 Invoice Prefix
                                             </Label>
-                                            <p className="text-lg">{club.invoice_prefix}</p>
+                                            <p className="text-lg">
+                                                {club.invoice_prefix}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -219,26 +256,30 @@ export default function Show({
                                         </Label>
                                         <p className="text-lg">{club.street}</p>
                                     </div>
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             City
                                         </Label>
                                         <p className="text-lg">{club.city}</p>
                                     </div>
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Postal Code
                                         </Label>
-                                        <p className="text-lg">{club.postal_code}</p>
+                                        <p className="text-lg">
+                                            {club.postal_code}
+                                        </p>
                                     </div>
-                                    
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Country
                                         </Label>
-                                        <p className="text-lg">{club.country}</p>
+                                        <p className="text-lg">
+                                            {club.country}
+                                        </p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -250,12 +291,21 @@ export default function Show({
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Star className="h-5 w-5" />
-                                        Ratings Received ({ratingsReceived.length})
+                                        Ratings Received (
+                                        {ratingsReceived.length})
                                         {club.average_rating && (
                                             <div className="flex items-center gap-2 ml-auto">
-                                                <RatingStars rating={club.average_rating} readonly size="sm" />
+                                                <RatingStars
+                                                    rating={club.average_rating}
+                                                    readonly
+                                                    size="sm"
+                                                />
                                                 <span className="text-sm text-muted-foreground">
-                                                    {club.average_rating.toFixed(1)} ({club.total_ratings} ratings)
+                                                    {club.average_rating.toFixed(
+                                                        1
+                                                    )}{" "}
+                                                    ({club.total_ratings}{" "}
+                                                    ratings)
                                                 </span>
                                             </div>
                                         )}
@@ -271,7 +321,9 @@ export default function Show({
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className="flex items-center gap-2">
                                                         <RatingStars
-                                                            rating={rating.rating}
+                                                            rating={
+                                                                rating.rating
+                                                            }
                                                             readonly
                                                             size="sm"
                                                         />
@@ -283,7 +335,9 @@ export default function Show({
                                                         </Badge>
                                                     </div>
                                                     <span className="text-sm text-muted-foreground">
-                                                        {new Date(rating.created_at).toLocaleDateString()}
+                                                        {new Date(
+                                                            rating.created_at
+                                                        ).toLocaleDateString()}
                                                     </span>
                                                 </div>
                                                 {rating.comment && (
@@ -297,8 +351,6 @@ export default function Show({
                                 </CardContent>
                             </Card>
                         )}
-
-
                     </div>
 
                     {/* Sidebar */}
@@ -317,39 +369,49 @@ export default function Show({
                                         <Users2 className="h-5 w-5 text-blue-600" />
                                         <span>Students</span>
                                     </div>
-                                    <span className="font-semibold">{stats.students_count}</span>
+                                    <span className="font-semibold">
+                                        {stats.students_count}
+                                    </span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <GraduationCap className="h-5 w-5 text-green-600" />
                                         <span>Instructors</span>
                                     </div>
-                                    <span className="font-semibold">{stats.instructors_count}</span>
+                                    <span className="font-semibold">
+                                        {stats.instructors_count}
+                                    </span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Award className="h-5 w-5 text-yellow-600" />
                                         <span>Certifications</span>
                                     </div>
-                                    <span className="font-semibold">{stats.certifications_count}</span>
+                                    <span className="font-semibold">
+                                        {stats.certifications_count}
+                                    </span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-5 w-5 text-purple-600" />
                                         <span>Attendances</span>
                                     </div>
-                                    <span className="font-semibold">{stats.attendances_count}</span>
+                                    <span className="font-semibold">
+                                        {stats.attendances_count}
+                                    </span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <CreditCard className="h-5 w-5 text-red-600" />
                                         <span>Payments</span>
                                     </div>
-                                    <span className="font-semibold">{stats.payments_count}</span>
+                                    <span className="font-semibold">
+                                        {stats.payments_count}
+                                    </span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -367,46 +429,66 @@ export default function Show({
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    <Button 
-                                        variant="outline" 
+                                    <Button
+                                        variant="outline"
                                         className="w-full justify-start"
-                                        onClick={() => window.location.href = route('club.students.index')}
+                                        onClick={() =>
+                                            (window.location.href = route(
+                                                "club.students.index"
+                                            ))
+                                        }
                                     >
                                         <User className="h-4 w-4 mr-2" />
                                         Manage Students
                                     </Button>
-                                    
-                                    <Button 
-                                        variant="outline" 
+
+                                    <Button
+                                        variant="outline"
                                         className="w-full justify-start"
-                                        onClick={() => window.location.href = route('club.instructors.index')}
+                                        onClick={() =>
+                                            (window.location.href = route(
+                                                "club.instructors.index"
+                                            ))
+                                        }
                                     >
                                         <GraduationCap className="h-4 w-4 mr-2" />
                                         Manage Instructors
                                     </Button>
-                                    
-                                    <Button 
-                                        variant="outline" 
+
+                                    <Button
+                                        variant="outline"
                                         className="w-full justify-start"
-                                        onClick={() => window.location.href = route('club.certifications.index')}
+                                        onClick={() =>
+                                            (window.location.href = route(
+                                                "club.certifications.index"
+                                            ))
+                                        }
                                     >
                                         <Award className="h-4 w-4 mr-2" />
                                         Manage Certifications
                                     </Button>
-                                    
-                                    <Button 
-                                        variant="outline" 
+
+                                    <Button
+                                        variant="outline"
                                         className="w-full justify-start"
-                                        onClick={() => window.location.href = route('club.attendances.index')}
+                                        onClick={() =>
+                                            (window.location.href = route(
+                                                "club.attendances.index"
+                                            ))
+                                        }
                                     >
                                         <Calendar className="h-4 w-4 mr-2" />
                                         Manage Attendances
                                     </Button>
-                                    
-                                    <Button 
-                                        variant="outline" 
+
+                                    <Button
+                                        variant="outline"
                                         className="w-full justify-start"
-                                        onClick={() => window.location.href = route('club.payments.index')}
+                                        onClick={() =>
+                                            (window.location.href = route(
+                                                "club.payments.index"
+                                            ))
+                                        }
                                     >
                                         <CreditCard className="h-4 w-4 mr-2" />
                                         Manage Payments

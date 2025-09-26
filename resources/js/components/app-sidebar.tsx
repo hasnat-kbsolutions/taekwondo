@@ -26,8 +26,6 @@ import { Link, usePage } from "@inertiajs/react";
 
 import { PageProps } from "@/types";
 
-// const { auth } = usePage<PageProps>().props;
-
 import { LucideIcon } from "lucide-react";
 
 type NavItem = {
@@ -128,14 +126,12 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/admin/reports",
             icon: SquareTerminal,
         },
-               {
+        {
             title: "Settings",
             url: "#",
             icon: SquareTerminal,
             isActive: false,
-            items: [
-                { title: "Currencies", url: "/admin/currencies" },
-            ],
+            items: [{ title: "Currencies", url: "/admin/currencies" }],
         },
     ],
 
@@ -246,13 +242,15 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/instructor/attendances",
             icon: SquareTerminal,
         },
-    
     ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { auth } = usePage<PageProps>().props;
     const role = (auth.user?.role ?? "student") as keyof typeof NAV_MENUS;
+
+    // Type assertion for userable
+    const user = auth.user as any;
 
     const navMain = NAV_MENUS[role];
 
@@ -265,17 +263,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <Link href={route(`${role}.dashboard`)}>
                                 {" "}
                                 {/* Use route based on role */}
-                                <img
-                                    src="/assets/images/logo.jpg"
-                                    alt=""
-                                    width="30%"
-                                />
+                                {user?.userable?.logo ? (
+                                    <img
+                                        src={`/storage/${user.userable.logo}`}
+                                        alt={user.userable.name}
+                                        className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <span className="text-primary font-bold text-sm">
+                                            {user?.userable?.name?.charAt(0) ||
+                                                "M"}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="grid flex-1 text-left text-sm leading-tight ">
                                     <span className="truncate font-semibold">
-                                        MTF
+                                        {user?.userable?.name || "MTF"}
                                     </span>
                                     <span className="truncate text-xs ">
-                                        Malaysian Taekwon-Do <br /> Federation
+                                        {user?.userable?.type === "Organization"
+                                            ? "Organization"
+                                            : user?.userable?.type === "Club"
+                                            ? "Club"
+                                            : "Malaysian Taekwon-Do Federation"}
                                     </span>
                                 </div>
                             </Link>

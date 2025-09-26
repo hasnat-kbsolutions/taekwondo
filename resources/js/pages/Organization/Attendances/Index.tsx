@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import { toast } from "sonner";
@@ -171,7 +171,7 @@ export default function Index({
                                     </SelectContent>
                                 </Select>
                             </div>
-    
+
                             {/* Year Filter */}
                             <div className="flex flex-col w-[200px]">
                                 <Label className="text-sm mb-1">Year</Label>
@@ -190,7 +190,7 @@ export default function Index({
                                     </SelectContent>
                                 </Select>
                             </div>
-    
+
                             {/* Month Filter */}
                             <div className="flex flex-col w-[200px]">
                                 <Label className="text-sm mb-1">Month</Label>
@@ -200,19 +200,27 @@ export default function Index({
                                     </SelectTrigger>
                                     <SelectContent>
                                         {Array.from({ length: 12 }, (_, i) => {
-                                            const m = (i + 1).toString().padStart(2, "0");
+                                            const m = (i + 1)
+                                                .toString()
+                                                .padStart(2, "0");
                                             return (
                                                 <SelectItem key={m} value={m}>
-                                                    {new Date(0, i).toLocaleString("default", {
-                                                        month: "long",
-                                                    })}
+                                                    {new Date(
+                                                        0,
+                                                        i
+                                                    ).toLocaleString(
+                                                        "default",
+                                                        {
+                                                            month: "long",
+                                                        }
+                                                    )}
                                                 </SelectItem>
                                             );
                                         })}
                                     </SelectContent>
                                 </Select>
                             </div>
-    
+
                             {/* Reset Button */}
                             <div className="flex items-end">
                                 <Button
@@ -226,7 +234,7 @@ export default function Index({
                     </CardContent>
                 </Card>
             </div>
-    
+
             {/* Attendance Table Section */}
             <div className="container mx-auto">
                 <Card>
@@ -251,33 +259,56 @@ export default function Index({
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {attendanceData.map(({ student, records }) => (
-                                            <TableRow key={student.id}>
-                                                <TableCell>{student.name}</TableCell>
-                                                {days.map((day) => {
-                                                    const d = format(day, "yyyy-MM-dd");
-                                                    const status = records[d];
-                                                    return (
-                                                        <TableCell
-                                                            key={d}
-                                                            className="text-center"
+                                        {attendanceData.map(
+                                            ({ student, records }) => (
+                                                <TableRow key={student.id}>
+                                                    <TableCell>
+                                                        <Link
+                                                            href={route(
+                                                                "organization.student-insights.show",
+                                                                student.id
+                                                            )}
+                                                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={status === "present"}
-                                                                onChange={(e) =>
-                                                                    handleAttendanceToggle(
-                                                                        student.id,
-                                                                        d,
-                                                                        e.target.checked
-                                                                    )
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </TableRow>
-                                        ))}
+                                                            {student.name}
+                                                        </Link>
+                                                    </TableCell>
+                                                    {days.map((day) => {
+                                                        const d = format(
+                                                            day,
+                                                            "yyyy-MM-dd"
+                                                        );
+                                                        const status =
+                                                            records[d];
+                                                        return (
+                                                            <TableCell
+                                                                key={d}
+                                                                className="text-center"
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={
+                                                                        status ===
+                                                                        "present"
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        handleAttendanceToggle(
+                                                                            student.id,
+                                                                            d,
+                                                                            e
+                                                                                .target
+                                                                                .checked
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </TableCell>
+                                                        );
+                                                    })}
+                                                </TableRow>
+                                            )
+                                        )}
                                     </TableBody>
                                 </Table>
                             </div>
@@ -287,5 +318,4 @@ export default function Index({
             </div>
         </AuthenticatedLayout>
     );
-    
 }

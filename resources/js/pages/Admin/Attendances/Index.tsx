@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import { toast } from "sonner";
@@ -268,7 +268,15 @@ export default function Index({
                                             ({ student, records }) => (
                                                 <TableRow key={student.id}>
                                                     <TableCell>
-                                                        {student.name}
+                                                        <Link
+                                                            href={route(
+                                                                "admin.student-insights.show",
+                                                                student.id
+                                                            )}
+                                                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                                                        >
+                                                            {student.name}
+                                                        </Link>
                                                     </TableCell>
                                                     {days.map((day) => {
                                                         const d = format(
@@ -315,5 +323,4 @@ export default function Index({
             </div>
         </AuthenticatedLayout>
     );
-    
 }

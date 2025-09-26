@@ -5,6 +5,24 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+    Building2,
+    MapPin,
+    Phone,
+    Mail,
+    Calendar,
+    User,
+    CreditCard,
+    Printer,
+} from "lucide-react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 export default function Invoice() {
     const { payment } = usePage().props as any;
@@ -13,106 +31,288 @@ export default function Invoice() {
     const student = payment.student || {};
     const club = student.club || {};
     const organization = student.organization || {};
+    const currency = payment.currency || { symbol: "$", code: "USD" };
     const items = payment.items || [];
     const total = payment.total || payment.amount || 0;
 
+    // Format date
+    const formatDate = (dateString: string) => {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    };
+
+    // Generate invoice number with prefix
+    const invoiceNumber = `${club.invoice_prefix || "INV"}-${payment.id
+        .toString()
+        .padStart(6, "0")}`;
+
     return (
-       <div className="flex items-center justify-center min-h-screen bg-[#0e0e10] px-4 py-10 font-poppins">
-        <Card className="w-full max-w-2xl rounded-xl bg-[#1b1b1d] border border-[#bebecf] shadow-[0_4px_20px_rgba(0,0,0,0.7)]">
-          <CardHeader className="">
-            <div className="flex justify-between items-start">
-              <div className="w-full">
-                <div className="text-right text-sm text-white font-medium">
-                  Invoice #{payment.id}
-                </div>
-                <CardTitle className="text-5xl font-bold text-white tracking-tight mt-3 mb-2">
-                  Invoice
-                </CardTitle>
-              </div>
-            </div>
-            <div className="mt-4 space-y-1 text-base text-white">
-              <div className="flex justify-between">
-                <span className="font-semibold">Date</span>
-                <span>{payment.pay_at}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Month</span>
-                <span>{payment.payment_month}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Status</span>
-                <Badge className="capitalize bg-green-500/90 text-white font-medium px-3 py-0.5 rounded-md">
-                  {payment.status}
-                </Badge>
-              </div>
-            </div>
-              <div className=" pt-6  border-b  border-[#9999aa]" />
-          </CardHeader>
-      
-          <CardContent className="pt-2 text-white">
-            <Label className="text-xl font-semibold mb-3 block">
-              Student Details
-            </Label>
-            <div className="space-y-2 text-base">
-              <div className="flex justify-between">
-                <span className="font-medium">Name</span>
-                <span>{student.name} {student.surname}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Student ID</span>
-                <span>{student.uid}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Club</span>
-                <span>{club.name || "-"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Organization</span>
-                <span>{organization.name || "-"}</span>
-              </div>
-            </div>
-      
-            <div className="mt-6">
-              <Label className="text-xl font-semibold mb-3 block">
-                Items
-              </Label>
-              {items.length > 0 ? (
-                <div className="space-y-3">
-                  {items.map((item: any, idx: number) => (
-                    <div key={idx} className="flex justify-between text-base">
-                      <span>{item.description}</span>
-                      <span>${item.amount?.toFixed ? item.amount.toFixed(2) : item.amount}</span>
+        <div className="min-h-screen bg-background py-8 px-4 print:bg-white print:py-0 print:px-0">
+            <div className="max-w-4xl mx-auto bg-card shadow-lg rounded-lg overflow-hidden print:shadow-none print:rounded-none border print:w-[210mm] print:h-[297mm] print:max-w-none print:mx-0">
+                {/* Header */}
+                <div className="bg-muted border-b p-8 print:p-6">
+                    <div className="flex justify-between items-start">
+                        <div className="flex items-center space-x-4">
+                            {organization.logo ? (
+                                <img
+                                    src={`/storage/${organization.logo}`}
+                                    alt={`${organization.name} Logo`}
+                                    className="w-16 h-16 rounded-lg object-cover bg-background p-2 border"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-lg bg-muted-foreground/10 flex items-center justify-center border">
+                                    <Building2 className="w-8 h-8 text-muted-foreground" />
+                                </div>
+                            )}
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground">
+                                    {organization.name || "Organization"}
+                                </h1>
+                                {club.name && (
+                                    <p className="text-muted-foreground text-lg">
+                                        {club.name}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <h2 className="text-2xl font-bold mb-2 text-foreground">
+                                INVOICE
+                            </h2>
+                            <p className="text-muted-foreground">
+                                #{invoiceNumber}
+                            </p>
+                        </div>
                     </div>
-                  ))}
                 </div>
-              ) : (
-                <div className="text-white">No items listed.</div>
-              )}
+
+                {/* Invoice Details */}
+                <div className="p-8 print:p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 print:gap-6 print:mb-6">
+                        {/* From */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                                <Building2 className="w-5 h-5 mr-2" />
+                                From
+                            </h3>
+                            <div className="space-y-2 text-muted-foreground">
+                                <p className="font-semibold text-foreground">
+                                    {organization.name || "Organization"}
+                                </p>
+                                {organization.street && (
+                                    <p className="flex items-center">
+                                        <MapPin className="w-4 h-4 mr-2" />
+                                        {organization.street}
+                                    </p>
+                                )}
+                                {organization.city && organization.country && (
+                                    <p>
+                                        {organization.city},{" "}
+                                        {organization.country}
+                                    </p>
+                                )}
+                                {organization.phone && (
+                                    <p className="flex items-center">
+                                        <Phone className="w-4 h-4 mr-2" />
+                                        {organization.phone}
+                                    </p>
+                                )}
+                                {organization.email && (
+                                    <p className="flex items-center">
+                                        <Mail className="w-4 h-4 mr-2" />
+                                        {organization.email}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* To */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                                <User className="w-5 h-5 mr-2" />
+                                Bill To
+                            </h3>
+                            <div className="space-y-2 text-muted-foreground">
+                                <p className="font-semibold text-foreground">
+                                    {student.name} {student.surname}
+                                </p>
+                                <p>Student ID: {student.uid}</p>
+                                {student.email && (
+                                    <p className="flex items-center">
+                                        <Mail className="w-4 h-4 mr-2" />
+                                        {student.email}
+                                    </p>
+                                )}
+                                {student.phone && (
+                                    <p className="flex items-center">
+                                        <Phone className="w-4 h-4 mr-2" />
+                                        {student.phone}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Invoice Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 bg-muted/50 rounded-lg print:gap-4 print:mb-6 print:p-4">
+                        <div className="text-center">
+                            <p className="text-sm text-muted-foreground mb-1">
+                                Invoice Date
+                            </p>
+                            <p className="font-semibold text-foreground flex items-center justify-center">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                {formatDate(payment.pay_at)}
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm text-muted-foreground mb-1">
+                                Payment Month
+                            </p>
+                            <p className="font-semibold text-foreground">
+                                {payment.payment_month}
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm text-muted-foreground mb-1">
+                                Status
+                            </p>
+                            <Badge className="capitalize font-medium px-3 py-1 bg-muted text-muted-foreground">
+                                {payment.status}
+                            </Badge>
+                        </div>
+                    </div>
+
+                    {/* Items Table */}
+                    <div className="mb-8 print:mb-6">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                            <CreditCard className="w-5 h-5 mr-2" />
+                            Payment Details
+                        </h3>
+                        <div className="rounded-lg border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Description</TableHead>
+                                        <TableHead>Method</TableHead>
+                                        <TableHead className="text-right">
+                                            Amount
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {items.length > 0 ? (
+                                        items.map((item: any, idx: number) => (
+                                            <TableRow key={idx}>
+                                                <TableCell className="font-medium">
+                                                    {item.description ||
+                                                        "Payment"}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground">
+                                                    {payment.method || "N/A"}
+                                                </TableCell>
+                                                <TableCell className="text-right font-medium">
+                                                    {currency.symbol}
+                                                    {item.amount?.toFixed
+                                                        ? item.amount.toFixed(2)
+                                                        : item.amount}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell className="font-medium">
+                                                Monthly Payment
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {payment.method || "N/A"}
+                                            </TableCell>
+                                            <TableCell className="text-right font-medium">
+                                                {currency.symbol}
+                                                {total?.toFixed
+                                                    ? total.toFixed(2)
+                                                    : total}
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Total */}
+                    <div className="flex justify-end mb-8 print:mb-6">
+                        <div className="w-64">
+                            <div className="bg-muted/50 p-6 rounded-lg">
+                                <div className="flex justify-between items-center text-lg font-semibold text-foreground">
+                                    <span>Total Amount:</span>
+                                    <span>
+                                        {currency.symbol}
+                                        {total?.toFixed
+                                            ? total.toFixed(2)
+                                            : total}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-muted-foreground mt-2">
+                                    Currency: {currency.code}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notes */}
+                    {payment.notes && (
+                        <div className="mb-8 p-4 bg-muted border-l-4 border-border rounded print:mb-6 print:p-3">
+                            <h4 className="text-sm font-medium text-foreground mb-2">
+                                Notes:
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                                {payment.notes}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="border-t border-border pt-8 print:pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:gap-6">
+                            <div>
+                                <h4 className="text-sm font-medium text-foreground mb-2">
+                                    Payment Terms
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Payment is due upon receipt of this invoice.
+                                    Please contact us if you have any questions.
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <h4 className="text-sm font-medium text-foreground mb-2">
+                                    Thank You!
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                    We appreciate your business and continued
+                                    support.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Print Button */}
+                <div className="bg-muted/50 px-8 py-4 print:hidden">
+                    <div className="flex justify-end">
+                        <Button
+                            onClick={() => window.print()}
+                            variant="outline"
+                        >
+                            <Printer className="w-4 h-4 mr-2" />
+                            Print Invoice
+                        </Button>
+                    </div>
+                </div>
             </div>
-      
-            <div className="border-t border-[#9898a8] my-6" />
-      
-            <div className="flex justify-between items-center text-xl font-semibold">
-              <span>Total</span>
-              <span>${total?.toFixed ? total.toFixed(2) : total}</span>
-            </div>
-      
-            {payment.notes && (
-              <div className="text-sm mt-4">
-                {payment.notes}
-              </div>
-            )}
-      
-            <div className="mt-10 flex justify-end">
-              <Button
-                onClick={() => window.print()}
-                className="bg-white text-black hover:bg-gray-200 font-semibold px-5 py-2 rounded-md"
-              >
-                Print Invoice
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        </div>
     );
 }

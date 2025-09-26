@@ -70,6 +70,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'destroy'])->name('students.destroy');
 
+    // Student Insights
+    Route::get('/student-insights/{student}', [App\Http\Controllers\Admin\StudentInsightsController::class, 'show'])->name('student-insights.show');
+
     // Club Routes
     Route::get('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'index'])->name('clubs.index');
     Route::get('/clubs/create', [App\Http\Controllers\Admin\ClubController::class, 'create'])->name('clubs.create');
@@ -199,6 +202,12 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
 
     // Organization Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'organizationIndex'])->name('ratings.index');
+
+    // Organization Insights
+    Route::get('/insights', [App\Http\Controllers\Organization\OrganizationInsightsController::class, 'show'])->name('insights.show');
+
+    // Organization Student Insights
+    Route::get('/student-insights/{student}', [App\Http\Controllers\Organization\StudentInsightsController::class, 'show'])->name('student-insights.show');
 });
 
 // Club routes
@@ -252,8 +261,11 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     // Club Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'clubIndex'])->name('ratings.index');
 
+    // Club Insights
+    Route::get('/insights', [App\Http\Controllers\Club\ClubInsightsController::class, 'show'])->name('insights.show');
 
-
+    // Club Student Insights
+    Route::get('/student-insights/{student}', [App\Http\Controllers\Club\StudentInsightsController::class, 'show'])->name('student-insights.show');
 });
 
 // Student routes
@@ -268,6 +280,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 
     // Student Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'index'])->name('ratings.index');
+
+    // Student Student Insights
+    Route::get('/student-insights', [App\Http\Controllers\Student\StudentInsightsController::class, 'show'])->name('student-insights.show');
 });
 
 // Guardian routes
@@ -293,6 +308,11 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::put('/attendances/{attendance}', [App\Http\Controllers\Instructor\AttendanceController::class, 'update'])->name('attendances.update');
     Route::delete('/attendances/{attendance}', [App\Http\Controllers\Instructor\AttendanceController::class, 'destroy'])->name('attendances.destroy');
     Route::post('/attendances/toggle', [App\Http\Controllers\Instructor\AttendanceController::class, 'toggle'])->name('attendances.toggle');
+
+    // Instructor Insights
+    Route::get('/insights', [App\Http\Controllers\Instructor\InstructorInsightsController::class, 'show'])->name('insights.show');
+
+    // Instructor Student Insights
 });
 
 // Rating routes (accessible by all authenticated users)

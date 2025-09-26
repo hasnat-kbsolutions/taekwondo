@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import { toast } from "sonner";
@@ -233,7 +233,7 @@ export default function Index({
                                         {attendanceData.map(
                                             ({ student, records }) => (
                                                 <TableRow key={student.id}>
-                                                    <TableCell>
+                                                    <TableCell className="font-medium">
                                                         {student.name}{" "}
                                                         {student.surname}
                                                     </TableCell>

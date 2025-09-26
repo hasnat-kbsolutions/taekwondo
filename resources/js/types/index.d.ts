@@ -5,8 +5,14 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    email_verified_at: string;
-    role: 'admin' | 'organization' | 'branch' | 'student';
+    userable_type: string | null;
+    role: 'admin' | 'organization' | 'club' | 'student' | 'instructor' | 'guardian' | 'branch';
+    userable: {
+        id: number;
+        name: string;
+        logo: string | null;
+        type: string;
+    } | null;
 }
 
 export type PageProps<

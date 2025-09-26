@@ -34,6 +34,12 @@ class Student extends Model
         'status',
     ];
 
+    protected $casts = [
+        'dob' => 'date',
+        'dod' => 'date',
+        'status' => 'boolean',
+    ];
+
     public function certifications()
     {
         return $this->hasMany(Certification::class);

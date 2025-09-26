@@ -86,7 +86,18 @@ export const columns = (
         },
     },
     { accessorKey: "code", header: "Code" },
-    { accessorKey: "name", header: "Name" },
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => (
+            <Link
+                href={route("admin.student-insights.show", row.original.id)}
+                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+                {row.original.name}
+            </Link>
+        ),
+    },
     { accessorKey: "surname", header: "Surname" },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },

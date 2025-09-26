@@ -41,6 +41,7 @@ interface Organization {
     street: string;
     postal_code: string;
     status: string;
+    logo?: string;
     average_rating?: number;
     total_ratings?: number;
 }
@@ -97,6 +98,29 @@ export default function Show({
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2">
+                                        <Label className="text-sm font-medium text-muted-foreground">
+                                            Logo
+                                        </Label>
+                                        <div className="mt-2">
+                                            {organization.logo ? (
+                                                <img
+                                                    src={`/storage/${organization.logo}`}
+                                                    alt={`${organization.name} Logo`}
+                                                    className="w-20 h-20 object-cover rounded-lg border"
+                                                />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-lg border bg-muted flex items-center justify-center">
+                                                    <span className="text-2xl font-bold text-muted-foreground">
+                                                        {organization.name.charAt(
+                                                            0
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <Label className="text-sm font-medium text-muted-foreground">
                                             Name

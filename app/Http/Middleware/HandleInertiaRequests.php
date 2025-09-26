@@ -42,7 +42,20 @@ class HandleInertiaRequests extends Middleware
                 'import_log' => fn() => $request->session()->get('import_log'),
             ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'email' => $request->user()->email,
+                    'userable_type' => $request->user()->userable_type,
+                    'role' => $request->user()->userable_type ?
+                        strtolower(class_basename($request->user()->userable_type)) :
+                        'admin',
+                    'userable' => $request->user()->userable ? [
+                        'id' => $request->user()->userable->id,
+                        'name' => $request->user()->userable->name,
+                        'logo' => $request->user()->userable->logo,
+                        'type' => class_basename($request->user()->userable_type),
+                    ] : null,
+                ] : null,
             ],
         ];
     }
