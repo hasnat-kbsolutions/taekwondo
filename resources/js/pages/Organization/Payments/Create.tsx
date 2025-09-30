@@ -23,8 +23,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Create() {
-    const { students, currencies, defaultCurrency, bank_information, errors } = usePage()
-        .props as any;
+    const { students, currencies, defaultCurrency, bank_information, errors } =
+        usePage().props as any;
 
     const [form, setForm] = useState({
         student_id: "",
@@ -35,7 +35,7 @@ export default function Create() {
         pay_at: "",
         payment_month: "",
         notes: "",
-        bank_information: [],
+        bank_information: [] as number[],
     });
 
     const handleChange = (field: string, value: string) => {
@@ -307,9 +307,11 @@ export default function Create() {
                             {/* Bank Information Selection */}
                             <div className="space-y-4">
                                 <Label className="text-base font-semibold">
-                                    Bank Information (Select banks to show on invoice)
+                                    Bank Information (Select banks to show on
+                                    invoice)
                                 </Label>
-                                {bank_information && bank_information.length > 0 ? (
+                                {bank_information &&
+                                bank_information.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {bank_information.map((bank: any) => (
                                             <div
@@ -318,8 +320,12 @@ export default function Create() {
                                             >
                                                 <Checkbox
                                                     id={`bank-${bank.id}`}
-                                                    checked={form.bank_information.includes(bank.id)}
-                                                    onCheckedChange={(checked) =>
+                                                    checked={form.bank_information.includes(
+                                                        bank.id
+                                                    )}
+                                                    onCheckedChange={(
+                                                        checked
+                                                    ) =>
                                                         handleBankSelection(
                                                             bank.id,
                                                             checked as boolean
@@ -334,8 +340,10 @@ export default function Create() {
                                                         {bank.bank_name}
                                                     </Label>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {bank.account_name} - {bank.account_number}
-                                                        {bank.currency && ` (${bank.currency})`}
+                                                        {bank.account_name} -{" "}
+                                                        {bank.account_number}
+                                                        {bank.currency &&
+                                                            ` (${bank.currency})`}
                                                     </div>
                                                 </div>
                                             </div>

@@ -36,7 +36,7 @@ export default function Create() {
         pay_at: "",
         payment_month: "",
         notes: "",
-        bank_information: [],
+        bank_information: [] as number[],
     });
 
     const handleChange = (field: string, value: string) => {

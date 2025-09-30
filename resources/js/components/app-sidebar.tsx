@@ -127,6 +127,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: SquareTerminal,
         },
         {
+            title: "Bank Information",
+            url: "/admin/bank-information",
+            icon: SquareTerminal,
+        },
+        {
             title: "Settings",
             url: "#",
             icon: SquareTerminal,
@@ -172,6 +177,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/organization/ratings",
             icon: Star,
         },
+        {
+            title: "Bank Information",
+            url: "/organization/bank-information",
+            icon: SquareTerminal,
+        },
     ],
 
     club: [
@@ -206,6 +216,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             title: "Ratings",
             url: "/club/ratings",
             icon: Star,
+        },
+        {
+            title: "Bank Information",
+            url: "/club/bank-information",
+            icon: SquareTerminal,
         },
     ],
 
