@@ -16,7 +16,7 @@ import {
     Building2,
     Users,
     Calendar,
-    DollarSign,
+    Coins,
     TrendingUp,
     UserCheck,
     Activity,
@@ -449,7 +449,7 @@ export default function OrganizationInsights({
                                         </span>
                                     </div>
                                     <div className="flex items-center space-x-3">
-                                        <DollarSign className="h-4 w-4 text-gray-500" />
+                                        <Coins className="h-4 w-4 text-gray-500" />
                                         <span className="text-sm text-gray-600">
                                             Currency:{" "}
                                             {organizationData.currency} (
@@ -985,7 +985,7 @@ export default function OrganizationInsights({
                                                         "student_registration" ? (
                                                             <Users className="h-5 w-5 text-blue-600" />
                                                         ) : (
-                                                            <DollarSign className="h-5 w-5 text-green-600" />
+                                                            <Coins className="h-5 w-5 text-green-600" />
                                                         )}
                                                     </div>
                                                     <div className="flex-1">

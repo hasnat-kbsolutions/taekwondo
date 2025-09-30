@@ -23,7 +23,7 @@ import {
 import {
     User,
     Calendar,
-    DollarSign,
+    Coins,
     Award,
     Star,
     TrendingUp,
@@ -38,6 +38,7 @@ import {
     BarChart3,
     PieChart,
     Edit,
+    DollarSign,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -586,7 +587,7 @@ export default function StudentInsights({
                             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">
                                 Payment Rate
                             </CardTitle>
-                            <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-green-900 dark:text-green-100">
@@ -733,7 +734,7 @@ export default function StudentInsights({
                                 value="payments"
                                 className="data-[state=active]:bg-green-500/10 data-[state=active]:text-green-700 dark:data-[state=active]:text-green-400"
                             >
-                                <DollarSign className="h-4 w-4 mr-2" />
+                                <Coins className="h-4 w-4 mr-2" />
                                 Payments
                             </TabsTrigger>
                             <TabsTrigger

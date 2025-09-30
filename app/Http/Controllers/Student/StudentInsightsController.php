@@ -192,8 +192,8 @@ class StudentInsightsController extends Controller
         // Get monthly payment breakdown
         $monthlyPayments = $payments->selectRaw('MONTH(pay_at) as month, SUM(amount) as total, SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as pending')
             ->groupBy('month')
-            ->orderBy('month')
             ->get()
+            ->sortBy('month')
             ->map(function ($item) {
                 $monthName = Carbon::create()->month($item->month)->format('M');
                 return [
@@ -207,8 +207,8 @@ class StudentInsightsController extends Controller
         // Get payment methods
         $paymentMethods = $payments->selectRaw('method, SUM(amount) as total')
             ->groupBy('method')
-            ->orderByDesc('total')
             ->get()
+            ->sortByDesc('total')
             ->map(function ($item) {
                 return [
                     'method' => ucfirst(str_replace('_', ' ', $item->method)),
@@ -217,7 +217,7 @@ class StudentInsightsController extends Controller
             });
 
         // Get recent payments
-        $recentPayments = $payments->orderBy('pay_at', 'desc')->take(5)->get()->map(function ($payment) {
+        $recentPayments = $student->payments()->whereYear('pay_at', $year)->orderBy('pay_at', 'desc')->take(5)->get()->map(function ($payment) {
             return [
                 'id' => $payment->id,
                 'amount' => (float) $payment->amount,

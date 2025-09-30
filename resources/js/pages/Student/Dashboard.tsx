@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/select";
 import {
     GraduationCap,
-    DollarSign,
+    Coins,
     BadgeCheck,
     Hourglass,
     Star,
     Calendar,
     TrendingUp,
+    DollarSign,
 } from "lucide-react";
 import RatingStars from "@/components/RatingStars";
 

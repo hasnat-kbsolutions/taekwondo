@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Create() {
-    const { students, currencies, defaultCurrency } = usePage().props as any;
+    const { students, currencies, defaultCurrency, bank_information } =
+        usePage().props as any;
 
     const [form, setForm] = useState({
         student_id: "",
@@ -33,10 +35,20 @@ export default function Create() {
         pay_at: "",
         payment_month: "",
         notes: "",
+        bank_information: [],
     });
 
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleBankSelection = (bankId: number, checked: boolean) => {
+        setForm((prev) => ({
+            ...prev,
+            bank_information: checked
+                ? [...prev.bank_information, bankId]
+                : prev.bank_information.filter((id: number) => id !== bankId),
+        }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -264,6 +276,61 @@ export default function Create() {
                                         }
                                     />
                                 </div>
+                            </div>
+
+                            {/* Bank Information Selection */}
+                            <div className="space-y-4">
+                                <Label className="text-base font-semibold">
+                                    Bank Information (Select banks to show on
+                                    invoice)
+                                </Label>
+                                {bank_information &&
+                                bank_information.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {bank_information.map((bank: any) => (
+                                            <div
+                                                key={bank.id}
+                                                className="flex items-center space-x-2 p-3 border rounded-lg"
+                                            >
+                                                <Checkbox
+                                                    id={`bank-${bank.id}`}
+                                                    checked={form.bank_information.includes(
+                                                        bank.id
+                                                    )}
+                                                    onCheckedChange={(
+                                                        checked
+                                                    ) =>
+                                                        handleBankSelection(
+                                                            bank.id,
+                                                            checked as boolean
+                                                        )
+                                                    }
+                                                />
+                                                <div className="flex-1">
+                                                    <Label
+                                                        htmlFor={`bank-${bank.id}`}
+                                                        className="text-sm font-medium cursor-pointer"
+                                                    >
+                                                        {bank.bank_name}
+                                                    </Label>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {bank.account_name} -{" "}
+                                                        {bank.account_number}
+                                                        {bank.currency &&
+                                                            ` (${bank.currency})`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 border border-dashed rounded-lg text-center text-muted-foreground">
+                                        <p>No bank information available.</p>
+                                        <p className="text-sm">
+                                            Please add bank information first.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4">

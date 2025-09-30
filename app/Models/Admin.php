@@ -7,4 +7,6 @@ use Spatie\Permission\Traits\HasRoles;
 class Admin extends Model
 {
     use HasRoles;
+
+    
 }

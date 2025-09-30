@@ -20,9 +20,10 @@ import {
     Edit,
     Trash2,
     FileText,
-    DollarSign,
+    Coins,
     BadgeCheck,
     Hourglass,
+    DollarSign,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { DollarSign, BadgeCheck, Hourglass } from "lucide-react";
+import { Coins, BadgeCheck, Hourglass, DollarSign } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 31 }, (_, i) => currentYear - 15 + i); // [currentYear -15, ..., currentYear +15]

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     GraduationCap,
-    DollarSign,
+    Coins,
     BadgeCheck,
     Hourglass,
     Users,
@@ -9,6 +9,7 @@ import {
     Calendar,
     Award,
     ArrowRight,
+    DollarSign,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, Link } from "@inertiajs/react";

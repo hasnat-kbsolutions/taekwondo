@@ -103,4 +103,10 @@ class Club extends Model
     {
         return Rating::getTotalRatings($this->id, 'App\Models\Club');
     }
+
+    public function bankInformations()
+{
+    return $this->morphMany(\App\Models\BankInformation::class, 'userable');
+}
+
 }

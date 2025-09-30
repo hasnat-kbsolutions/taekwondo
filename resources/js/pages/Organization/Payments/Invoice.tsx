@@ -14,6 +14,7 @@ import {
     User,
     CreditCard,
     Printer,
+    Landmark,
 } from "lucide-react";
 import {
     Table,
@@ -262,6 +263,77 @@ export default function Invoice() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Bank Information */}
+                    {payment.bank_information &&
+                        payment.bank_information.length > 0 && (
+                            <div className="mb-8 print:mb-6">
+                                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                                    <Landmark className="w-5 h-5 mr-2" />
+                                    Bank Information
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {payment.bank_information.map(
+                                        (bank: any, index: number) => (
+                                            <div
+                                                key={index}
+                                                className="p-4 border rounded-lg bg-muted/30"
+                                            >
+                                                <h4 className="font-semibold text-foreground mb-2">
+                                                    {bank.bank_name}
+                                                </h4>
+                                                <div className="space-y-1 text-sm text-muted-foreground">
+                                                    <p>
+                                                        <span className="font-medium">
+                                                            Account Name:
+                                                        </span>{" "}
+                                                        {bank.account_name}
+                                                    </p>
+                                                    <p>
+                                                        <span className="font-medium">
+                                                            Account Number:
+                                                        </span>{" "}
+                                                        {bank.account_number}
+                                                    </p>
+                                                    {bank.iban && (
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                IBAN:
+                                                            </span>{" "}
+                                                            {bank.iban}
+                                                        </p>
+                                                    )}
+                                                    {bank.swift_code && (
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                SWIFT Code:
+                                                            </span>{" "}
+                                                            {bank.swift_code}
+                                                        </p>
+                                                    )}
+                                                    {bank.branch && (
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                Branch:
+                                                            </span>{" "}
+                                                            {bank.branch}
+                                                        </p>
+                                                    )}
+                                                    {bank.currency && (
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                Currency:
+                                                            </span>{" "}
+                                                            {bank.currency}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                     {/* Notes */}
                     {payment.notes && (

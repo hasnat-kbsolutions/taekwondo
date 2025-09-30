@@ -143,6 +143,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Admin Reports
     Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export/{type}', [App\Http\Controllers\Admin\ReportController::class, 'exportReport'])->name('reports.export');
+
+    // Bank Information Routes
+    Route::get('/bank-information', [App\Http\Controllers\Admin\BankInformationController::class, 'index'])->name('bank-information.index');
+    Route::get('/bank-information/create', [App\Http\Controllers\Admin\BankInformationController::class, 'create'])->name('bank-information.create');
+    Route::post('/bank-information', [App\Http\Controllers\Admin\BankInformationController::class, 'store'])->name('bank-information.store');
+    Route::get('/bank-information/{bankInformation}/edit', [App\Http\Controllers\Admin\BankInformationController::class, 'edit'])->name('bank-information.edit');
+    Route::put('/bank-information/{bankInformation}', [App\Http\Controllers\Admin\BankInformationController::class, 'update'])->name('bank-information.update');
+    Route::delete('/bank-information/{bankInformation}', [App\Http\Controllers\Admin\BankInformationController::class, 'destroy'])->name('bank-information.destroy');
 });
 
 // Organization routes
@@ -208,6 +216,14 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
 
     // Organization Student Insights
     Route::get('/student-insights/{student}', [App\Http\Controllers\Organization\StudentInsightsController::class, 'show'])->name('student-insights.show');
+
+    // Bank Information Routes
+    Route::get('/bank-information', [App\Http\Controllers\Organization\BankInformationController::class, 'index'])->name('bank-information.index');
+    Route::get('/bank-information/create', [App\Http\Controllers\Organization\BankInformationController::class, 'create'])->name('bank-information.create');
+    Route::post('/bank-information', [App\Http\Controllers\Organization\BankInformationController::class, 'store'])->name('bank-information.store');
+    Route::get('/bank-information/{bankInformation}/edit', [App\Http\Controllers\Organization\BankInformationController::class, 'edit'])->name('bank-information.edit');
+    Route::put('/bank-information/{bankInformation}', [App\Http\Controllers\Organization\BankInformationController::class, 'update'])->name('bank-information.update');
+    Route::delete('/bank-information/{bankInformation}', [App\Http\Controllers\Organization\BankInformationController::class, 'destroy'])->name('bank-information.destroy');
 });
 
 // Club routes
@@ -266,6 +282,14 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 
     // Club Student Insights
     Route::get('/student-insights/{student}', [App\Http\Controllers\Club\StudentInsightsController::class, 'show'])->name('student-insights.show');
+
+    // Bank Information Routes
+    Route::get('/bank-information', [App\Http\Controllers\Club\BankInformationController::class, 'index'])->name('bank-information.index');
+    Route::get('/bank-information/create', [App\Http\Controllers\Club\BankInformationController::class, 'create'])->name('bank-information.create');
+    Route::post('/bank-information', [App\Http\Controllers\Club\BankInformationController::class, 'store'])->name('bank-information.store');
+    Route::get('/bank-information/{bankInformation}/edit', [App\Http\Controllers\Club\BankInformationController::class, 'edit'])->name('bank-information.edit');
+    Route::put('/bank-information/{bankInformation}', [App\Http\Controllers\Club\BankInformationController::class, 'update'])->name('bank-information.update');
+    Route::delete('/bank-information/{bankInformation}', [App\Http\Controllers\Club\BankInformationController::class, 'destroy'])->name('bank-information.destroy');
 });
 
 // Student routes

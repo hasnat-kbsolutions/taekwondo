@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         // Get payment statistics for the year with currency support
         $payments = $student->payments()
-            ->whereYear('payment_month', $year)
+            ->where('payment_month', 'LIKE', $year . '-%')
             ->with('currency')
             ->get();
 

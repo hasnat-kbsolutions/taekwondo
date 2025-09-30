@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     User,
     Calendar,
-    DollarSign,
+    Coins,
     Award,
     Star,
     TrendingUp,
@@ -446,7 +446,7 @@ export default function StudentInsights({
                         <Card>
                             <CardContent className="p-6">
                                 <div className="flex items-center">
-                                    <DollarSign className="h-8 w-8 text-blue-600" />
+                                    <Coins className="h-8 w-8 text-blue-600" />
                                     <div className="ml-4">
                                         <p className="text-sm font-medium text-gray-600">
                                             Payment Rate
@@ -1106,7 +1106,7 @@ export default function StudentInsights({
                                                             <Calendar className="h-5 w-5 text-blue-600" />
                                                         ) : activity.type ===
                                                           "payment" ? (
-                                                            <DollarSign className="h-5 w-5 text-green-600" />
+                                                            <Coins className="h-5 w-5 text-green-600" />
                                                         ) : (
                                                             <Award className="h-5 w-5 text-purple-600" />
                                                         )}

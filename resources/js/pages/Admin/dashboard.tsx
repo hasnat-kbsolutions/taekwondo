@@ -5,7 +5,7 @@ import {
     Users,
     Group,
     Star,
-    DollarSign,
+    Coins,
     BadgeCheck,
     Hourglass,
     Calendar,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Currency;
+use App\Models\BankInformation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -75,6 +76,8 @@ class PaymentController extends Controller
             'students' => $students,
             'currencies' => Currency::getActive(),
             'defaultCurrency' => $user->userable->default_currency ?? 'MYR',
+            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')
+                ->where('userable_id', $user->id)->get(),
         ]);
     }
 
@@ -89,12 +92,23 @@ class PaymentController extends Controller
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
+            'bank_information' => 'nullable|array',
+            'bank_information.*' => 'exists:bank_information,id',
         ]);
 
         $year = now()->year;
         $validated['payment_month'] = $year . '-' . $validated['payment_month'];
 
-        Payment::create($validated);
+        // Get selected bank information details
+        $selectedBanks = [];
+        if (!empty($validated['bank_information'])) {
+            $selectedBanks = BankInformation::whereIn('id', $validated['bank_information'])->get()->toArray();
+        }
+
+        $paymentData = $validated;
+        $paymentData['bank_information'] = $selectedBanks;
+
+        Payment::create($paymentData);
 
         return redirect()->route('organization.payments.index')->with('success', 'Payment created successfully');
     }
@@ -112,6 +126,8 @@ class PaymentController extends Controller
             'payment' => $payment,
             'students' => $students,
             'currencies' => Currency::getActive(),
+            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')
+                ->where('userable_id', $user->id)->get(),
         ]);
     }
 
@@ -126,12 +142,23 @@ class PaymentController extends Controller
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
+            'bank_information' => 'nullable|array',
+            'bank_information.*' => 'exists:bank_information,id',
         ]);
 
         $year = now()->year;
         $validated['payment_month'] = $year . '-' . $validated['payment_month'];
 
-        $payment->update($validated);
+        // Get selected bank information details
+        $selectedBanks = [];
+        if (!empty($validated['bank_information'])) {
+            $selectedBanks = BankInformation::whereIn('id', $validated['bank_information'])->get()->toArray();
+        }
+
+        $paymentData = $validated;
+        $paymentData['bank_information'] = $selectedBanks;
+
+        $payment->update($paymentData);
 
         return redirect()->route('organization.payments.index')->with('success', 'Payment updated successfully');
     }

@@ -16,7 +16,7 @@ class PaymentController extends Controller
         $year = $request->input('year', now()->year);
 
         $payments = $student->payments()
-            ->whereYear('payment_month', $year)
+            ->where('payment_month', 'LIKE', $year . '-%')
             ->with('currency')
             ->orderBy('pay_at', 'desc')
             ->get();

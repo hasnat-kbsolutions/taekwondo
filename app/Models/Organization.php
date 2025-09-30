@@ -99,4 +99,10 @@ class Organization extends Model
     {
         return Rating::getTotalRatings($this->id, 'App\Models\Organization');
     }
+
+    public function bankInformations()
+    {
+        return $this->morphMany(\App\Models\BankInformation::class, 'userable');
+    }
+
 }

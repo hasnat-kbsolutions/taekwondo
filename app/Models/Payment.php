@@ -17,10 +17,12 @@ class Payment extends Model
         'pay_at',         // date the payment was made
         'notes',
         'transaction_id', // optional: for Stripe or other gateways
+        'bank_information', // JSON array of selected bank information
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'bank_information' => 'array',
     ];
 
     /**
