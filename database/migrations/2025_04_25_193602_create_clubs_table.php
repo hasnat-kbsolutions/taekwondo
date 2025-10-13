@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('invoice_prefix')->nullable(); // if not always needed
             $table->string('logo')->nullable(); // use 'logo' OR 'logo_image'
             $table->string('phone')->nullable();
-            $table->string('notification_emails')->nullable();
+            $table->boolean('notification_emails')->default(false);
             $table->string('website')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('city')->nullable();

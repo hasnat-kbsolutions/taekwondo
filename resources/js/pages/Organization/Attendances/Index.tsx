@@ -136,112 +136,121 @@ export default function Index({
         <AuthenticatedLayout header="Attendances">
             <Head title="Attendances" />
             <div className="container mx-auto py-5">
-                {/* Filters Card */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap">
-                            {/* Club Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Club</Label>
-                                <Select
-                                    value={filters.club_id}
-                                    onValueChange={(value) =>
-                                        setFilters((prev) => ({
-                                            ...prev,
-                                            club_id: value,
-                                        }))
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Year Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Year</Label>
-                                <Select value={year} onValueChange={setYear}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Year" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.from({ length: 5 }, (_, i) =>
-                                            (currentYear - i).toString()
-                                        ).map((yr) => (
-                                            <SelectItem key={yr} value={yr}>
-                                                {yr}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Month Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Month</Label>
-                                <Select value={month} onValueChange={setMonth}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Month" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.from({ length: 12 }, (_, i) => {
-                                            const m = (i + 1)
-                                                .toString()
-                                                .padStart(2, "0");
-                                            return (
-                                                <SelectItem key={m} value={m}>
-                                                    {new Date(
-                                                        0,
-                                                        i
-                                                    ).toLocaleString(
-                                                        "default",
-                                                        {
-                                                            month: "long",
-                                                        }
-                                                    )}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Reset Button */}
-                            <div className="flex items-end">
-                                <Button
-                                    className="bg-foreground text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Attendance Table Section */}
-            <div className="container mx-auto">
                 <Card>
                     <CardHeader>
                         <CardTitle>Attendance List</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                {/* Club Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">Club</Label>
+                                    <Select
+                                        value={filters.club_id}
+                                        onValueChange={(value) =>
+                                            setFilters((prev) => ({
+                                                ...prev,
+                                                club_id: value,
+                                            }))
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Year Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">Year</Label>
+                                    <Select
+                                        value={year}
+                                        onValueChange={setYear}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Year" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Array.from({ length: 5 }, (_, i) =>
+                                                (currentYear - i).toString()
+                                            ).map((yr) => (
+                                                <SelectItem key={yr} value={yr}>
+                                                    {yr}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Month Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Month
+                                    </Label>
+                                    <Select
+                                        value={month}
+                                        onValueChange={setMonth}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Month" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Array.from(
+                                                { length: 12 },
+                                                (_, i) => {
+                                                    const m = (i + 1)
+                                                        .toString()
+                                                        .padStart(2, "0");
+                                                    return (
+                                                        <SelectItem
+                                                            key={m}
+                                                            value={m}
+                                                        >
+                                                            {new Date(
+                                                                0,
+                                                                i
+                                                            ).toLocaleString(
+                                                                "default",
+                                                                {
+                                                                    month: "long",
+                                                                }
+                                                            )}
+                                                        </SelectItem>
+                                                    );
+                                                }
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Reset Button */}
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Attendance Table */}
                         <div className="w-full overflow-x-auto">
                             <div className="min-w-[800px]">
                                 <Table>

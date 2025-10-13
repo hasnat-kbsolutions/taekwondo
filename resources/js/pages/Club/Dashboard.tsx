@@ -9,7 +9,7 @@ import {
     Calendar,
     Award,
     ArrowRight,
-    DollarSign,
+    Wallet,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, Link } from "@inertiajs/react";
@@ -78,7 +78,7 @@ export default function DashboardCards({
         {
             label: "Total Payments",
             count: paymentsCount,
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            icon: <Wallet className="h-6 w-6 text-primary" />,
             url: route("club.payments.index"),
         },
         {
@@ -129,7 +129,7 @@ export default function DashboardCards({
                         )}
                 </div>
             ),
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            icon: <Wallet className="h-6 w-6 text-primary" />,
             url: route("club.payments.index"),
         },
         {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -218,75 +218,70 @@ export default function Index({ instructors, clubs = [], filters }: Props) {
     return (
         <AuthenticatedLayout header="Instructors">
             <Head title="Instructors" />
-            <div className="container mx-auto py-10 space-y-6">
-                {/* Filters Card */}
-                <Card>
-                    <div className="p-6">
-                        <div className="flex items-end gap-4 flex-wrap">
-                            {/* Club Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Club</Label>
-                                <Select
-                                    value={clubId}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setClubId(selected);
-                                        handleFilterChange({
-                                            club_id: selected,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Clubs
-                                        </SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Reset Button */}
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-
+            <div className="container mx-auto py-10">
                 {/* Instructors Table Card */}
                 <Card>
-                    <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                                Instructors
-                            </h2>
-                            <Link
-                                href={route("organization.instructors.create")}
-                            >
-                                <Button>Add Instructor</Button>
-                            </Link>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Instructors</CardTitle>
+                        <Link href={route("organization.instructors.create")}>
+                            <Button>Add Instructor</Button>
+                        </Link>
+                    </CardHeader>
+                    <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                {/* Club Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">Club</Label>
+                                    <Select
+                                        value={clubId}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setClubId(selected);
+                                            handleFilterChange({
+                                                club_id: selected,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All Clubs
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Reset Button */}
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns(handleView)}
                             data={instructors}
                         />
-                    </div>
+                    </CardContent>
                 </Card>
             </div>
 

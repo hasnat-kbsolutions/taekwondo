@@ -72,6 +72,32 @@ const columns = (
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
+        meta: {
+            sticky: true,
+            left: "0px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[60px] w-[60px]",
+        },
+    },
+    {
+        header: "IC Number",
+        accessorKey: "ic_number",
+        meta: {
+            sticky: true,
+            left: "60px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[120px]",
+        },
+    },
+    {
+        header: "Name",
+        accessorKey: "name",
+        meta: {
+            sticky: true,
+            left: "180px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[150px]",
+        },
     },
     {
         header: "Photo",
@@ -87,16 +113,8 @@ const columns = (
             ),
     },
     {
-        header: "Name",
-        accessorKey: "name",
-    },
-    {
         header: "Email",
         accessorKey: "email",
-    },
-    {
-        header: "IC Number",
-        accessorKey: "ic_number",
     },
     {
         header: "Mobile",
@@ -226,83 +244,6 @@ export default function Index({
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap">
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">
-                                    Organization
-                                </Label>
-                                <Select
-                                    value={organizationId}
-                                    onValueChange={(val) => {
-                                        setOrganizationId(val);
-                                        handleFilterChange({ club_id: clubId });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Organizations" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem
-                                                key={org.id}
-                                                value={org.id.toString()}
-                                            >
-                                                {org.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Club</Label>
-                                <Select
-                                    value={clubId}
-                                    onValueChange={(val) => {
-                                        setClubId(val);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="container mx-auto">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Instructors</CardTitle>
                         <Link href={route("admin.instructors.create")}>
                             <Button>Add Instructor</Button>
@@ -310,6 +251,83 @@ export default function Index({
                     </CardHeader>
 
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Organization
+                                    </Label>
+                                    <Select
+                                        value={organizationId}
+                                        onValueChange={(val) => {
+                                            setOrganizationId(val);
+                                            handleFilterChange({
+                                                club_id: clubId,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Organizations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={org.id.toString()}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">Club</Label>
+                                    <Select
+                                        value={clubId}
+                                        onValueChange={(val) => {
+                                            setClubId(val);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns((instructor) =>
                                 setSelectedInstructor(instructor)

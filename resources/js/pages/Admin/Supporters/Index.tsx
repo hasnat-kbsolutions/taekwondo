@@ -86,161 +86,7 @@ export default function Index({
         <AuthenticatedLayout header="Supporters">
             <Head title="Supporters" />
 
-            <div className="container mx-auto py-10 space-y-6">
-                {/* Filters Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-wrap items-end gap-4">
-                            {/* Organization */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">
-                                    Organization
-                                </Label>
-                                <Select
-                                    value={organizationId}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setOrganizationId(selected);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                            club_id: clubId,
-                                            gender,
-                                            status,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Organizations" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem
-                                                key={org.id}
-                                                value={org.id.toString()}
-                                            >
-                                                {org.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Club */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">Club</Label>
-                                <Select
-                                    value={clubId}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setClubId(selected);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                            club_id: selected,
-                                            gender,
-                                            status,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Gender */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">Gender</Label>
-                                <Select
-                                    value={gender}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setGender(selected);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                            club_id: clubId,
-                                            gender: selected,
-                                            status,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Genders" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="male">
-                                            Male
-                                        </SelectItem>
-                                        <SelectItem value="female">
-                                            Female
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Status */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">Status</Label>
-                                <Select
-                                    value={status}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setStatus(selected);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                            club_id: clubId,
-                                            gender,
-                                            status: selected,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="active">
-                                            Active
-                                        </SelectItem>
-                                        <SelectItem value="inactive">
-                                            Inactive
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Reset */}
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-foreground text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
+            <div className="container mx-auto py-10">
                 {/* Table Card */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -250,6 +96,168 @@ export default function Index({
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex flex-wrap items-end gap-4">
+                                {/* Organization */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Organization
+                                    </Label>
+                                    <Select
+                                        value={organizationId}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setOrganizationId(selected);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                                club_id: clubId,
+                                                gender,
+                                                status,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Organizations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={org.id.toString()}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Club */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">Club</Label>
+                                    <Select
+                                        value={clubId}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setClubId(selected);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                                club_id: selected,
+                                                gender,
+                                                status,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Gender */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Gender
+                                    </Label>
+                                    <Select
+                                        value={gender}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setGender(selected);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                                club_id: clubId,
+                                                gender: selected,
+                                                status,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Genders" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            <SelectItem value="male">
+                                                Male
+                                            </SelectItem>
+                                            <SelectItem value="female">
+                                                Female
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Status */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Status
+                                    </Label>
+                                    <Select
+                                        value={status}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setStatus(selected);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                                club_id: clubId,
+                                                gender,
+                                                status: selected,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            <SelectItem value="active">
+                                                Active
+                                            </SelectItem>
+                                            <SelectItem value="inactive">
+                                                Inactive
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Reset */}
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns((supporter) =>
                                 setSelectedSupporter(supporter)
@@ -273,7 +281,8 @@ export default function Index({
                                         {selectedSupporter.profile_image ? (
                                             <img
                                                 src={
-                                                    selectedSupporter.profile_image                                                }
+                                                    selectedSupporter.profile_image
+                                                }
                                                 alt="Profile"
                                                 className="w-28 h-28 rounded-full object-cover"
                                                 onError={(e) => {

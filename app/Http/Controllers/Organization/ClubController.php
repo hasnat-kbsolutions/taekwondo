@@ -38,7 +38,7 @@ class ClubController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-        
+
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
@@ -48,7 +48,7 @@ class ClubController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'notification_emails' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|boolean',
             'website' => 'nullable|string|max:255',
             'tax_number' => 'nullable|string|max:255',
             'invoice_prefix' => 'nullable|string|max:255',
@@ -71,7 +71,7 @@ class ClubController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'phone' => $validated['phone'] ?? null,
-            'notification_emails' => $validated['notification_emails'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? false,
             'website' => $validated['website'] ?? null,
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,
@@ -114,7 +114,7 @@ class ClubController extends Controller
             'street' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'notification_emails' => 'nullable|string|max:255',
+            'notification_emails' => 'nullable|boolean',
             'website' => 'nullable|string|max:255',
             'tax_number' => 'nullable|string|max:255',
             'invoice_prefix' => 'nullable|string|max:255',
@@ -142,7 +142,7 @@ class ClubController extends Controller
             'street' => $validated['street'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
             'phone' => $validated['phone'] ?? null,
-            'notification_emails' => $validated['notification_emails'] ?? null,
+            'notification_emails' => $validated['notification_emails'] ?? false,
             'website' => $validated['website'] ?? null,
             'tax_number' => $validated['tax_number'] ?? null,
             'invoice_prefix' => $validated['invoice_prefix'] ?? null,

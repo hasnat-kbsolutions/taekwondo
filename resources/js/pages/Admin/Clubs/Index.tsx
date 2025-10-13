@@ -16,7 +16,7 @@ import {
     Users,
     GraduationCap,
     Heart,
-    DollarSign,
+    Wallet,
     ArrowRight,
 } from "lucide-react";
 import {
@@ -284,7 +284,7 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                     )}
                 </div>
             ),
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            icon: <Wallet className="h-6 w-6 text-primary" />,
             url: route("admin.payments.index"),
         },
         {
@@ -362,68 +362,6 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
         <AuthenticatedLayout header="Clubs">
             <Head title="Organizations" />
             <div className="container mx-auto py-10">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap ">
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">
-                                    Organizations
-                                </Label>
-                                <Select
-                                    value={organizationId || ""}
-                                    onValueChange={(val) => {
-                                        setOrganizationId(val);
-                                        handleFilterChange({ country });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Organizations" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem
-                                                key={org.id}
-                                                value={org.id.toString()}
-                                            >
-                                                {org.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Country</Label>
-                                <CountryDropdown
-                                    placeholder="All Countries"
-                                    defaultValue={country || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setCountry(selected);
-                                        handleFilterChange({
-                                            organization_id: organizationId,
-                                        });
-                                    }}
-                                    slim={false}
-                                />
-                            </div>
-
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-white dark:text-black"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
                 {/* Statistics Cards */}
                 <div>
                     <h2 className="text-lg font-semibold mb-4 text-muted-foreground">
@@ -465,11 +403,73 @@ export default function Index({ clubs, organizations = [], filters }: Props) {
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Clubs</CardTitle>
                         <Link href={route("admin.clubs.create")}>
-                            {" "}
-                            <Button>Add Club</Button>{" "}
+                            <Button>Add Club</Button>
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Organizations
+                                    </Label>
+                                    <Select
+                                        value={organizationId || ""}
+                                        onValueChange={(val) => {
+                                            setOrganizationId(val);
+                                            handleFilterChange({ country });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Organizations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={org.id.toString()}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Country
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Countries"
+                                        defaultValue={country || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setCountry(selected);
+                                            handleFilterChange({
+                                                organization_id: organizationId,
+                                            });
+                                        }}
+                                        slim={false}
+                                    />
+                                </div>
+
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns((club) => setSelectedClub(club))}
                             data={safeClubs}

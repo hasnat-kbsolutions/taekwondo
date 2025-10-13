@@ -284,122 +284,7 @@ export default function Index({
     return (
         <AuthenticatedLayout header="Students">
             <Head title="Students" />
-            <div className="container mx-auto py-10 space-y-6">
-                {/* Filters Card */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap">
-                            {/* Club Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Club</Label>
-                                <Select
-                                    value={clubId}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setClubId(selected);
-                                        handleFilterChange({
-                                            club_id: selected,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Nationality Filter */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">
-                                    Nationality
-                                </Label>
-                                <CountryDropdown
-                                    placeholder="All Nationalities"
-                                    defaultValue={nationality || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setNationality(selected);
-                                        handleFilterChange({
-                                            nationality: selected,
-                                        });
-                                    }}
-                                    slim={false}
-                                />
-                            </div>
-
-                            {/* Country Filter */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">Country</Label>
-                                <CountryDropdown
-                                    placeholder="All Countries"
-                                    defaultValue={country || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setCountry(selected);
-                                        handleFilterChange({
-                                            country: selected,
-                                        });
-                                    }}
-                                />
-                            </div>
-
-                            {/* Status Filter */}
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Status</Label>
-                                <Select
-                                    value={status}
-                                    onValueChange={(val) => {
-                                        const selected =
-                                            val === "all" ? "" : val;
-                                        setStatus(selected);
-                                        handleFilterChange({
-                                            status: selected,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="active">
-                                            Active
-                                        </SelectItem>
-                                        <SelectItem value="inactive">
-                                            Inactive
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Reset Button */}
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
+            <div className="container mx-auto py-10">
                 {/* Students Table Card */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -409,6 +294,125 @@ export default function Index({
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                {/* Club Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">Club</Label>
+                                    <Select
+                                        value={clubId}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setClubId(selected);
+                                            handleFilterChange({
+                                                club_id: selected,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Nationality Filter */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Nationality
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Nationalities"
+                                        defaultValue={nationality || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setNationality(selected);
+                                            handleFilterChange({
+                                                nationality: selected,
+                                            });
+                                        }}
+                                        slim={false}
+                                    />
+                                </div>
+
+                                {/* Country Filter */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Country
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Countries"
+                                        defaultValue={country || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setCountry(selected);
+                                            handleFilterChange({
+                                                country: selected,
+                                            });
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Status Filter */}
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Status
+                                    </Label>
+                                    <Select
+                                        value={status}
+                                        onValueChange={(val) => {
+                                            const selected =
+                                                val === "all" ? "" : val;
+                                            setStatus(selected);
+                                            handleFilterChange({
+                                                status: selected,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            <SelectItem value="active">
+                                                Active
+                                            </SelectItem>
+                                            <SelectItem value="inactive">
+                                                Inactive
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Reset Button */}
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns(handleView)}
                             data={students}

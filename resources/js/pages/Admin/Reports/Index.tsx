@@ -9,7 +9,7 @@ import {
     Building,
     Users,
     GraduationCap,
-    DollarSign,
+    Wallet,
     Calendar,
     Award,
     Star,
@@ -86,7 +86,7 @@ export default function ReportsIndex({
             title: "Financial",
             description: "Financial analysis and payment trends",
             icon: (
-                <DollarSign className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <Wallet className="h-8 w-8 text-green-600 dark:text-green-400" />
             ),
             value: "financial",
             color: "bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50",
@@ -133,7 +133,7 @@ export default function ReportsIndex({
                 </div>
             ),
             icon: (
-                <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <Wallet className="h-5 w-5 text-green-600 dark:text-green-400" />
             ),
             url: route("admin.payments.index"),
         },
@@ -211,7 +211,7 @@ export default function ReportsIndex({
                 </div>
             ),
             icon: (
-                <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <Wallet className="h-4 w-4 text-green-600 dark:text-green-400" />
             ),
             color: "text-green-600 dark:text-green-400",
         },

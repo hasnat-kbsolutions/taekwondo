@@ -37,8 +37,23 @@ export const columns = (
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
+        meta: {
+            sticky: true,
+            left: "0px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[60px] w-[60px]",
+        },
     },
-    { accessorKey: "name", header: "Name" },
+    {
+        accessorKey: "name",
+        header: "Name",
+        meta: {
+            sticky: true,
+            left: "60px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[150px]",
+        },
+    },
     { accessorKey: "surename", header: "Surename" },
     { accessorKey: "gender", header: "Gender" },
     { accessorKey: "email", header: "Email" },

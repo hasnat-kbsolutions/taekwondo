@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Organization {
     id: number;
@@ -31,7 +32,7 @@ interface Club {
     tax_number?: string;
     invoice_prefix?: string;
     phone?: string;
-    notification_emails?: string;
+    notification_emails?: boolean;
     website?: string;
     status: boolean;
     logo_url?: string;
@@ -62,26 +63,16 @@ export default function Edit({ club, organizations }: Props) {
         tax_number: club.tax_number ?? "",
         invoice_prefix: club.invoice_prefix ?? "",
         phone: club.phone ?? "",
-        notification_emails: club.notification_emails ?? "",
+        notification_emails: club.notification_emails ?? false,
         website: club.website ?? "",
         status: club.status ?? false,
         logo: null as File | null,
     });
-    
-    
 
     const handleSubmit = (e: React.FormEvent) => {
-        
         e.preventDefault();
         post(route("organization.clubs.update", club.id));
     };
-
-
-    
-
-
-
-    
 
     const renderError = (field: keyof typeof errors) =>
         errors[field] && (
@@ -169,22 +160,6 @@ export default function Edit({ club, organizations }: Props) {
                                     }
                                 />
                                 {renderError("phone")}
-                            </div>
-
-                          
-
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Notification Emails</Label>
-                                <Input
-                                    value={data.notification_emails}
-                                    onChange={(e) =>
-                                        setData(
-                                            "notification_emails",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                {renderError("notification_emails")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
@@ -319,6 +294,28 @@ export default function Edit({ club, organizations }: Props) {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="notification_emails"
+                                        checked={data.notification_emails}
+                                        onCheckedChange={(checked) =>
+                                            setData(
+                                                "notification_emails",
+                                                checked as boolean
+                                            )
+                                        }
+                                    />
+                                    <Label
+                                        htmlFor="notification_emails"
+                                        className="cursor-pointer"
+                                    >
+                                        Enable Notification Emails
+                                    </Label>
+                                </div>
+                                {renderError("notification_emails")}
                             </div>
 
                             <div className="w-full px-2 mt-4">

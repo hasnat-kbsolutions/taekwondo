@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @property-read \App\Models\User|null $user
+ */
 class Club extends Model
 {
     protected $fillable = [
@@ -29,6 +32,7 @@ class Club extends Model
 
     protected $casts = [
         'status' => 'boolean',
+        'notification_emails' => 'boolean',
     ];
 
     public function organization(): BelongsTo
@@ -105,8 +109,8 @@ class Club extends Model
     }
 
     public function bankInformations()
-{
-    return $this->morphMany(\App\Models\BankInformation::class, 'userable');
-}
+    {
+        return $this->morphMany(\App\Models\BankInformation::class, 'userable');
+    }
 
 }

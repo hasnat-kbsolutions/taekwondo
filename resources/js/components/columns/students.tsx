@@ -52,6 +52,40 @@ export const columns = (
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
+        meta: {
+            sticky: true,
+            left: "0px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[60px] w-[60px]",
+        },
+    },
+    {
+        accessorKey: "code",
+        header: "Code",
+        meta: {
+            sticky: true,
+            left: "60px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[120px]",
+        },
+    },
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => (
+            <Link
+                href={route("admin.student-insights.show", row.original.id)}
+                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+                {row.original.name}
+            </Link>
+        ),
+        meta: {
+            sticky: true,
+            left: "180px",
+            className:
+                "border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[150px]",
+        },
     },
     {
         id: "profile_image",
@@ -85,23 +119,16 @@ export const columns = (
             return <span className="text-gray-400 italic">No image</span>;
         },
     },
-    { accessorKey: "code", header: "Code" },
     {
-        accessorKey: "name",
-        header: "Name",
-        cell: ({ row }) => (
-            <Link
-                href={route("admin.student-insights.show", row.original.id)}
-                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-            >
-                {row.original.name}
-            </Link>
-        ),
+        accessorKey: "surname",
+        header: "Surname",
     },
-    { accessorKey: "surname", header: "Surname" },
+    {
+        accessorKey: "email",
+        header: "Email",
+    },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },
-    { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
     {
         id: "organization",

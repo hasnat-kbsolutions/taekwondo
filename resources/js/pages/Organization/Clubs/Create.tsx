@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Organization {
     id: number;
@@ -32,7 +33,7 @@ export default function Create() {
         tax_number: "",
         invoice_prefix: "",
         phone: "",
-        notification_emails: "",
+        notification_emails: false,
         website: "",
         logo: null as File | null,
         status: false,
@@ -140,22 +141,6 @@ export default function Create() {
                                     }
                                 />
                                 {renderError("phone")}
-                            </div>
-
-                          
-
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Notification Emails</Label>
-                                <Input
-                                    value={data.notification_emails}
-                                    onChange={(e) =>
-                                        setData(
-                                            "notification_emails",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                {renderError("notification_emails")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">
@@ -274,6 +259,28 @@ export default function Create() {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="w-[25%] px-2 mt-3">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="notification_emails"
+                                        checked={data.notification_emails}
+                                        onCheckedChange={(checked) =>
+                                            setData(
+                                                "notification_emails",
+                                                checked as boolean
+                                            )
+                                        }
+                                    />
+                                    <Label
+                                        htmlFor="notification_emails"
+                                        className="cursor-pointer"
+                                    >
+                                        Enable Notification Emails
+                                    </Label>
+                                </div>
+                                {renderError("notification_emails")}
                             </div>
 
                             <div className="w-full px-2 mt-4">

@@ -34,47 +34,86 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className={className}>
-            <Table>
-                <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                                <TableHead key={header.id}>
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext()
-                                    )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </TableCell>
-                                ))}
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    const meta = header.column.columnDef
+                                        .meta as any;
+                                    return (
+                                        <TableHead
+                                            key={header.id}
+                                            className={
+                                                meta?.sticky
+                                                    ? `sticky z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${
+                                                          meta.className || ""
+                                                      }`
+                                                    : ""
+                                            }
+                                            style={
+                                                meta?.sticky
+                                                    ? { left: meta.left }
+                                                    : {}
+                                            }
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </TableHead>
+                                    );
+                                })}
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell
-                                colSpan={columns.length}
-                                className="h-24 text-center"
-                            >
-                                {emptyMessage}
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow key={row.id}>
+                                    {row.getVisibleCells().map((cell) => {
+                                        const meta = cell.column.columnDef
+                                            .meta as any;
+                                        return (
+                                            <TableCell
+                                                key={cell.id}
+                                                className={
+                                                    meta?.sticky
+                                                        ? `sticky z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${
+                                                              meta.className ||
+                                                              ""
+                                                          }`
+                                                        : ""
+                                                }
+                                                style={
+                                                    meta?.sticky
+                                                        ? { left: meta.left }
+                                                        : {}
+                                                }
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    {emptyMessage}
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }

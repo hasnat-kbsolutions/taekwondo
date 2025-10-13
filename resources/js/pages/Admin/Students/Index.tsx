@@ -169,143 +169,6 @@ export default function Index({
                     </CardContent>
                 </Card>
 
-                {/* Filters Section */}
-                <Card className="my-6">
-                    <CardHeader>
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-wrap gap-4 items-end">
-                            {/* Organization Filter */}
-                            <div>
-                                <Label htmlFor="organization">
-                                    Organization
-                                </Label>
-                                <Select
-                                    value={organizationId}
-                                    onValueChange={(value) => {
-                                        setOrganizationId(value);
-                                        handleFilterChange({
-                                            organization_id: value,
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger
-                                        id="organization"
-                                        className="w-48"
-                                    >
-                                        <SelectValue placeholder="All Organizations" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem
-                                                key={org.id}
-                                                value={String(org.id)}
-                                            >
-                                                {org.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {/* Club Filter */}
-                            <div>
-                                <Label htmlFor="club">Club</Label>
-                                <Select
-                                    value={clubId}
-                                    onValueChange={(value) => {
-                                        setClubId(value);
-                                        handleFilterChange({ club_id: value });
-                                    }}
-                                >
-                                    <SelectTrigger id="club" className="w-48">
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={String(club.id)}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {/* Nationality Filter */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">
-                                    Nationality
-                                </Label>
-                                <CountryDropdown
-                                    placeholder="All Nationalities"
-                                    defaultValue={nationality || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setNationality(selected);
-                                        handleFilterChange({
-                                            nationality: selected,
-                                        });
-                                    }}
-                                    slim={false}
-                                />
-                            </div>
-                            {/* Country Filter */}
-                            <div className="w-[200px]">
-                                <Label className="text-sm mb-1">Country</Label>
-                                <CountryDropdown
-                                    placeholder="All Countries"
-                                    defaultValue={country || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setCountry(selected);
-                                        handleFilterChange({
-                                            country: selected,
-                                        });
-                                    }}
-                                    slim={false}
-                                />
-                            </div>
-                            {/* Status Filter */}
-                            <div>
-                                <Label htmlFor="status">Status</Label>
-                                <Select
-                                    value={status}
-                                    onValueChange={(value) => {
-                                        setStatus(value);
-                                        handleFilterChange({ status: value });
-                                    }}
-                                >
-                                    <SelectTrigger id="status" className="w-32">
-                                        <SelectValue placeholder="All Statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="active">
-                                            Active
-                                        </SelectItem>
-                                        <SelectItem value="inactive">
-                                            Inactive
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {/* Reset Button */}
-                            <div>
-                                <Button
-                                    variant="secondary"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
                 {/* Table Section */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -315,6 +178,170 @@ export default function Index({
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex flex-wrap gap-4 items-end">
+                                {/* Organization Filter */}
+                                <div>
+                                    <Label
+                                        htmlFor="organization"
+                                        className="text-sm mb-1"
+                                    >
+                                        Organization
+                                    </Label>
+                                    <Select
+                                        value={organizationId}
+                                        onValueChange={(value) => {
+                                            setOrganizationId(value);
+                                            handleFilterChange({
+                                                organization_id: value,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger
+                                            id="organization"
+                                            className="w-48"
+                                        >
+                                            <SelectValue placeholder="All Organizations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {organizations.map((org) => (
+                                                <SelectItem
+                                                    key={org.id}
+                                                    value={String(org.id)}
+                                                >
+                                                    {org.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {/* Club Filter */}
+                                <div>
+                                    <Label
+                                        htmlFor="club"
+                                        className="text-sm mb-1"
+                                    >
+                                        Club
+                                    </Label>
+                                    <Select
+                                        value={clubId}
+                                        onValueChange={(value) => {
+                                            setClubId(value);
+                                            handleFilterChange({
+                                                club_id: value,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger
+                                            id="club"
+                                            className="w-48"
+                                        >
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={String(club.id)}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {/* Nationality Filter */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Nationality
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Nationalities"
+                                        defaultValue={nationality || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setNationality(selected);
+                                            handleFilterChange({
+                                                nationality: selected,
+                                            });
+                                        }}
+                                        slim={false}
+                                    />
+                                </div>
+                                {/* Country Filter */}
+                                <div className="w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Country
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Countries"
+                                        defaultValue={country || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setCountry(selected);
+                                            handleFilterChange({
+                                                country: selected,
+                                            });
+                                        }}
+                                        slim={false}
+                                    />
+                                </div>
+                                {/* Status Filter */}
+                                <div>
+                                    <Label
+                                        htmlFor="status"
+                                        className="text-sm mb-1"
+                                    >
+                                        Status
+                                    </Label>
+                                    <Select
+                                        value={status}
+                                        onValueChange={(value) => {
+                                            setStatus(value);
+                                            handleFilterChange({
+                                                status: value,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger
+                                            id="status"
+                                            className="w-32"
+                                        >
+                                            <SelectValue placeholder="All Statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            <SelectItem value="active">
+                                                Active
+                                            </SelectItem>
+                                            <SelectItem value="inactive">
+                                                Inactive
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {/* Reset Button */}
+                                <div>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             columns={columns((student) =>
                                 setSelectedStudent(student)
@@ -347,15 +374,20 @@ export default function Index({
                                                 <div className="relative">
                                                     <img
                                                         src={
-                                                            selectedStudent.profile_image.startsWith('http') 
-                                                                ? selectedStudent.profile_image 
+                                                            selectedStudent.profile_image.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? selectedStudent.profile_image
                                                                 : `/storage/${selectedStudent.profile_image}`
                                                         }
                                                         alt="Profile"
                                                         className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
                                                         onError={(e) => {
-                                                            e.currentTarget.style.display = 'none';
-                                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                            e.currentTarget.style.display =
+                                                                "none";
+                                                            e.currentTarget.nextElementSibling?.classList.remove(
+                                                                "hidden"
+                                                            );
                                                         }}
                                                     />
                                                     <div className="w-32 h-32 hidden flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
@@ -431,8 +463,10 @@ export default function Index({
                                                 value: selectedStudent.identification_document ? (
                                                     <a
                                                         href={
-                                                            selectedStudent.identification_document.startsWith('http') 
-                                                                ? selectedStudent.identification_document 
+                                                            selectedStudent.identification_document.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? selectedStudent.identification_document
                                                                 : `/storage/${selectedStudent.identification_document}`
                                                         }
                                                         target="_blank"
@@ -477,11 +511,17 @@ export default function Index({
                                             },
                                             {
                                                 label: "Organization",
-                                                value: selectedStudent.organization?.name || "Not specified",
+                                                value:
+                                                    selectedStudent.organization
+                                                        ?.name ||
+                                                    "Not specified",
                                             },
                                             {
                                                 label: "Club",
-                                                value: selectedStudent.club?.name || "Not specified",
+                                                value:
+                                                    selectedStudent.club
+                                                        ?.name ||
+                                                    "Not specified",
                                             },
                                             {
                                                 label: "Status",
@@ -535,8 +575,6 @@ export default function Index({
                                             </div>
                                         ))}
                                     </div>
-
-                                 
                                 </div>
                             )}
                         </DialogContent>

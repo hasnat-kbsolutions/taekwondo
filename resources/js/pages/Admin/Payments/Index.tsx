@@ -294,124 +294,7 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
     return (
         <AuthenticatedLayout header="Payments">
             <Head title="Payments" />
-            <div className="container mx-auto py-10 space-y-6">
-                {/* Filters */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap">
-                            <div className="flex flex-col w-[160px]">
-                                <Label className="text-sm mb-1">Year</Label>
-                                <Select
-                                    value={selectedYear}
-                                    onValueChange={(value) => {
-                                        setSelectedYear(value);
-                                        if (value === "All")
-                                            setSelectedMonth(""); // Clear month if "All" is selected
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Year" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {years.map((year) => (
-                                            <SelectItem key={year} value={year}>
-                                                {year}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col w-[160px]">
-                                <Label className="text-sm mb-1">Month</Label>
-                                <Select
-                                    value={selectedMonth}
-                                    onValueChange={(val) =>
-                                        setSelectedMonth(
-                                            val === "all" ? "" : val
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Month" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {months.map((month) => (
-                                            <SelectItem
-                                                key={month.value}
-                                                value={month.value}
-                                            >
-                                                {month.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col w-[160px]">
-                                <Label className="text-sm mb-1">Status</Label>
-                                <Select
-                                    value={status}
-                                    onValueChange={(val) =>
-                                        setStatus(val === "all" ? "" : val)
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="paid">
-                                            Paid
-                                        </SelectItem>
-                                        <SelectItem value="unpaid">
-                                            Unpaid
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col w-[160px]">
-                                <Label className="text-sm mb-1">Currency</Label>
-                                <Select
-                                    value={selectedCurrency}
-                                    onValueChange={(val) =>
-                                        setSelectedCurrency(
-                                            val === "all" ? "" : val
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Currencies" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        {currencies.map((currency) => (
-                                            <SelectItem
-                                                key={currency.code}
-                                                value={currency.code}
-                                            >
-                                                {currency.code} -{" "}
-                                                {currency.symbol}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex items-end">
-                                <Button onClick={resetFilters}>
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
+            <div className="container mx-auto py-10">
                 {/* Payments Table */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -421,6 +304,137 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                <div className="flex flex-col w-[160px]">
+                                    <Label className="text-sm mb-1">Year</Label>
+                                    <Select
+                                        value={selectedYear}
+                                        onValueChange={(value) => {
+                                            setSelectedYear(value);
+                                            if (value === "All")
+                                                setSelectedMonth(""); // Clear month if "All" is selected
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Year" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {years.map((year) => (
+                                                <SelectItem
+                                                    key={year}
+                                                    value={year}
+                                                >
+                                                    {year}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col w-[160px]">
+                                    <Label className="text-sm mb-1">
+                                        Month
+                                    </Label>
+                                    <Select
+                                        value={selectedMonth}
+                                        onValueChange={(val) =>
+                                            setSelectedMonth(
+                                                val === "all" ? "" : val
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Month" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {months.map((month) => (
+                                                <SelectItem
+                                                    key={month.value}
+                                                    value={month.value}
+                                                >
+                                                    {month.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col w-[160px]">
+                                    <Label className="text-sm mb-1">
+                                        Status
+                                    </Label>
+                                    <Select
+                                        value={status}
+                                        onValueChange={(val) =>
+                                            setStatus(val === "all" ? "" : val)
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            <SelectItem value="paid">
+                                                Paid
+                                            </SelectItem>
+                                            <SelectItem value="unpaid">
+                                                Unpaid
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col w-[160px]">
+                                    <Label className="text-sm mb-1">
+                                        Currency
+                                    </Label>
+                                    <Select
+                                        value={selectedCurrency}
+                                        onValueChange={(val) =>
+                                            setSelectedCurrency(
+                                                val === "all" ? "" : val
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Currencies" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {currencies.map((currency) => (
+                                                <SelectItem
+                                                    key={currency.code}
+                                                    value={currency.code}
+                                                >
+                                                    {currency.code} -{" "}
+                                                    {currency.symbol}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable data={payments} columns={columns} />
                     </CardContent>
                 </Card>

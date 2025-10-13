@@ -40,11 +40,11 @@ interface Club {
     country: string;
     street: string;
     postal_code: string;
-    status: string;
+    status: boolean;
     tax_number?: string;
     invoice_prefix?: string;
     logo?: string;
-    notification_emails?: string;
+    notification_emails?: boolean;
     organization?: {
         id: number;
         name: string;
@@ -156,12 +156,14 @@ export default function Show({
                                         </Label>
                                         <Badge
                                             variant={
-                                                club.status === "active"
+                                                club.status
                                                     ? "default"
                                                     : "secondary"
                                             }
                                         >
-                                            {club.status}
+                                            {club.status
+                                                ? "Active"
+                                                : "Inactive"}
                                         </Badge>
                                     </div>
 

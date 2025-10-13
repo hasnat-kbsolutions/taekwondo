@@ -172,59 +172,59 @@ export default function Index({ clubs, filters }: Props) {
             <div className="container mx-auto py-10">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Filters</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-end gap-4 flex-wrap ">
-                            <div className="flex flex-col w-[200px]">
-                                <Label className="text-sm mb-1">Country</Label>
-                                <CountryDropdown
-                                    placeholder="All Countries"
-                                    defaultValue={country || ""}
-                                    onChange={(c) => {
-                                        const selected = c?.alpha3 || "";
-                                        setCountry(selected);
-                                        router.get(
-                                            route("organization.clubs.index"),
-                                            {
-                                                country:
-                                                    typeof selected === "string"
-                                                        ? selected
-                                                        : null,
-                                            },
-                                            {
-                                                preserveScroll: true,
-                                                preserveState: true,
-                                                replace: true,
-                                            }
-                                        );
-                                    }}
-                                    slim={false}
-                                />
-                            </div>
-
-                            <div className="flex items-end">
-                                <Button
-                                    className="flex flex-wrap items-center gap-2 md:flex-row bg-primary text-background"
-                                    onClick={resetFilters}
-                                >
-                                    Reset Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="container mx-auto ">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Clubs</CardTitle>
                         <Link href={route("organization.clubs.create")}>
-                            {" "}
-                            <Button>Add Club</Button>{" "}
+                            <Button>Add Club</Button>
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-end gap-4 flex-wrap">
+                                <div className="flex flex-col w-[200px]">
+                                    <Label className="text-sm mb-1">
+                                        Country
+                                    </Label>
+                                    <CountryDropdown
+                                        placeholder="All Countries"
+                                        defaultValue={country || ""}
+                                        onChange={(c) => {
+                                            const selected = c?.alpha3 || "";
+                                            setCountry(selected);
+                                            router.get(
+                                                route(
+                                                    "organization.clubs.index"
+                                                ),
+                                                {
+                                                    country:
+                                                        typeof selected ===
+                                                        "string"
+                                                            ? selected
+                                                            : null,
+                                                },
+                                                {
+                                                    preserveScroll: true,
+                                                    preserveState: true,
+                                                    replace: true,
+                                                }
+                                            );
+                                        }}
+                                        slim={false}
+                                    />
+                                </div>
+
+                                <div className="flex items-end">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable columns={columns} data={clubs} />
                     </CardContent>
                 </Card>

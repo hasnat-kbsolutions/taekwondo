@@ -15,8 +15,10 @@ class ProfileController extends Controller
 {
     public function show()
     {
+        /** @var Club $club */
         $club = auth()->user()->userable;
-        
+        $club->load(['organization']);
+
         // Get ratings received by the club
         $ratingsReceived = Rating::where('rated_id', $club->id)
             ->where('rated_type', 'App\\Models\\Club')
@@ -29,23 +31,23 @@ class ProfileController extends Controller
                     $raterModel = $rating->rater_type;
                     $rater = $raterModel::find($rating->rater_id);
                 }
-                
+
                 // Get rater name based on the model type
                 $raterName = 'Anonymous';
                 if ($rater) {
-                    if ($rater instanceof \App\Models\Student) {
+                    if ($rater instanceof Student) {
                         $raterName = $rater->name . ' ' . $rater->surname;
-                    } elseif ($rater instanceof \App\Models\Instructor) {
+                    } elseif ($rater instanceof Instructor) {
                         $raterName = $rater->name;
-                    } elseif ($rater instanceof \App\Models\Club) {
+                    } elseif ($rater instanceof Club) {
                         $raterName = $rater->name;
-                    } elseif ($rater instanceof \App\Models\Organization) {
+                    } elseif ($rater instanceof Organization) {
                         $raterName = $rater->name;
                     } else {
                         $raterName = $rater->name ?? 'Unknown';
                     }
                 }
-                
+
                 return [
                     'id' => $rating->id,
                     'rating' => $rating->rating,
@@ -55,9 +57,9 @@ class ProfileController extends Controller
                     'rater_type' => $rater ? class_basename($rating->rater_type) : 'Unknown',
                 ];
             });
-        
 
-        
+
+
         // Calculate statistics
         $stats = [
             'students_count' => $club->students()->count(),
@@ -66,14 +68,18 @@ class ProfileController extends Controller
             'attendances_count' => $club->students()->withCount('attendances')->get()->sum('attendances_count'),
             'payments_count' => $club->students()->withCount('payments')->get()->sum('payments_count'),
         ];
-        
+
+        /** @var \App\Models\User|null $user */
+        $user = $club->user()->first();
+
         // Calculate average rating
         $averageRating = $ratingsReceived->avg('rating');
         $totalRatings = $ratingsReceived->count();
-        
+
         $club->average_rating = $averageRating;
         $club->total_ratings = $totalRatings;
-        
+        $club->email = $user->email ?? null;
+
         return Inertia::render('Club/Profile/Show', [
             'club' => $club,
             'ratingsReceived' => $ratingsReceived,
@@ -84,7 +90,7 @@ class ProfileController extends Controller
     public function showClub($id)
     {
         $club = Club::with(['organization', 'instructors', 'students'])->findOrFail($id);
-        
+
         // Get ratings received by the club
         $ratingsReceived = Rating::where('rated_id', $club->id)
             ->where('rated_type', 'App\\Models\\Club')
@@ -97,7 +103,7 @@ class ProfileController extends Controller
                     $raterModel = $rating->rater_type;
                     $rater = $raterModel::find($rating->rater_id);
                 }
-                
+
                 // Get rater name based on the model type
                 $raterName = 'Anonymous';
                 if ($rater) {
@@ -113,7 +119,7 @@ class ProfileController extends Controller
                         $raterName = $rater->name ?? 'Unknown';
                     }
                 }
-                
+
                 return [
                     'id' => $rating->id,
                     'rating' => $rating->rating,
@@ -123,9 +129,9 @@ class ProfileController extends Controller
                     'rater_type' => $rater ? class_basename($rating->rater_type) : 'Unknown',
                 ];
             });
-        
 
-        
+
+
         // Calculate statistics
         $stats = [
             'students_count' => $club->students()->count(),
@@ -134,14 +140,14 @@ class ProfileController extends Controller
             'attendances_count' => $club->students()->withCount('attendances')->get()->sum('attendances_count'),
             'payments_count' => $club->students()->withCount('payments')->get()->sum('payments_count'),
         ];
-        
+
         // Calculate average rating
         $averageRating = $ratingsReceived->avg('rating');
         $totalRatings = $ratingsReceived->count();
-        
+
         $club->average_rating = $averageRating;
         $club->total_ratings = $totalRatings;
-        
+
         return Inertia::render('Club/Profile/Show', [
             'club' => $club,
             'ratingsReceived' => $ratingsReceived,
@@ -152,7 +158,7 @@ class ProfileController extends Controller
     public function showStudent($id)
     {
         $student = Student::with(['user', 'club', 'organization'])->findOrFail($id);
-        
+
         return Inertia::render('Club/Profile/ShowStudent', [
             'student' => $student,
         ]);
@@ -161,7 +167,7 @@ class ProfileController extends Controller
     public function showInstructor($id)
     {
         $instructor = Instructor::with(['user', 'organization'])->findOrFail($id);
-        
+
         return Inertia::render('Club/Profile/ShowInstructor', [
             'instructor' => $instructor,
         ]);
@@ -170,7 +176,7 @@ class ProfileController extends Controller
     public function showOrganization($id)
     {
         $organization = Organization::with(['clubs', 'instructors', 'students'])->findOrFail($id);
-        
+
         return Inertia::render('Club/Profile/ShowOrganization', [
             'organization' => $organization,
         ]);

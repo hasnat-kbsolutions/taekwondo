@@ -4,7 +4,7 @@ import {
     Landmark,
     Users,
     Group,
-    DollarSign,
+    Wallet,
     BadgeCheck,
     Hourglass,
     Star,
@@ -101,7 +101,7 @@ export default function DashboardCards({
                         )}
                 </div>
             ),
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            icon: <Wallet className="h-6 w-6 text-primary" />,
             url: route("organization.payments.index"),
         },
         {
@@ -125,7 +125,7 @@ export default function DashboardCards({
         {
             label: "Total Payments",
             count: paymentsCount,
-            icon: <DollarSign className="h-6 w-6 text-primary" />,
+            icon: <Wallet className="h-6 w-6 text-primary" />,
             url: route("organization.payments.index"),
         },
         {

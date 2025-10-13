@@ -190,81 +190,7 @@ const CertificationsIndex: React.FC<Props> = ({
     return (
         <AuthenticatedLayout header="Certifications">
             <Head title="Certifications" />
-            <div className="container mx-auto py-10 space-y-6">
-                {/* Filters Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Filter className="w-5 h-5" />
-                            Filters
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <Label htmlFor="search">Search</Label>
-                                <Input
-                                    id="search"
-                                    placeholder="Search students, clubs..."
-                                    value={localFilters.search}
-                                    onChange={(e) => {
-                                        const newFilters = {
-                                            ...localFilters,
-                                            search: e.target.value,
-                                        };
-                                        setLocalFilters(newFilters);
-                                        applyFilters(newFilters);
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="club">Club</Label>
-                                <Select
-                                    value={localFilters.club_id || "all"}
-                                    onValueChange={(value) => {
-                                        const newFilters = {
-                                            ...localFilters,
-                                            club_id:
-                                                value === "all" ? "" : value,
-                                        };
-                                        setLocalFilters(newFilters);
-                                        applyFilters(newFilters);
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Clubs" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Clubs
-                                        </SelectItem>
-                                        {clubs.map((club) => (
-                                            <SelectItem
-                                                key={club.id}
-                                                value={club.id.toString()}
-                                            >
-                                                {club.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex items-end gap-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={clearFilters}
-                                    className="w-full"
-                                >
-                                    <X className="w-4 h-4 mr-2" />
-                                    Clear Filters
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
+            <div className="container mx-auto py-10">
                 {/* Certifications Table */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -278,6 +204,75 @@ const CertificationsIndex: React.FC<Props> = ({
                         </Link>
                     </CardHeader>
                     <CardContent>
+                        {/* Filters Section */}
+                        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <Label htmlFor="search">Search</Label>
+                                    <Input
+                                        id="search"
+                                        placeholder="Search students, clubs..."
+                                        value={localFilters.search}
+                                        onChange={(e) => {
+                                            const newFilters = {
+                                                ...localFilters,
+                                                search: e.target.value,
+                                            };
+                                            setLocalFilters(newFilters);
+                                            applyFilters(newFilters);
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="club">Club</Label>
+                                    <Select
+                                        value={localFilters.club_id || "all"}
+                                        onValueChange={(value) => {
+                                            const newFilters = {
+                                                ...localFilters,
+                                                club_id:
+                                                    value === "all"
+                                                        ? ""
+                                                        : value,
+                                            };
+                                            setLocalFilters(newFilters);
+                                            applyFilters(newFilters);
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Clubs" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All Clubs
+                                            </SelectItem>
+                                            {clubs.map((club) => (
+                                                <SelectItem
+                                                    key={club.id}
+                                                    value={club.id.toString()}
+                                                >
+                                                    {club.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex items-end gap-2">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={clearFilters}
+                                        className="w-full"
+                                    >
+                                        <X className="w-4 h-4 mr-2" />
+                                        Clear Filters
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DataTable */}
                         <DataTable
                             data={filteredCertifications}
                             columns={columns}

@@ -38,7 +38,7 @@ import {
     BarChart3,
     PieChart,
     Edit,
-    DollarSign,
+    Wallet,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -1346,7 +1346,7 @@ export default function StudentInsights({
                                                 )}
                                                 {activity.type ===
                                                     "payment" && (
-                                                    <DollarSign className="h-4 w-4 text-green-500" />
+                                                    <Wallet className="h-4 w-4 text-green-500" />
                                                 )}
                                                 {activity.type ===
                                                     "certification" && (
