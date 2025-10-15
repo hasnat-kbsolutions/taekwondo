@@ -49,8 +49,6 @@ export default function Edit({ organization, currencies }: Props) {
         postal_code: organization.postal_code || "",
         status: organization.status ?? true,
         default_currency: organization.default_currency || "MYR",
-        password: "",
-        password_confirmation: "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -98,32 +96,7 @@ export default function Edit({ organization, currencies }: Props) {
                                 />
                                 {renderError("email")}
                             </div>
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Password</Label>
-                                <Input
-                                    type="password"
-                                    value={data.password}
-                                    onChange={(e) =>
-                                        setData("password", e.target.value)
-                                    }
-                                />
-                                {renderError("password")}
-                            </div>
 
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Confirm Password</Label>
-                                <Input
-                                    type="password"
-                                    value={data.password_confirmation}
-                                    onChange={(e) =>
-                                        setData(
-                                            "password_confirmation",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                {renderError("password_confirmation")}
-                            </div>
                             <div className="w-[25%] px-2 mt-3">
                                 <Label>Phone</Label>
                                 <Input

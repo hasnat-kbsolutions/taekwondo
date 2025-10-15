@@ -8,7 +8,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2, FileText } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, FileText, Key } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
 
@@ -28,7 +28,6 @@ export interface Student {
     identification_document: string | null;
     email: string;
     phone: string;
-    website: string;
     city: string;
     postal_code: string;
     street: string;
@@ -47,7 +46,8 @@ export interface Student {
 }
 
 export const columns = (
-    onView: (student: Student) => void
+    onView: (student: Student) => void,
+    onChangePassword?: (student: Student) => void
 ): ColumnDef<Student>[] => [
     {
         header: "#",
@@ -220,6 +220,15 @@ export const columns = (
                                 <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
+
+                        {onChangePassword && (
+                            <DropdownMenuItem
+                                onClick={() => onChangePassword(student)}
+                            >
+                                <Key className="w-4 h-4 mr-2" /> Change Password
+                            </DropdownMenuItem>
+                        )}
+
                         <DropdownMenuItem asChild>
                             <Link
                                 href={route(

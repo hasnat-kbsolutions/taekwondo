@@ -46,4 +46,18 @@ class PaymentController extends Controller
             'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
     }
+
+    public function invoice($paymentId)
+    {
+        $student = Auth::user()->userable;
+
+        // Find the payment and verify it belongs to this student
+        $payment = $student->payments()
+            ->with(['student.club', 'student.organization', 'currency'])
+            ->findOrFail($paymentId);
+
+        return Inertia::render('Student/Payments/Invoice', [
+            'payment' => $payment,
+        ]);
+    }
 }

@@ -153,4 +153,22 @@ class OrganizationController extends Controller
             ->with('success', 'Organization and associated user deleted successfully');
     }
 
+    public function updatePassword(Request $request, Organization $organization)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Update the user's password if the organization has a linked user
+        if ($organization->user) {
+            $organization->user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            return redirect()->route('admin.organizations.index')->with('success', 'Password updated successfully');
+        }
+
+        return redirect()->route('admin.organizations.index')->with('error', 'No user account found for this organization');
+    }
+
 }

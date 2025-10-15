@@ -23,7 +23,15 @@ import {
     DialogFooter,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Eye, Edit, Trash2, FileText } from "lucide-react";
+import {
+    MoreHorizontal,
+    Eye,
+    Edit,
+    Trash2,
+    FileText,
+    CheckCircle,
+    XCircle,
+} from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -91,7 +99,11 @@ const months = [
 export default function PaymentIndex({ payments, filters, currencies }: Props) {
     const [status, setStatus] = useState(filters.status || "");
     const [selectedYear, setSelectedYear] = useState(
-        filters.payment_month?.split("-")[0] || currentYear.toString()
+        filters.payment_month
+            ? filters.payment_month.length === 4
+                ? filters.payment_month
+                : filters.payment_month.split("-")[0]
+            : "All"
     );
     const [selectedMonth, setSelectedMonth] = useState(
         filters.payment_month?.split("-")[1] || ""
@@ -132,9 +144,12 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
         status: string;
         currency: string;
     }) => {
-        // Ensure a valid payment_month format (default to "01" if no month selected, clear if year is "All")
+        // Ensure a valid payment_month format
+        // - If year is "All", clear payment_month
+        // - If month is empty/not selected, send year only (for year-wide filtering)
+        // - If month is selected, send year-month
         const paymentMonth =
-            year === "All" ? "" : month ? `${year}-${month}` : `${year}-01`; // Default to January if no month
+            year === "All" ? "" : month ? `${year}-${month}` : year;
         console.log("Filter Values:", {
             year,
             month,
@@ -174,7 +189,7 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
 
     const resetFilters = () => {
         setStatus("");
-        setSelectedYear(currentYear.toString());
+        setSelectedYear("All");
         setSelectedMonth("");
         setSelectedCurrency("");
         router.get(
@@ -264,6 +279,39 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
                                 <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
+                        {row.original.status === "unpaid" && (
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        "admin.payments.updateStatus",
+                                        row.original.id
+                                    )}
+                                    method="patch"
+                                    data={{ status: "paid" }}
+                                    as="button"
+                                >
+                                    <CheckCircle className="w-4 h-4 mr-2" />{" "}
+                                    Mark as Paid
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
+                        {(row.original.status === "paid" ||
+                            row.original.status === "success") && (
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        "admin.payments.updateStatus",
+                                        row.original.id
+                                    )}
+                                    method="patch"
+                                    data={{ status: "unpaid" }}
+                                    as="button"
+                                >
+                                    <XCircle className="w-4 h-4 mr-2" /> Mark as
+                                    Unpaid
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem asChild>
                             <Link
                                 href={route(

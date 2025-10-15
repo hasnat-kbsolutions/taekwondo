@@ -23,8 +23,6 @@ interface Organization {
 interface Club {
     id: number;
     user?: { name: string; email: string };
-    password?: string;
-    password_confirmation?: string;
     city?: string;
     country?: string;
     street?: string;
@@ -52,8 +50,6 @@ export default function Edit({ club, organizations }: Props) {
         _method: "put",
         name: club.user?.name || "",
         email: club.user?.email || "",
-        password: "",
-        password_confirmation: "",
 
         // set to "" instead of null
         city: club.city ?? "",
@@ -122,33 +118,6 @@ export default function Edit({ club, organizations }: Props) {
                                     }
                                 />
                                 {renderError("email")}
-                            </div>
-
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Password</Label>
-                                <Input
-                                    type="password"
-                                    value={data.password}
-                                    onChange={(e) =>
-                                        setData("password", e.target.value)
-                                    }
-                                />
-                                {renderError("password")}
-                            </div>
-
-                            <div className="w-[25%] px-2 mt-3">
-                                <Label>Confirm Password</Label>
-                                <Input
-                                    type="password"
-                                    value={data.password_confirmation}
-                                    onChange={(e) =>
-                                        setData(
-                                            "password_confirmation",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                {renderError("password_confirmation")}
                             </div>
 
                             <div className="w-[25%] px-2 mt-3">

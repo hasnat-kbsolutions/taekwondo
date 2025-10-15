@@ -81,20 +81,6 @@ export default function Edit({ student }: Props) {
                         {renderError("email")}
                     </div>
 
-                    {/* Required: Password */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Password</Label>
-                        <Input
-                            type="password"
-                            placeholder="Password"
-                            value={data.password}
-                            onChange={(e) =>
-                                setData("password", e.target.value)
-                            }
-                        />
-                        {renderError("password")}
-                    </div>
-
                     {/* Required: Phone */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>
@@ -267,17 +253,6 @@ export default function Edit({ student }: Props) {
                             }
                         />
                         {renderError("id_passport")}
-                    </div>
-
-                    {/* Optional: Website */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Website</Label>
-                        <Input
-                            placeholder="Website"
-                            value={data.website}
-                            onChange={(e) => setData("website", e.target.value)}
-                        />
-                        {renderError("website")}
                     </div>
 
                     {/* Optional Address Fields */}

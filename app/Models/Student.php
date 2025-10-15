@@ -26,7 +26,6 @@ class Student extends Model
         'identification_document',
         'email',
         'phone',
-        'website',
         'city',
         'postal_code',
         'street',

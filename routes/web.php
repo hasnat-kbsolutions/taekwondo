@@ -126,6 +126,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Admin\PaymentController::class, 'invoice'])->name('payments.invoice');
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
+
+    // Student Password Update
+    Route::patch('/students/{student}/password', [App\Http\Controllers\Admin\StudentController::class, 'updatePassword'])->name('students.updatePassword');
+
+    // Organization Password Update
+    Route::patch('/organizations/{organization}/password', [App\Http\Controllers\Admin\OrganizationController::class, 'updatePassword'])->name('organizations.updatePassword');
+
+    // Club Password Update
+    Route::patch('/clubs/{club}/password', [App\Http\Controllers\Admin\ClubController::class, 'updatePassword'])->name('clubs.updatePassword');
 
     // Admin Currency Management
     Route::get('/currencies', [App\Http\Controllers\Admin\CurrencyController::class, 'index'])->name('currencies.index');
@@ -163,6 +173,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/students/{student}/edit', [App\Http\Controllers\Organization\StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [App\Http\Controllers\Organization\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Organization\StudentController::class, 'destroy'])->name('students.destroy');
+    Route::patch('/students/{student}/password', [App\Http\Controllers\Organization\StudentController::class, 'updatePassword'])->name('students.updatePassword');
 
     Route::get('/instructors', [App\Http\Controllers\Organization\InstructorController::class, 'index'])->name('instructors.index');
     Route::get('/instructors/create', [App\Http\Controllers\Organization\InstructorController::class, 'create'])->name('instructors.create');
@@ -177,6 +188,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/clubs/{club}/edit', [App\Http\Controllers\Organization\ClubController::class, 'edit'])->name('clubs.edit');
     Route::put('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'update'])->name('clubs.update');
     Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
+    Route::patch('/clubs/{club}/password', [App\Http\Controllers\Organization\ClubController::class, 'updatePassword'])->name('clubs.updatePassword');
 
     Route::get('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Organization\PaymentController::class, 'create'])->name('payments.create');
@@ -185,6 +197,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::put('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Organization\PaymentController::class, 'invoice'])->name('payments.invoice');
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Organization\AttendanceController::class, 'create'])->name('attendances.create');
@@ -236,6 +249,7 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::get('/students/{student}/edit', [App\Http\Controllers\Club\StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [App\Http\Controllers\Club\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Club\StudentController::class, 'destroy'])->name('students.destroy');
+    Route::patch('/students/{student}/password', [App\Http\Controllers\Club\StudentController::class, 'updatePassword'])->name('students.updatePassword');
 
     Route::get('/payments', [App\Http\Controllers\Club\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Club\PaymentController::class, 'create'])->name('payments.create');
@@ -244,6 +258,7 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::put('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Club\PaymentController::class, 'invoice'])->name('payments.invoice');
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Club\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
     Route::get('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Club\AttendanceController::class, 'create'])->name('attendances.create');
@@ -296,6 +311,7 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Student\PaymentController::class, 'invoice'])->name('payments.invoice');
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/certifications', [App\Http\Controllers\Student\CertificationController::class, 'index'])->name('certifications.index');
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'show'])->name('profile.show');

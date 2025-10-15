@@ -126,7 +126,7 @@ class PaymentController extends Controller
             'bank_information' => 'nullable|array',
             'bank_information.*' => 'exists:bank_information,id',
         ]);
-   
+
 
         // Combine current year with selected month for "YYYY-MM" format
         $year = now()->year;
@@ -158,5 +158,18 @@ class PaymentController extends Controller
         $payment->delete();
 
         return redirect()->route('admin.payments.index')->with('success', 'Payment deleted successfully');
+    }
+
+    public function updateStatus(Request $request, Payment $payment)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:paid,unpaid',
+        ]);
+
+        $payment->update([
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('admin.payments.index')->with('success', 'Payment status updated successfully');
     }
 }

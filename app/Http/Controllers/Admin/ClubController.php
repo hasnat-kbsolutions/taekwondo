@@ -276,4 +276,22 @@ class ClubController extends Controller
 
         return redirect()->route('admin.clubs.index')->with('success', 'Club deleted successfully');
     }
+
+    public function updatePassword(Request $request, Club $club)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Update the user's password if the club has a linked user
+        if ($club->user) {
+            $club->user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            return redirect()->route('admin.clubs.index')->with('success', 'Password updated successfully');
+        }
+
+        return redirect()->route('admin.clubs.index')->with('error', 'No user account found for this club');
+    }
 }

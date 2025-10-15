@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { DataTable } from "@/components/DataTable";
 import { columns, Student } from "@/components/columns/students";
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,12 @@ export default function Index({
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(
         null
     );
+    const [passwordChangeStudent, setPasswordChangeStudent] =
+        useState<Student | null>(null);
+    const passwordForm = useForm({
+        password: "",
+        password_confirmation: "",
+    });
 
     useEffect(() => {
         // Listen for import log and show modal if present
@@ -343,8 +349,9 @@ export default function Index({
 
                         {/* DataTable */}
                         <DataTable
-                            columns={columns((student) =>
-                                setSelectedStudent(student)
+                            columns={columns(
+                                (student) => setSelectedStudent(student),
+                                (student) => setPasswordChangeStudent(student)
                             )}
                             data={students}
                         />
@@ -480,12 +487,6 @@ export default function Index({
                                                 ),
                                             },
                                             {
-                                                label: "Website",
-                                                value:
-                                                    selectedStudent.website ||
-                                                    "Not specified",
-                                            },
-                                            {
                                                 label: "Street",
                                                 value:
                                                     selectedStudent.street ||
@@ -577,6 +578,126 @@ export default function Index({
                                     </div>
                                 </div>
                             )}
+                        </DialogContent>
+                    </Dialog>
+                )}
+
+                {/* Change Password Modal */}
+                {passwordChangeStudent && (
+                    <Dialog
+                        open={!!passwordChangeStudent}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setPasswordChangeStudent(null);
+                                passwordForm.reset();
+                            }
+                        }}
+                    >
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Change Password</DialogTitle>
+                                <DialogDescription>
+                                    Update password for{" "}
+                                    {passwordChangeStudent.name}{" "}
+                                    {passwordChangeStudent.surname}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    passwordForm.patch(
+                                        route(
+                                            "admin.students.updatePassword",
+                                            passwordChangeStudent.id
+                                        ),
+                                        {
+                                            onSuccess: () => {
+                                                setPasswordChangeStudent(null);
+                                                passwordForm.reset();
+                                            },
+                                        }
+                                    );
+                                }}
+                                className="space-y-4"
+                            >
+                                <div>
+                                    <Label htmlFor="password">
+                                        New Password{" "}
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Enter new password"
+                                        value={passwordForm.data.password}
+                                        onChange={(e) =>
+                                            passwordForm.setData(
+                                                "password",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
+                                    {passwordForm.errors.password && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {passwordForm.errors.password}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="password_confirmation">
+                                        Confirm Password{" "}
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="password_confirmation"
+                                        type="password"
+                                        placeholder="Confirm new password"
+                                        value={
+                                            passwordForm.data
+                                                .password_confirmation
+                                        }
+                                        onChange={(e) =>
+                                            passwordForm.setData(
+                                                "password_confirmation",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
+                                    {passwordForm.errors
+                                        .password_confirmation && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {
+                                                passwordForm.errors
+                                                    .password_confirmation
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+
+                                <DialogFooter>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setPasswordChangeStudent(null);
+                                            passwordForm.reset();
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={passwordForm.processing}
+                                    >
+                                        {passwordForm.processing
+                                            ? "Updating..."
+                                            : "Update Password"}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
                         </DialogContent>
                     </Dialog>
                 )}

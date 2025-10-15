@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,21 @@ import {
 } from "@/components/ui/select";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { Coins, BadgeCheck, Hourglass, DollarSign } from "lucide-react";
+import {
+    Coins,
+    BadgeCheck,
+    Hourglass,
+    DollarSign,
+    FileText,
+    Download,
+} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 31 }, (_, i) => currentYear - 15 + i); // [currentYear -15, ..., currentYear +15]
@@ -124,6 +138,40 @@ export default function Payment({
         {
             header: "Notes",
             cell: ({ row }) => row.original.notes || "-",
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("student.payments.invoice", {
+                                    payment: row.original.id,
+                                })}
+                            >
+                                <FileText className="w-4 h-4 mr-2" /> View
+                                Invoice
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("student.payments.invoice", {
+                                    payment: row.original.id,
+                                })}
+                            >
+                                <Download className="w-4 h-4 mr-2" /> Download
+                                Invoice
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
         },
     ];
 

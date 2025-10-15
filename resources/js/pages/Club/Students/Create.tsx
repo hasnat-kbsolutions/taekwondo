@@ -37,7 +37,6 @@ export default function Create({ clubs, organizations }: Props) {
         id_passport: "",
         profile_image: null as File | null,
         identification_document: null as File | null,
-        website: "",
         city: "",
         postal_code: "",
         street: "",
@@ -292,16 +291,7 @@ export default function Create({ clubs, organizations }: Props) {
                         {renderError("id_passport")}
                     </div>
 
-                    {/* Optional: Website */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>Website</Label>
-                        <Input
-                            placeholder="Website"
-                            value={data.website}
-                            onChange={(e) => setData("website", e.target.value)}
-                        />
-                        {renderError("website")}
-                    </div>
+             
 
                     {/* Optional Address Fields */}
                     <div className="w-[33.33%] px-2 mt-3">

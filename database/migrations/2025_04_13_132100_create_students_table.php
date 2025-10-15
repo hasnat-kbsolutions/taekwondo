@@ -31,7 +31,6 @@ return new class extends Migration {
             $table->string('identification_document')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->string('website')->nullable();
             $table->string('city')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('street')->nullable();

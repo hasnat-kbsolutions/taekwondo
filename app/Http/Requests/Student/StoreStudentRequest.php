@@ -42,7 +42,6 @@ class StoreStudentRequest extends FormRequest
             'dod' => ['nullable', 'date', 'after:dob'],
             'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'identification_document' => ['nullable', 'file', 'mimes:pdf', 'max:2048'],
-            'website' => ['nullable', 'string', 'url', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'street' => ['nullable', 'string', 'max:255'],
@@ -82,7 +81,6 @@ class StoreStudentRequest extends FormRequest
             'profile_image.max' => 'Profile image size must not exceed 2MB.',
             'identification_document.mimes' => 'Identification document must be in PDF format.',
             'identification_document.max' => 'Identification document size must not exceed 2MB.',
-            'website.url' => 'Please enter a valid website URL.',
             'status.required' => 'Status selection is required.',
         ];
     }
@@ -110,7 +108,6 @@ class StoreStudentRequest extends FormRequest
             'surname' => 'surname',
             'profile_image' => 'profile image',
             'identification_document' => 'identification document',
-            'website' => 'website',
             'city' => 'city',
             'postal_code' => 'postal code',
             'street' => 'street address',

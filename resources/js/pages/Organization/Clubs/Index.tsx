@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -15,7 +15,16 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Key } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+    DialogHeader,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface User {
     id: number;
@@ -43,7 +52,9 @@ interface Props {
     };
 }
 
-const columns: ColumnDef<Club>[] = [
+const columns = (
+    onChangePassword?: (club: Club) => void
+): ColumnDef<Club>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -118,6 +129,15 @@ const columns: ColumnDef<Club>[] = [
                             <Edit className="w-4 h-4 mr-2" /> Edit
                         </Link>
                     </DropdownMenuItem>
+
+                    {onChangePassword && (
+                        <DropdownMenuItem
+                            onClick={() => onChangePassword(row.original)}
+                        >
+                            <Key className="w-4 h-4 mr-2" /> Change Password
+                        </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem asChild>
                         <Link
                             href={route(
@@ -138,6 +158,13 @@ const columns: ColumnDef<Club>[] = [
 
 export default function Index({ clubs, filters }: Props) {
     const [country, setCountry] = useState(filters.country || "");
+    const [passwordChangeClub, setPasswordChangeClub] = useState<Club | null>(
+        null
+    );
+    const passwordForm = useForm({
+        password: "",
+        password_confirmation: "",
+    });
 
     const handleFilterChange = (extraParams = {}) => {
         router.get(
@@ -225,10 +252,131 @@ export default function Index({ clubs, filters }: Props) {
                         </div>
 
                         {/* DataTable */}
-                        <DataTable columns={columns} data={clubs} />
+                        <DataTable
+                            columns={columns((club) =>
+                                setPasswordChangeClub(club)
+                            )}
+                            data={clubs}
+                        />
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Change Password Modal */}
+            {passwordChangeClub && (
+                <Dialog
+                    open={!!passwordChangeClub}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setPasswordChangeClub(null);
+                            passwordForm.reset();
+                        }
+                    }}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogDescription>
+                                Update password for {passwordChangeClub.name}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                passwordForm.patch(
+                                    route(
+                                        "organization.clubs.updatePassword",
+                                        passwordChangeClub.id
+                                    ),
+                                    {
+                                        onSuccess: () => {
+                                            setPasswordChangeClub(null);
+                                            passwordForm.reset();
+                                        },
+                                    }
+                                );
+                            }}
+                            className="space-y-4"
+                        >
+                            <div>
+                                <Label htmlFor="password">
+                                    New Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Enter new password"
+                                    value={passwordForm.data.password}
+                                    onChange={(e) =>
+                                        passwordForm.setData(
+                                            "password",
+                                            e.target.value
+                                        )
+                                    }
+                                    required
+                                />
+                                {passwordForm.errors.password && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {passwordForm.errors.password}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="password_confirmation">
+                                    Confirm Password{" "}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="password_confirmation"
+                                    type="password"
+                                    placeholder="Confirm new password"
+                                    value={
+                                        passwordForm.data.password_confirmation
+                                    }
+                                    onChange={(e) =>
+                                        passwordForm.setData(
+                                            "password_confirmation",
+                                            e.target.value
+                                        )
+                                    }
+                                    required
+                                />
+                                {passwordForm.errors.password_confirmation && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {
+                                            passwordForm.errors
+                                                .password_confirmation
+                                        }
+                                    </p>
+                                )}
+                            </div>
+
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setPasswordChangeClub(null);
+                                        passwordForm.reset();
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={passwordForm.processing}
+                                >
+                                    {passwordForm.processing
+                                        ? "Updating..."
+                                        : "Update Password"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            )}
         </AuthenticatedLayout>
     );
 }

@@ -176,4 +176,22 @@ class PaymentController extends Controller
             'payment' => $payment,
         ]);
     }
+
+    public function updateStatus(Request $request, Payment $payment)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'club') {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:paid,unpaid',
+        ]);
+
+        $payment->update([
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('club.payments.index')->with('success', 'Payment status updated successfully');
+    }
 }

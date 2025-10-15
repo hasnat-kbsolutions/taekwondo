@@ -54,7 +54,6 @@ class StudentController extends Controller
                     'city' => $student->city,
                     'postal_code' => $student->postal_code,
                     'street' => $student->street,
-                    'website' => $student->website,
                 ];
             });
 
@@ -94,7 +93,6 @@ class StudentController extends Controller
             'gender' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'identification_document' => 'nullable|mimes:pdf|max:2048',
-            'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'street' => 'nullable|string',
@@ -160,7 +158,6 @@ class StudentController extends Controller
             'gender' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'identification_document' => 'nullable|mimes:pdf|max:2048',
-            'website' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'street' => 'nullable|string',
@@ -226,6 +223,26 @@ class StudentController extends Controller
         $student->delete();
 
         return redirect()->route('club.students.index')->with('success', 'Student and associated user deleted');
+    }
+
+    public function updatePassword(Request $request, Student $student)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Update the user's password if the student has a linked user
+        $user = User::where('email', $student->email)->first();
+
+        if ($user) {
+            $user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            return redirect()->route('club.students.index')->with('success', 'Password updated successfully');
+        }
+
+        return redirect()->route('club.students.index')->with('error', 'No user account found for this student');
     }
 }
 
