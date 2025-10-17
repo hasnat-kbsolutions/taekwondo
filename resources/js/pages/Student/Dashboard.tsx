@@ -18,7 +18,7 @@ import {
     Star,
     Calendar,
     TrendingUp,
-    DollarSign,
+    Wallet,
 } from "lucide-react";
 import RatingStars from "@/components/RatingStars";
 
@@ -193,7 +193,7 @@ export default function Dashboard({
                             <CardTitle className="text-sm font-medium">
                                 Total Payments
                             </CardTitle>
-                            <DollarSign className="h-6 w-6 text-primary" />
+                            <Wallet className="h-6 w-6 text-primary" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
@@ -235,7 +235,7 @@ export default function Dashboard({
                             <CardTitle className="text-sm font-medium">
                                 Total Amount
                             </CardTitle>
-                            <DollarSign className="h-6 w-6 text-primary" />
+                            <Wallet className="h-6 w-6 text-primary" />
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-1 w-full">
