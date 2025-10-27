@@ -25,6 +25,7 @@ import {
     Hourglass,
     CheckCircle,
     XCircle,
+    Download,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -188,12 +189,23 @@ const columns: ColumnDef<Payment>[] = [
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={route("organization.payments.invoice", {
+                            href={route("invoice.show", {
                                 payment: row.original.id,
                             })}
                         >
                             <FileText className="w-4 h-4 mr-2" /> Invoice
                         </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const url = route("invoice.download", {
+                                payment: row.original.id,
+                            });
+                            window.open(url, "_blank");
+                        }}
+                    >
+                        <Download className="w-4 h-4 mr-2" /> Download Invoice
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -435,6 +447,26 @@ export default function PaymentIndex({
                                     {
                                         payments.filter(
                                             (p) => p.status === "pending"
+                                        ).length
+                                    }
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
+                                    Unpaid
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <XCircle className="h-6 w-6 text-red-600" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold group-hover:text-primary transition-colors text-red-600">
+                                    {
+                                        payments.filter(
+                                            (p) => p.status === "unpaid"
                                         ).length
                                     }
                                 </div>

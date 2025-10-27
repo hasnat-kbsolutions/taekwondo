@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Currency;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\View;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class PaymentController extends Controller
 {
@@ -58,6 +61,72 @@ class PaymentController extends Controller
 
         return Inertia::render('Student/Payments/Invoice', [
             'payment' => $payment,
+        ]);
+    }
+
+    public function downloadInvoice($paymentId, Request $request)
+    {
+        $student = Auth::user()->userable;
+
+        // Find the payment and verify it belongs to this student
+        $payment = $student->payments()
+            ->with(['student.club', 'student.organization', 'currency'])
+            ->findOrFail($paymentId);
+
+        // Prepare data for PDF
+        $club = $payment->student->club;
+        $organization = $payment->student->organization;
+        $currency = $payment->currency;
+        $invoiceNumber = ($club->invoice_prefix ?? 'INV') . '-' . str_pad($payment->id, 6, '0', STR_PAD_LEFT);
+        $invoiceDate = $payment->pay_at ? \Carbon\Carbon::parse($payment->pay_at)->format('F d, Y') : '-';
+
+        // Bank information is stored as JSON array in the payment model
+        $bankInfo = $payment->bank_information ?? [];
+
+        // For now, use a default payment item since items may not be separate
+        $items = [];
+        $totalAmount = number_format($payment->amount, 2);
+        $itemAmount = number_format($payment->amount, 2);
+        $currencySymbol = $currency->code === 'MYR' ? 'RM' : $currency->symbol;
+
+        // Generate HTML content
+        $html = View::make('student.invoices.invoice', compact(
+            'payment',
+            'student',
+            'club',
+            'organization',
+            'currency',
+            'invoiceNumber',
+            'invoiceDate',
+            'items',
+            'totalAmount',
+            'itemAmount',
+            'currencySymbol',
+            'bankInfo'
+        ))->render();
+
+        // Create PDF using DomPDF
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isFontSubsettingEnabled', true);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('debugLayout', false);
+        $options->set('debugLayoutLines', false);
+        $options->set('debugLayoutPaddingBox', false);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Download the PDF
+        $filename = 'Invoice_' . $invoiceNumber . '_' . now()->format('Y-m-d') . '.pdf';
+
+        return response()->streamDownload(function () use ($dompdf) {
+            echo $dompdf->output();
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
         ]);
     }
 }

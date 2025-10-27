@@ -6,13 +6,15 @@ use App\Exports\StudentsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Inertia\Inertia;
 
-Route::get('/invoice', function () {
-    return Inertia::render('Admin/Payments/Invoice');
-});
-
 Route::get('/', function () {
     return redirect('/login');
 })->middleware('redirect.role');
+
+// Shared invoice routes for all user types
+Route::middleware('auth')->group(function () {
+    Route::get('/invoice/{payment}', [App\Http\Controllers\InvoiceController::class, 'show'])->name('invoice.show');
+    Route::get('/invoice/{payment}/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('invoice.download');
+});
 
 
 Route::get('/storage-link', function () {
@@ -125,7 +127,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/payments/{payment}/edit', [App\Http\Controllers\Admin\PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Admin\PaymentController::class, 'invoice'])->name('payments.invoice');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
     // Student Password Update
@@ -196,7 +197,6 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/payments/{payment}/edit', [App\Http\Controllers\Organization\PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Organization\PaymentController::class, 'invoice'])->name('payments.invoice');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
@@ -257,7 +257,6 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::get('/payments/{payment}/edit', [App\Http\Controllers\Club\PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Club\PaymentController::class, 'invoice'])->name('payments.invoice');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Club\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
     Route::get('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'index'])->name('attendances.index');
@@ -311,7 +310,6 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
-    Route::get('/payments/{payment}/invoice', [App\Http\Controllers\Student\PaymentController::class, 'invoice'])->name('payments.invoice');
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/certifications', [App\Http\Controllers\Student\CertificationController::class, 'index'])->name('certifications.index');
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'show'])->name('profile.show');

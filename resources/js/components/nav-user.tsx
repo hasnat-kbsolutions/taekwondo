@@ -83,44 +83,17 @@ export function NavUser({ user }: { user: User }) {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    href={route(
-                                        `${role}.profile.${
-                                            role === "admin" ? "edit" : "show"
-                                        }`
-                                    )}
-                                >
-                                    <BadgeCheck />
-                                    {role === "admin"
-                                        ? "Edit Profile"
-                                        : "View Profile"}
-                                </Link>
-                            </DropdownMenuItem>
-
-                            {/* Additional Profile Links for Different Roles */}
-                            {role === "student" && (
-                                <>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={route("club.profile.show")}>
-                                            <Building2 />
-                                            Club Profile
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href={route(
-                                                "organization.profile.show"
-                                            )}
-                                        >
-                                            <Users />
-                                            Organization Profile
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </>
+                            {/* Hide Edit Profile option for admin */}
+                            {role !== "admin" && (
+                                <DropdownMenuItem asChild>
+                                    <Link href={route(`${role}.profile.show`)}>
+                                        <BadgeCheck />
+                                        View Profile
+                                    </Link>
+                                </DropdownMenuItem>
                             )}
 
-               
+                            {/* Additional Profile Links for Different Roles */}
 
                             {role === "branch" && (
                                 <>

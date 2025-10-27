@@ -21,6 +21,7 @@ import {
     Wallet,
     FileText,
     Download,
+    XCircle,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -54,6 +55,7 @@ interface Props {
     totalPayments?: number;
     paidPayments?: number;
     pendingPayments?: number;
+    unpaidPayments?: number;
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
 }
@@ -74,6 +76,7 @@ export default function Payment({
     totalPayments,
     paidPayments,
     pendingPayments,
+    unpaidPayments,
     amountsByCurrency,
     defaultCurrencyCode,
 }: Props) {
@@ -151,7 +154,7 @@ export default function Payment({
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                             <Link
-                                href={route("student.payments.invoice", {
+                                href={route("invoice.show", {
                                     payment: row.original.id,
                                 })}
                             >
@@ -159,15 +162,17 @@ export default function Payment({
                                 Invoice
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route("student.payments.invoice", {
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const url = route("invoice.download", {
                                     payment: row.original.id,
-                                })}
-                            >
-                                <Download className="w-4 h-4 mr-2" /> Download
-                                Invoice
-                            </Link>
+                                });
+                                window.open(url, "_blank");
+                            }}
+                        >
+                            <Download className="w-4 h-4 mr-2" /> Download
+                            Invoice
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -258,6 +263,20 @@ export default function Payment({
                         <CardContent>
                             <div className="text-2xl font-bold text-yellow-500">
                                 {pendingPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Unpaid
+                            </CardTitle>
+                            <XCircle className="h-6 w-6 text-red-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-600">
+                                {unpaidPayments || 0}
                             </div>
                         </CardContent>
                     </Card>

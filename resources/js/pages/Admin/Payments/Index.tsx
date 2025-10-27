@@ -31,6 +31,7 @@ import {
     FileText,
     CheckCircle,
     XCircle,
+    Download,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -326,12 +327,24 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link
-                                href={route("admin.payments.invoice", {
+                                href={route("invoice.show", {
                                     payment: row.original.id,
                                 })}
                             >
                                 <FileText className="w-4 h-4 mr-2" /> Invoice
                             </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const url = route("invoice.download", {
+                                    payment: row.original.id,
+                                });
+                                window.open(url, "_blank");
+                            }}
+                        >
+                            <Download className="w-4 h-4 mr-2" /> Download
+                            Invoice
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
