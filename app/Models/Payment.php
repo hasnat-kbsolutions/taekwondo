@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -51,7 +52,7 @@ class Payment extends Model
         }
 
         // Fallback to MYR if no currency is set
-        return "RM " . number_format($this->amount, 2);
+        return "RM " . number_format((float) $this->amount, 2);
     }
 
     /**
@@ -60,5 +61,21 @@ class Payment extends Model
     public function getCurrencySymbolAttribute(): string
     {
         return $this->currency ? $this->currency->symbol : 'RM';
+    }
+
+    /**
+     * Get attachment for this payment (one-to-one)
+     */
+    public function attachment()
+    {
+        return $this->hasOne(PaymentAttachment::class);
+    }
+
+    /**
+     * Check if payment has an attachment
+     */
+    public function hasAttachment(): bool
+    {
+        return $this->attachment()->exists();
     }
 }

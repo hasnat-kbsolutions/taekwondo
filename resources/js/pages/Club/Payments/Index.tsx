@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +28,8 @@ import {
     CheckCircle,
     XCircle,
     Download,
+    Upload,
+    FileCheck,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -39,6 +42,15 @@ interface Student {
     name: string;
 }
 
+interface PaymentAttachment {
+    id: number;
+    payment_id: number;
+    file_path: string;
+    original_filename: string;
+    file_type: string;
+    file_size: number;
+}
+
 interface Payment {
     id: number;
     student: Student;
@@ -49,6 +61,7 @@ interface Payment {
     pay_at: string;
     notes?: string;
     currency_code?: string;
+    attachment?: PaymentAttachment;
     currency?: {
         code: string;
         symbol: string;

@@ -129,6 +129,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
+    // Admin Payment Attachment Routes
+    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Admin\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
+    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Admin\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
+    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Admin\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+
     // Student Password Update
     Route::patch('/students/{student}/password', [App\Http\Controllers\Admin\StudentController::class, 'updatePassword'])->name('students.updatePassword');
 
@@ -199,6 +204,11 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
+    // Organization Payment Attachment Routes
+    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Organization\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
+    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Organization\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
+    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Organization\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Organization\AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'store'])->name('attendances.store');
@@ -259,6 +269,11 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::delete('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Club\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
+    // Club Payment Attachment Routes
+    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Club\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
+    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Club\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
+    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Club\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+
     Route::get('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Club\AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'store'])->name('attendances.store');
@@ -280,6 +295,14 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::get('/certifications/{certification}/edit', [\App\Http\Controllers\Club\CertificationController::class, 'edit'])->name('certifications.edit');
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Club\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Club\CertificationController::class, 'destroy'])->name('certifications.destroy');
+
+    // Club Event Routes
+    Route::get('/events', [\App\Http\Controllers\Club\EventController::class, 'index'])->name('events.index');
+    Route::get('/events/create', [\App\Http\Controllers\Club\EventController::class, 'create'])->name('events.create');
+    Route::post('/events', [\App\Http\Controllers\Club\EventController::class, 'store'])->name('events.store');
+    Route::get('/events/{event}/edit', [\App\Http\Controllers\Club\EventController::class, 'edit'])->name('events.edit');
+    Route::put('/events/{event}', [\App\Http\Controllers\Club\EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{event}', [\App\Http\Controllers\Club\EventController::class, 'destroy'])->name('events.destroy');
 
     // Club Profile Routes
     Route::get('/profile', [App\Http\Controllers\Club\ProfileController::class, 'show'])->name('profile.show');
@@ -310,8 +333,18 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
+
+    // Student Payment Attachment Routes
+    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Student\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
+    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Student\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
+    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Student\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/certifications', [App\Http\Controllers\Student\CertificationController::class, 'index'])->name('certifications.index');
+
+    // Student Event Routes
+    Route::get('/events', [App\Http\Controllers\Student\EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [App\Http\Controllers\Student\EventController::class, 'show'])->name('events.show');
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/student/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showStudent'])->name('profile.show-student');
     Route::get('/profile/instructor/{id}', [App\Http\Controllers\Student\ProfileController::class, 'showInstructor'])->name('profile.show-instructor');

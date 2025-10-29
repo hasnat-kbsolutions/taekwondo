@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Currency;
+use App\Models\Payment;
+use App\Models\PaymentAttachment;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\View;
 use Dompdf\Dompdf;
@@ -20,7 +22,7 @@ class PaymentController extends Controller
 
         $payments = $student->payments()
             ->where('payment_month', 'LIKE', $year . '-%')
-            ->with('currency')
+            ->with(['currency', 'attachment'])
             ->orderBy('pay_at', 'desc')
             ->get();
 
@@ -56,7 +58,7 @@ class PaymentController extends Controller
 
         // Find the payment and verify it belongs to this student
         $payment = $student->payments()
-            ->with(['student.club', 'student.organization', 'currency'])
+            ->with(['student.club', 'student.organization', 'currency', 'attachment'])
             ->findOrFail($paymentId);
 
         return Inertia::render('Student/Payments/Invoice', [
@@ -128,5 +130,107 @@ class PaymentController extends Controller
         }, $filename, [
             'Content-Type' => 'application/pdf',
         ]);
+    }
+
+    /**
+     * Upload payment attachment
+     */
+    public function uploadAttachment(Request $request, Payment $payment)
+    {
+        $student = Auth::user()->userable;
+
+        // Verify payment belongs to student
+        $payment = $student->payments()->findOrFail($payment->id);
+
+        $request->validate([
+            'attachment' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120', // 5MB max
+            'description' => 'nullable|string|max:500',
+            'replace_attachment_id' => 'nullable|exists:payment_attachments,id', // For replacing existing attachment
+        ]);
+
+        // If replacing, delete the old attachment
+        if ($request->replace_attachment_id) {
+            $oldAttachment = PaymentAttachment::findOrFail($request->replace_attachment_id);
+
+            // Verify it belongs to this student's payment
+            if ($oldAttachment->payment_id !== $payment->id) {
+                abort(403, 'Unauthorized to replace this attachment.');
+            }
+
+            // Delete old file
+            $oldFile = storage_path('app/public/' . $oldAttachment->file_path);
+            if (file_exists($oldFile)) {
+                unlink($oldFile);
+            }
+
+            // Delete old record
+            $oldAttachment->delete();
+        }
+
+        // Store the new file
+        $file = $request->file('attachment');
+        $filename = 'payment_attachment_' . $payment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('payment-attachments', $filename, 'public');
+
+        // Create attachment record
+        PaymentAttachment::create([
+            'payment_id' => $payment->id,
+            'file_path' => $path,
+            'original_filename' => $file->getClientOriginalName(),
+            'file_type' => $file->getClientOriginalExtension(),
+            'file_size' => $file->getSize(),
+            'description' => $request->description,
+        ]);
+
+        $message = $request->replace_attachment_id
+            ? 'Payment attachment replaced successfully.'
+            : 'Payment attachment uploaded successfully.';
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Download payment attachment
+     */
+    public function downloadAttachment(PaymentAttachment $attachment)
+    {
+        $student = Auth::user()->userable;
+
+        // Verify attachment belongs to student's payment
+        $attachment->load('payment');
+        if ($attachment->payment->student_id !== $student->id) {
+            abort(403, 'Unauthorized access to this attachment.');
+        }
+
+        $filePath = storage_path('app/public/' . $attachment->file_path);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'Attachment file not found.');
+        }
+
+        return response()->download($filePath, $attachment->original_filename);
+    }
+
+    /**
+     * Delete payment attachment
+     */
+    public function deleteAttachment(PaymentAttachment $attachment)
+    {
+        $student = Auth::user()->userable;
+
+        // Verify attachment belongs to student's payment
+        $attachment->load('payment');
+        if ($attachment->payment->student_id !== $student->id) {
+            abort(403, 'Unauthorized access to this attachment.');
+        }
+
+        $filePath = storage_path('app/public/' . $attachment->file_path);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        $attachment->delete();
+
+        return back()->with('success', 'Attachment deleted successfully.');
     }
 }

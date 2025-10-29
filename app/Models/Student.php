@@ -71,6 +71,7 @@ class Student extends Model
         return $this->belongsToMany(\App\Models\Instructor::class, 'instructor_student');
     }
 
+
     /**
      * Get ratings given by this student
      */

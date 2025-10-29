@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Currency;
 use App\Models\BankInformation;
+use App\Models\PaymentAttachment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +15,7 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['student.club', 'student.organization', 'currency']);
+        $query = Payment::with(['student.club', 'student.organization', 'currency', 'attachment']);
 
         // Filter by status
         if ($request->status) {
@@ -47,7 +48,7 @@ class PaymentController extends Controller
 
     public function invoice(Payment $payment)
     {
-        $payment->load(['student.club', 'student.organization', 'currency']);
+        $payment->load(['student.club', 'student.organization', 'currency', 'attachment']);
         return Inertia::render('Admin/Payments/Invoice', [
             'payment' => $payment,
         ]);
@@ -171,5 +172,62 @@ class PaymentController extends Controller
         ]);
 
         return redirect()->route('admin.payments.index')->with('success', 'Payment status updated successfully');
+    }
+
+    /**
+     * Upload payment attachment
+     */
+    public function uploadAttachment(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'attachment' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120', // 5MB max
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        // Store the file
+        $file = $request->file('attachment');
+        $filename = 'payment_attachment_' . $payment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('payment-attachments', $filename, 'public');
+
+        // Create attachment record
+        PaymentAttachment::create([
+            'payment_id' => $payment->id,
+            'file_path' => $path,
+            'original_filename' => $file->getClientOriginalName(),
+            'file_type' => $file->getClientOriginalExtension(),
+            'file_size' => $file->getSize(),
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Payment attachment uploaded successfully.');
+    }
+
+    /**
+     * Download payment attachment
+     */
+    public function downloadAttachment(PaymentAttachment $attachment)
+    {
+        $filePath = storage_path('app/public/' . $attachment->file_path);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'Attachment file not found.');
+        }
+
+        return response()->download($filePath, $attachment->original_filename);
+    }
+
+    /**
+     * Delete payment attachment
+     */
+    public function deleteAttachment(PaymentAttachment $attachment)
+    {
+        $filePath = storage_path('app/public/' . $attachment->file_path);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        $attachment->delete();
+
+        return back()->with('success', 'Attachment deleted successfully.');
     }
 }

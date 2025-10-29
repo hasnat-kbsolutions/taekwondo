@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
     GraduationCap,
     Coins,
@@ -10,10 +11,23 @@ import {
     Award,
     ArrowRight,
     Wallet,
+    MapPin,
+    Clock,
+    AlertCircle,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, Link } from "@inertiajs/react";
 import RatingStars from "@/components/RatingStars";
+
+interface Event {
+    id: number;
+    title: string;
+    description?: string;
+    event_type: string;
+    event_date: string;
+    start_time?: string;
+    venue?: string;
+}
 
 interface Props {
     studentsCount: number;
@@ -32,6 +46,7 @@ interface Props {
     certificationsCount: number;
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
+    upcomingEvents?: Event[];
 }
 
 // Utility function to safely format amounts
@@ -61,6 +76,7 @@ export default function DashboardCards({
     certificationsCount,
     amountsByCurrency,
     defaultCurrencyCode,
+    upcomingEvents = [],
 }: Props) {
     const stats = [
         {
@@ -158,10 +174,106 @@ export default function DashboardCards({
         },
     ];
 
+    const formatEventDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
+
+    const formatEventTime = (timeStr?: string) => {
+        if (!timeStr) return "";
+        const [hours, minutes] = timeStr.split(":");
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+    };
+
     return (
         <AuthenticatedLayout header="Dashboard">
             <Head title="Dashboard" />
             <div className="space-y-6">
+                {/* Upcoming Events Alert */}
+                {upcomingEvents && upcomingEvents.length > 0 && (
+                    <Card className="border-orange-500 bg-gradient-to-r from-orange-50 to-blue-50 dark:from-orange-950/20 dark:to-blue-950/20">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="h-5 w-5 text-orange-600" />
+                                    <CardTitle className="text-lg">
+                                        Upcoming Events
+                                    </CardTitle>
+                                </div>
+                                <Link
+                                    href={route("club.events.index")}
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    View All
+                                </Link>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid gap-3 md:grid-cols-3">
+                                {upcomingEvents.map((event) => (
+                                    <Link
+                                        key={event.id}
+                                        href={route(
+                                            "club.events.edit",
+                                            event.id
+                                        )}
+                                        className="block"
+                                    >
+                                        <div className="p-3 rounded-lg border bg-white dark:bg-gray-800 hover:bg-accent/50 transition-colors cursor-pointer">
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <h4 className="font-semibold text-sm line-clamp-1">
+                                                    {event.title}
+                                                </h4>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-xs shrink-0"
+                                                >
+                                                    {event.event_type}
+                                                </Badge>
+                                            </div>
+                                            <div className="space-y-1 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-3 w-3" />
+                                                    <span>
+                                                        {formatEventDate(
+                                                            event.event_date
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                {event.start_time && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>
+                                                            {formatEventTime(
+                                                                event.start_time
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {event.venue && (
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin className="h-3 w-3" />
+                                                        <span className="line-clamp-1">
+                                                            {event.venue}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Main Stats */}
                 <div>
                     <h2 className="text-lg font-semibold mb-4 text-muted-foreground">

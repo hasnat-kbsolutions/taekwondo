@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\Payment;
 use App\Models\Currency;
+use App\Models\Event;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -69,6 +70,16 @@ class DashboardController extends Controller
         $averageRating = is_numeric($averageRating) ? (float) $averageRating : 0.0;
         $totalRatings = is_numeric($totalRatings) ? (int) $totalRatings : 0;
 
+        // Get upcoming events for the student's club
+        $upcomingEvents = Event::where('club_id', $student->club_id)
+            ->where('organization_id', $student->organization_id)
+            ->where('status', 'upcoming')
+            ->where('event_date', '>=', now()->toDateString())
+            ->where('is_public', true)
+            ->orderBy('event_date', 'asc')
+            ->take(3)
+            ->get();
+
         return Inertia::render('Student/Dashboard', [
             'year' => $year,
             'attendanceStats' => [
@@ -91,6 +102,7 @@ class DashboardController extends Controller
             'amountsByCurrency' => $amountsByCurrency,
             'paidAmountsByCurrency' => $paidAmountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
+            'upcomingEvents' => $upcomingEvents,
         ]);
     }
 }

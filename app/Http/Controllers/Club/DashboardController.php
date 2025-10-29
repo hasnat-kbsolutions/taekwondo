@@ -19,6 +19,7 @@ use App\Models\Supporter;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
+use App\Models\Event;
 
 class DashboardController extends Controller
 {
@@ -59,6 +60,15 @@ class DashboardController extends Controller
         // Get certification statistics
         $certificationsCount = \App\Models\Certification::whereIn('student_id', $studentIds)->count();
 
+        // Get upcoming events
+        $upcomingEvents = Event::where('club_id', $club->id)
+            ->where('organization_id', $club->organization_id)
+            ->where('status', 'upcoming')
+            ->where('event_date', '>=', now()->toDateString())
+            ->orderBy('event_date', 'asc')
+            ->take(3)
+            ->get();
+
         // Calculate amounts by currency
         $amountsByCurrency = $payments->groupBy('currency_code')
             ->map(function ($currencyPayments) {
@@ -86,6 +96,7 @@ class DashboardController extends Controller
             'certificationsCount' => $certificationsCount,
             'amountsByCurrency' => $amountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
+            'upcomingEvents' => $upcomingEvents,
         ]);
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head, router, Link } from "@inertiajs/react";
+import { Head, router, Link, useForm } from "@inertiajs/react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,9 @@ import {
     FileText,
     Download,
     XCircle,
+    Upload,
+    FileCheck,
+    Trash2,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -29,10 +32,29 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 31 }, (_, i) => currentYear - 15 + i); // [currentYear -15, ..., currentYear +15]
+
+interface PaymentAttachment {
+    id: number;
+    payment_id: number;
+    file_path: string;
+    original_filename: string;
+    file_type: string;
+    file_size: number;
+}
 
 interface Payment {
     id: number;
@@ -43,6 +65,7 @@ interface Payment {
     pay_at: string;
     notes?: string;
     currency_code?: string;
+    attachment?: PaymentAttachment; // Single attachment
     currency?: {
         code: string;
         symbol: string;
@@ -68,6 +91,15 @@ const formatAmount = (amount: any, currencyCode: string = "MYR") => {
     } else {
         return numAmount.toFixed(2);
     }
+};
+
+// Utility function to format file size
+const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
 
 export default function Payment({
@@ -143,6 +175,21 @@ export default function Payment({
             cell: ({ row }) => row.original.notes || "-",
         },
         {
+            header: "Proof",
+            cell: ({ row }) => {
+                const payment = row.original;
+                return (
+                    <div className="flex items-center gap-2">
+                        {payment.attachment ? (
+                            <FileCheck className="w-4 h-4 text-primary" />
+                        ) : (
+                            <XCircle className="w-4 h-4 text-muted-foreground" />
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
             header: "Actions",
             cell: ({ row }) => (
                 <DropdownMenu>
@@ -174,15 +221,317 @@ export default function Payment({
                             <Download className="w-4 h-4 mr-2" /> Download
                             Invoice
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setSelectedPayment(row.original);
+                                setDialogOpen(true);
+                            }}
+                        >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {row.original.attachment ? "Manage" : "Upload"}{" "}
+                            Proof
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
         },
     ];
 
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState<Payment | null>(
+        null
+    );
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        attachment: File | null;
+    }>({
+        attachment: null,
+    });
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setSelectedFile(file || null);
+
+        if (file) {
+            // Create preview for images
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setFilePreview(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                setFilePreview(null);
+            }
+            setData("attachment", file);
+        }
+    };
+
+    const handleUpload = () => {
+        if (!data.attachment || !selectedPayment) {
+            toast.error("Please select a file to upload");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("attachment", data.attachment);
+        if (selectedPayment.attachment?.id) {
+            formData.append(
+                "replace_attachment_id",
+                selectedPayment.attachment.id.toString()
+            );
+        }
+
+        router.post(
+            route("student.payments.upload-attachment", {
+                payment: selectedPayment.id,
+            }),
+            formData,
+            {
+                onSuccess: () => {
+                    toast.success(
+                        selectedPayment.attachment
+                            ? "Attachment updated successfully"
+                            : "Attachment uploaded successfully"
+                    );
+                    setDialogOpen(false);
+                    setFilePreview(null);
+                    setSelectedFile(null);
+                    reset();
+                },
+                onError: () => {
+                    toast.error("Failed to upload attachment");
+                },
+            }
+        );
+    };
+
+    const handleDelete = () => {
+        if (!selectedPayment?.attachment) return;
+
+        if (confirm("Are you sure you want to delete this attachment?")) {
+            router.delete(
+                route("student.payments.delete-attachment", {
+                    attachment: selectedPayment.attachment.id,
+                }),
+                {
+                    onSuccess: () => {
+                        toast.success("Attachment deleted successfully");
+                        setDialogOpen(false);
+                        setSelectedPayment(null);
+                        router.reload({ only: ["payments"] });
+                    },
+                    onError: () => {
+                        toast.error("Failed to delete attachment");
+                    },
+                }
+            );
+        }
+    };
+
     return (
         <AuthenticatedLayout header="My Payments">
             <Head title="My Payments" />
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {selectedPayment?.attachment
+                                ? "Update Payment Proof"
+                                : "Upload Payment Proof"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Upload an image or PDF as proof of payment. Max 5MB.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        {/* Show current attachment if exists */}
+                        {selectedPayment?.attachment && !selectedFile && (
+                            <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 flex-1">
+                                        <FileCheck className="w-5 h-5 text-primary" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">
+                                                {
+                                                    selectedPayment.attachment
+                                                        .original_filename
+                                                }
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {selectedPayment.attachment.file_type.toUpperCase()}{" "}
+                                                •{" "}
+                                                {formatFileSize(
+                                                    selectedPayment.attachment
+                                                        .file_size
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Show preview if image */}
+                                {selectedPayment.attachment.file_type.match(
+                                    /^(jpg|jpeg|png|gif|webp)$/i
+                                ) && (
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <img
+                                            src={`/storage/${selectedPayment.attachment.file_path}`}
+                                            alt="Current proof"
+                                            className="w-full h-auto max-h-64 object-contain bg-white"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="flex-1"
+                                        onClick={() => {
+                                            if (selectedPayment?.attachment) {
+                                                window.open(
+                                                    route(
+                                                        "student.payments.download-attachment",
+                                                        {
+                                                            attachment:
+                                                                selectedPayment
+                                                                    .attachment
+                                                                    .id,
+                                                        }
+                                                    ),
+                                                    "_blank"
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Download
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        className="flex-1"
+                                        onClick={handleDelete}
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* File Preview */}
+                        {filePreview && (
+                            <div className="space-y-2">
+                                <Label>Preview</Label>
+                                <div className="border rounded-lg overflow-hidden bg-muted/50">
+                                    <img
+                                        src={filePreview}
+                                        alt="Preview"
+                                        className="w-full h-auto max-h-64 object-contain"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Upload/Update form - only show if no attachment exists or user selected a file */}
+                        {(!selectedPayment?.attachment || selectedFile) && (
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleUpload();
+                                }}
+                            >
+                                <div className="space-y-4">
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="attachment">
+                                            Select File
+                                        </Label>
+                                        <input
+                                            id="attachment"
+                                            type="file"
+                                            accept=".jpg,.jpeg,.png,.pdf"
+                                            onChange={handleFileSelect}
+                                            className="file:border-0 file:bg-primary file:text-primary-foreground file:rounded-md file:px-4 file:py-2 file:mr-4 text-sm"
+                                        />
+                                        {errors.attachment && (
+                                            <p className="text-sm text-red-600">
+                                                {errors.attachment}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <DialogFooter className="gap-2 mt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            if (selectedFile) {
+                                                // Clear selection, show current attachment again
+                                                setSelectedFile(null);
+                                                setFilePreview(null);
+                                                reset();
+                                            } else {
+                                                // Close dialog
+                                                setDialogOpen(false);
+                                                setSelectedPayment(null);
+                                                reset();
+                                            }
+                                        }}
+                                    >
+                                        {selectedFile ? "Cancel" : "Close"}
+                                    </Button>
+                                    {selectedFile && (
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? "Uploading..."
+                                                : selectedPayment?.attachment
+                                                ? "Replace"
+                                                : "Upload"}
+                                        </Button>
+                                    )}
+                                </DialogFooter>
+                            </form>
+                        )}
+
+                        {/* Hidden file input for replace button */}
+                        <input
+                            id="attachment-hidden"
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                        />
+
+                        {/* Show replace option button when attachment exists but no file selected */}
+                        {selectedPayment?.attachment && !selectedFile && (
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        document
+                                            .getElementById("attachment-hidden")
+                                            ?.click();
+                                    }}
+                                >
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    Replace with New File
+                                </Button>
+                            </DialogFooter>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <div className="container mx-auto py-10 space-y-6">
                 {/* Filters */}

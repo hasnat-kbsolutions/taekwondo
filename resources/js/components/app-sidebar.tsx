@@ -8,6 +8,7 @@ import {
     Send,
     SquareTerminal,
     Star,
+    Calendar,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -218,6 +219,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: Star,
         },
         {
+            title: "Events",
+            url: "/club/events",
+            icon: Calendar,
+        },
+        {
             title: "Bank Information",
             url: "/club/bank-information",
             icon: SquareTerminal,
@@ -232,6 +238,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             title: "Certifications",
             url: "/student/certifications",
             icon: SquareTerminal,
+        },
+        {
+            title: "Events",
+            url: "/student/events",
+            icon: Calendar,
         },
         {
             title: "Profile",
