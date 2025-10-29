@@ -72,32 +72,35 @@ class InvoiceController extends Controller
         $itemAmount = number_format($payment->amount, 2);
         $currencySymbol = $currency->code === 'MYR' ? 'RM' : $currency->symbol;
 
-        // Convert logo URL to local file path for DomPDF
+        // Convert logo URL to base64 data URI for DomPDF
         $logoPath = null;
         if ($club->logo) {
-            // Extract the relative path from the full URL
-            $parsedUrl = parse_url($club->logo);
-            if (isset($parsedUrl['path'])) {
-                // Remove leading slash if present
-                $relativePath = ltrim($parsedUrl['path'], '/');
-                // Remove 'storage/' from the path if present since we'll add it with public_path
+            $fullPath = null;
+            
+            // Handle full URL
+            if (filter_var($club->logo, FILTER_VALIDATE_URL)) {
+                $parsedUrl = parse_url($club->logo);
+                if (isset($parsedUrl['path'])) {
+                    $relativePath = ltrim($parsedUrl['path'], '/');
+                    $relativePath = str_replace('storage/', '', $relativePath);
+                    $fullPath = public_path('storage/' . $relativePath);
+                }
+            } else {
+                // Handle relative path
+                $relativePath = ltrim($club->logo, '/');
                 $relativePath = str_replace('storage/', '', $relativePath);
-                // Get the absolute path to the storage directory
                 $fullPath = public_path('storage/' . $relativePath);
+            }
 
-                // Check if file exists
-                if (file_exists($fullPath)) {
-                    // Check if it's an SVG file
-                    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-
-                    if ($ext === 'svg') {
-                        // For SVG, read the content and encode it as base64 data URI
-                        $svgContent = file_get_contents($fullPath);
-                        $logoPath = 'data:image/svg+xml;base64,' . base64_encode($svgContent);
-                    } else {
-                        // For other image formats (jpg, png, etc.), use the file path
-                        $logoPath = $fullPath;
-                    }
+            // Check if file exists and convert to base64
+            if ($fullPath && file_exists($fullPath)) {
+                $imageData = file_get_contents($fullPath);
+                $imageInfo = getimagesize($fullPath);
+                
+                if ($imageInfo !== false) {
+                    $mimeType = $imageInfo['mime'];
+                    $base64 = base64_encode($imageData);
+                    $logoPath = 'data:' . $mimeType . ';base64,' . $base64;
                 }
             }
         }

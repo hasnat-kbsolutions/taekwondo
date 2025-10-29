@@ -14,6 +14,8 @@ import {
     MapPin,
     Clock,
     AlertCircle,
+    FileText,
+    CheckCircle,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head, Link } from "@inertiajs/react";
@@ -27,6 +29,30 @@ interface Event {
     event_date: string;
     start_time?: string;
     venue?: string;
+}
+
+interface PaymentAttachment {
+    id: number;
+    payment_id: number;
+    file_path: string;
+    original_filename: string;
+    file_type: string;
+    file_size: number;
+    created_at: string;
+    payment: {
+        id: number;
+        amount: number;
+        currency_code: string;
+        student: {
+            id: number;
+            name: string;
+            surname?: string;
+        };
+        currency?: {
+            symbol: string;
+            code: string;
+        };
+    };
 }
 
 interface Props {
@@ -47,6 +73,7 @@ interface Props {
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
     upcomingEvents?: Event[];
+    paymentProofs?: PaymentAttachment[];
 }
 
 // Utility function to safely format amounts
@@ -77,6 +104,7 @@ export default function DashboardCards({
     amountsByCurrency,
     defaultCurrencyCode,
     upcomingEvents = [],
+    paymentProofs = [],
 }: Props) {
     const stats = [
         {
@@ -192,10 +220,108 @@ export default function DashboardCards({
         return `${displayHour}:${minutes} ${ampm}`;
     };
 
+    const formatPaymentProofTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    const formatPaymentAmount = (
+        amount: number,
+        currencyCode: string = "MYR",
+        currencySymbol?: string
+    ) => {
+        const numAmount = Number(amount) || 0;
+        const symbol =
+            currencySymbol || (currencyCode === "MYR" ? "RM" : currencyCode);
+        return `${symbol} ${numAmount.toFixed(2)}`;
+    };
+
     return (
         <AuthenticatedLayout header="Dashboard">
             <Head title="Dashboard" />
             <div className="space-y-6">
+                {/* Payment Proofs Alert */}
+                {paymentProofs && paymentProofs.length > 0 && (
+                    <Card className="border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                    <CardTitle className="text-lg">
+                                        Payment Proofs (Today)
+                                    </CardTitle>
+                                </div>
+                                <Link
+                                    href={route("club.payments.index")}
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    View All
+                                </Link>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid gap-3 md:grid-cols-5">
+                                {paymentProofs.map((proof) => (
+                                    <Link
+                                        key={proof.id}
+                                        href={route("club.payments.index", {
+                                            highlight: proof.payment_id,
+                                        })}
+                                        className="block"
+                                    >
+                                        <div className="p-3 rounded-lg border bg-white dark:bg-gray-800 hover:bg-accent/50 transition-colors cursor-pointer">
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <h4 className="font-semibold text-sm line-clamp-1">
+                                                    {proof.payment.student.name}
+                                                    {proof.payment.student
+                                                        .surname
+                                                        ? ` ${proof.payment.student.surname}`
+                                                        : ""}
+                                                </h4>
+                                                <FileText className="h-4 w-4 text-green-600 shrink-0" />
+                                            </div>
+                                            <div className="space-y-1 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Coins className="h-3 w-3" />
+                                                    <span className="font-medium text-foreground">
+                                                        {formatPaymentAmount(
+                                                            proof.payment
+                                                                .amount,
+                                                            proof.payment
+                                                                .currency_code,
+                                                            proof.payment
+                                                                .currency
+                                                                ?.symbol
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-3 w-3" />
+                                                    <span>
+                                                        {formatPaymentProofTime(
+                                                            proof.created_at
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <FileText className="h-3 w-3" />
+                                                    <span className="line-clamp-1">
+                                                        {
+                                                            proof.original_filename
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
                 {/* Upcoming Events Alert */}
                 {upcomingEvents && upcomingEvents.length > 0 && (
                     <Card className="border-orange-500 bg-gradient-to-r from-orange-50 to-blue-50 dark:from-orange-950/20 dark:to-blue-950/20">

@@ -291,7 +291,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 {/* Use route based on role */}
                                 {user?.userable?.logo ? (
                                     <img
-                                        src={`/storage/${user.userable.logo}`}
+                                        src={
+                                            user.userable.logo.startsWith(
+                                                "http"
+                                            )
+                                                ? user.userable.logo
+                                                : `/storage/${user.userable.logo}`
+                                        }
                                         alt={user.userable.name}
                                         className="w-8 h-8 rounded-full object-cover"
                                     />

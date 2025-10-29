@@ -91,6 +91,39 @@ class PaymentController extends Controller
         $itemAmount = number_format($payment->amount, 2);
         $currencySymbol = $currency->code === 'MYR' ? 'RM' : $currency->symbol;
 
+        // Convert logo URL to base64 data URI for DomPDF
+        $logoPath = null;
+        if ($club->logo) {
+            $fullPath = null;
+            
+            // Handle full URL
+            if (filter_var($club->logo, FILTER_VALIDATE_URL)) {
+                $parsedUrl = parse_url($club->logo);
+                if (isset($parsedUrl['path'])) {
+                    $relativePath = ltrim($parsedUrl['path'], '/');
+                    $relativePath = str_replace('storage/', '', $relativePath);
+                    $fullPath = public_path('storage/' . $relativePath);
+                }
+            } else {
+                // Handle relative path
+                $relativePath = ltrim($club->logo, '/');
+                $relativePath = str_replace('storage/', '', $relativePath);
+                $fullPath = public_path('storage/' . $relativePath);
+            }
+
+            // Check if file exists and convert to base64
+            if ($fullPath && file_exists($fullPath)) {
+                $imageData = file_get_contents($fullPath);
+                $imageInfo = getimagesize($fullPath);
+                
+                if ($imageInfo !== false) {
+                    $mimeType = $imageInfo['mime'];
+                    $base64 = base64_encode($imageData);
+                    $logoPath = 'data:' . $mimeType . ';base64,' . $base64;
+                }
+            }
+        }
+
         // Generate HTML content
         $html = View::make('student.invoices.invoice', compact(
             'payment',
@@ -104,7 +137,8 @@ class PaymentController extends Controller
             'totalAmount',
             'itemAmount',
             'currencySymbol',
-            'bankInfo'
+            'bankInfo',
+            'logoPath'
         ))->render();
 
         // Create PDF using DomPDF

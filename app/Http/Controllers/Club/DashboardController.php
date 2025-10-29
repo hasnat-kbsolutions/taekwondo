@@ -19,6 +19,7 @@ use App\Models\Supporter;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
+use App\Models\PaymentAttachment;
 use App\Models\Event;
 
 class DashboardController extends Controller
@@ -69,6 +70,18 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
+        // Get latest 5 payment proofs from today
+        $today = now()->toDateString();
+
+        $paymentProofs = PaymentAttachment::whereHas('payment', function ($query) use ($studentIds) {
+            $query->whereIn('student_id', $studentIds);
+        })
+            ->whereDate('created_at', $today)
+            ->with(['payment.student', 'payment.currency'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         // Calculate amounts by currency
         $amountsByCurrency = $payments->groupBy('currency_code')
             ->map(function ($currencyPayments) {
@@ -97,6 +110,7 @@ class DashboardController extends Controller
             'amountsByCurrency' => $amountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
             'upcomingEvents' => $upcomingEvents,
+            'paymentProofs' => $paymentProofs,
         ]);
     }
 }

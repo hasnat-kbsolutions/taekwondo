@@ -31,6 +31,14 @@ import {
     Upload,
     FileCheck,
 } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -92,132 +100,6 @@ const formatAmount = (amount: any, currencyCode: string = "MYR") => {
     }
 };
 
-const columns: ColumnDef<Payment>[] = [
-    {
-        header: "#",
-        cell: ({ row }) => row.index + 1,
-    },
-    {
-        header: "Student",
-        cell: ({ row }) => row.original.student?.name || "-",
-    },
-    {
-        header: "Amount",
-        cell: ({ row }) => {
-            const currencySymbol = row.original.currency?.symbol || "RM";
-            const currencyCode = row.original.currency_code || "MYR";
-            return `${currencySymbol} ${formatAmount(
-                row.original.amount,
-                currencyCode
-            )}`;
-        },
-    },
-    {
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge
-                variant={
-                    row.original.status === "paid" ||
-                    row.original.status === "success"
-                        ? "default"
-                        : "destructive"
-                }
-            >
-                {row.original.status}
-            </Badge>
-        ),
-    },
-    { header: "Method", accessorKey: "method" },
-    { header: "Payment Month", accessorKey: "payment_month" },
-    { header: "Pay At", accessorKey: "pay_at" },
-    {
-        header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route("club.payments.edit", row.original.id)}
-                        >
-                            <Edit className="w-4 h-4 mr-2" /> Edit
-                        </Link>
-                    </DropdownMenuItem>
-                    {row.original.status === "unpaid" && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route(
-                                    "club.payments.updateStatus",
-                                    row.original.id
-                                )}
-                                method="patch"
-                                data={{ status: "paid" }}
-                                as="button"
-                            >
-                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
-                                Paid
-                            </Link>
-                        </DropdownMenuItem>
-                    )}
-                    {(row.original.status === "paid" ||
-                        row.original.status === "success") && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route(
-                                    "club.payments.updateStatus",
-                                    row.original.id
-                                )}
-                                method="patch"
-                                data={{ status: "unpaid" }}
-                                as="button"
-                            >
-                                <XCircle className="w-4 h-4 mr-2" /> Mark as
-                                Unpaid
-                            </Link>
-                        </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "club.payments.destroy",
-                                row.original.id
-                            )}
-                            method="delete"
-                            as="button"
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route("invoice.show", {
-                                payment: row.original.id,
-                            })}
-                        >
-                            <FileText className="w-4 h-4 mr-2" /> Invoice
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={(e) => {
-                            e.preventDefault();
-                            const url = route("invoice.download", {
-                                payment: row.original.id,
-                            });
-                            window.open(url, "_blank");
-                        }}
-                    >
-                        <Download className="w-4 h-4 mr-2" /> Download Invoice
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
-
 const currentYear = new Date().getFullYear();
 const years = [
     "All",
@@ -250,6 +132,17 @@ export default function PaymentIndex({
     defaultCurrencyCode,
 }: Props) {
     const [status, setStatus] = useState(filters.status || "");
+    const [selectedPaymentForProof, setSelectedPaymentForProof] =
+        useState<Payment | null>(null);
+    const [manageProofOpen, setManageProofOpen] = useState(false);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        attachment: File | null;
+    }>({
+        attachment: null,
+    });
 
     const [selectedYear, setSelectedYear] = useState(
         filters.payment_month
@@ -261,6 +154,87 @@ export default function PaymentIndex({
     const [selectedMonth, setSelectedMonth] = useState(
         filters.payment_month?.split("-")[1] || ""
     );
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setSelectedFile(file || null);
+
+        if (file) {
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setFilePreview(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                setFilePreview(null);
+            }
+            setData("attachment", file);
+        }
+    };
+
+    const handleUpload = () => {
+        if (!data.attachment || !selectedPaymentForProof) {
+            toast.error("Please select a file to upload");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("attachment", data.attachment);
+        if (selectedPaymentForProof.attachment?.id) {
+            formData.append(
+                "replace_attachment_id",
+                selectedPaymentForProof.attachment.id.toString()
+            );
+        }
+
+        router.post(
+            route("club.payments.upload-attachment", {
+                payment: selectedPaymentForProof.id,
+            }),
+            formData,
+            {
+                onSuccess: () => {
+                    toast.success(
+                        selectedPaymentForProof.attachment
+                            ? "Attachment updated successfully"
+                            : "Attachment uploaded successfully"
+                    );
+                    setManageProofOpen(false);
+                    setFilePreview(null);
+                    setSelectedFile(null);
+                    reset();
+                    router.reload({ only: ["payments"] });
+                },
+                onError: () => {
+                    toast.error("Failed to upload attachment");
+                },
+            }
+        );
+    };
+
+    const handleDelete = () => {
+        if (!selectedPaymentForProof?.attachment) return;
+
+        if (confirm("Are you sure you want to delete this attachment?")) {
+            router.delete(
+                route("club.payments.delete-attachment", {
+                    attachment: selectedPaymentForProof.attachment.id,
+                }),
+                {
+                    onSuccess: () => {
+                        toast.success("Attachment deleted successfully");
+                        setManageProofOpen(false);
+                        setSelectedPaymentForProof(null);
+                        router.reload({ only: ["payments"] });
+                    },
+                    onError: () => {
+                        toast.error("Failed to delete attachment");
+                    },
+                }
+            );
+        }
+    };
 
     const handleFilterChange = ({
         year,
@@ -320,6 +294,163 @@ export default function PaymentIndex({
             }
         );
     };
+
+    // Define columns inside component to access state handlers
+    const columns: ColumnDef<Payment>[] = [
+        {
+            header: "#",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            header: "Student",
+            cell: ({ row }) => row.original.student?.name || "-",
+        },
+        {
+            header: "Amount",
+            cell: ({ row }) => {
+                const currencySymbol = row.original.currency?.symbol || "RM";
+                const currencyCode = row.original.currency_code || "MYR";
+                return `${currencySymbol} ${formatAmount(
+                    row.original.amount,
+                    currencyCode
+                )}`;
+            },
+        },
+        {
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge
+                    variant={
+                        row.original.status === "paid" ||
+                        row.original.status === "success"
+                            ? "default"
+                            : "destructive"
+                    }
+                >
+                    {row.original.status}
+                </Badge>
+            ),
+        },
+        { header: "Method", accessorKey: "method" },
+        { header: "Payment Month", accessorKey: "payment_month" },
+        { header: "Pay At", accessorKey: "pay_at" },
+        {
+            header: "Proof",
+            cell: ({ row }) => {
+                const payment = row.original;
+                return (
+                    <div className="flex items-center gap-2">
+                        {payment.attachment ? (
+                            <FileCheck className="w-4 h-4 text-primary" />
+                        ) : (
+                            <XCircle className="w-4 h-4 text-muted-foreground" />
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "club.payments.edit",
+                                    row.original.id
+                                )}
+                            >
+                                <Edit className="w-4 h-4 mr-2" /> Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        {row.original.status === "unpaid" && (
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        "club.payments.updateStatus",
+                                        row.original.id
+                                    )}
+                                    method="patch"
+                                    data={{ status: "paid" }}
+                                    as="button"
+                                >
+                                    <CheckCircle className="w-4 h-4 mr-2" />{" "}
+                                    Mark as Paid
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
+                        {(row.original.status === "paid" ||
+                            row.original.status === "success") && (
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        "club.payments.updateStatus",
+                                        row.original.id
+                                    )}
+                                    method="patch"
+                                    data={{ status: "unpaid" }}
+                                    as="button"
+                                >
+                                    <XCircle className="w-4 h-4 mr-2" /> Mark as
+                                    Unpaid
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "club.payments.destroy",
+                                    row.original.id
+                                )}
+                                method="delete"
+                                as="button"
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("invoice.show", {
+                                    payment: row.original.id,
+                                })}
+                            >
+                                <FileText className="w-4 h-4 mr-2" /> Invoice
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const url = route("invoice.download", {
+                                    payment: row.original.id,
+                                });
+                                window.open(url, "_blank");
+                            }}
+                        >
+                            <Download className="w-4 h-4 mr-2" /> Download
+                            Invoice
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setSelectedPaymentForProof(row.original);
+                                setManageProofOpen(true);
+                            }}
+                        >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {row.original.attachment ? "Manage" : "Upload"}{" "}
+                            Proof
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
 
     return (
         <AuthenticatedLayout header="Payments">
@@ -549,6 +680,211 @@ export default function PaymentIndex({
                         <DataTable data={payments} columns={columns} />
                     </CardContent>
                 </Card>
+
+                {/* Manage Proof Dialog */}
+                <Dialog
+                    open={manageProofOpen}
+                    onOpenChange={setManageProofOpen}
+                >
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {selectedPaymentForProof?.attachment
+                                    ? "Update Payment Proof"
+                                    : "Upload Payment Proof"}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Upload an image or PDF as proof of payment. Max
+                                5MB.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4">
+                            {/* Show current attachment if exists */}
+                            {selectedPaymentForProof?.attachment &&
+                                !selectedFile && (
+                                    <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 flex-1">
+                                                <FileCheck className="w-5 h-5 text-primary" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium truncate">
+                                                        {
+                                                            selectedPaymentForProof
+                                                                .attachment
+                                                                .original_filename
+                                                        }
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {selectedPaymentForProof.attachment.file_type.toUpperCase()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Show preview if image */}
+                                        {selectedPaymentForProof.attachment.file_type.match(
+                                            /^(jpg|jpeg|png|gif|webp)$/i
+                                        ) && (
+                                            <div className="border rounded-lg overflow-hidden">
+                                                <img
+                                                    src={`/storage/${selectedPaymentForProof.attachment.file_path}`}
+                                                    alt="Current proof"
+                                                    className="w-full h-auto max-h-64 object-contain bg-white"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    if (
+                                                        selectedPaymentForProof?.attachment
+                                                    ) {
+                                                        window.open(
+                                                            route(
+                                                                "club.payments.download-attachment",
+                                                                {
+                                                                    attachment:
+                                                                        selectedPaymentForProof
+                                                                            .attachment
+                                                                            .id,
+                                                                }
+                                                            ),
+                                                            "_blank"
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                <Download className="w-4 h-4 mr-2" />
+                                                Download
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="flex-1"
+                                                onClick={handleDelete}
+                                            >
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                            {/* File Preview */}
+                            {filePreview && (
+                                <div className="space-y-2">
+                                    <Label>Preview</Label>
+                                    <div className="border rounded-lg overflow-hidden bg-muted/50">
+                                        <img
+                                            src={filePreview}
+                                            alt="Preview"
+                                            className="w-full h-auto max-h-64 object-contain"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Upload/Update form */}
+                            {(!selectedPaymentForProof?.attachment ||
+                                selectedFile) && (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        handleUpload();
+                                    }}
+                                >
+                                    <div className="space-y-4">
+                                        <div className="flex flex-col gap-2">
+                                            <Label htmlFor="attachment">
+                                                Select File
+                                            </Label>
+                                            <input
+                                                id="attachment"
+                                                type="file"
+                                                accept=".jpg,.jpeg,.png,.pdf"
+                                                onChange={handleFileSelect}
+                                                className="file:border-0 file:bg-primary file:text-primary-foreground file:rounded-md file:px-4 file:py-2 file:mr-4 text-sm"
+                                            />
+                                            {errors.attachment && (
+                                                <p className="text-sm text-red-600">
+                                                    {errors.attachment}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <DialogFooter className="gap-2 mt-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                if (selectedFile) {
+                                                    setSelectedFile(null);
+                                                    setFilePreview(null);
+                                                    reset();
+                                                } else {
+                                                    setManageProofOpen(false);
+                                                    setSelectedPaymentForProof(
+                                                        null
+                                                    );
+                                                    reset();
+                                                }
+                                            }}
+                                        >
+                                            {selectedFile ? "Cancel" : "Close"}
+                                        </Button>
+                                        {selectedFile && (
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                {processing
+                                                    ? "Uploading..."
+                                                    : selectedPaymentForProof?.attachment
+                                                    ? "Replace"
+                                                    : "Upload"}
+                                            </Button>
+                                        )}
+                                    </DialogFooter>
+                                </form>
+                            )}
+
+                            {/* Hidden file input for replace button */}
+                            <input
+                                id="attachment-hidden"
+                                type="file"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+
+                            {/* Show replace option button when attachment exists but no file selected */}
+                            {selectedPaymentForProof?.attachment &&
+                                !selectedFile && (
+                                    <DialogFooter>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => {
+                                                document
+                                                    .getElementById(
+                                                        "attachment-hidden"
+                                                    )
+                                                    ?.click();
+                                            }}
+                                        >
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            Replace with New File
+                                        </Button>
+                                    </DialogFooter>
+                                )}
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

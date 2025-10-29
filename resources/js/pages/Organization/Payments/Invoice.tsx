@@ -58,16 +58,12 @@ export default function Invoice() {
                 <div className="bg-muted border-b p-8 print:p-6">
                     <div className="flex justify-between items-start">
                         <div className="flex items-center space-x-4">
-                            {organization.logo ? (
+                            {club.logo && (
                                 <img
-                                    src={`/storage/${organization.logo}`}
-                                    alt={`${organization.name} Logo`}
+                                    src={`/storage/${club.logo}`}
+                                    alt={`${club.name} Logo`}
                                     className="w-16 h-16 rounded-lg object-cover bg-background p-2 border"
                                 />
-                            ) : (
-                                <div className="w-16 h-16 rounded-lg bg-muted-foreground/10 flex items-center justify-center border">
-                                    <Building2 className="w-8 h-8 text-muted-foreground" />
-                                </div>
                             )}
                             <div>
                                 <h1 className="text-3xl font-bold text-foreground">

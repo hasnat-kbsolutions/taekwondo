@@ -367,11 +367,19 @@
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
-                    <div class="club-info">
-                        <h1><?php echo e($club->name ?? 'Taekwondo Club'); ?></h1>
-                        <?php if($organization->name): ?>
-                            <p><?php echo e($organization->name); ?></p>
+                    <div class="club-info" style="display: table; width: 100%;">
+                        <?php if(isset($logoPath) && $logoPath): ?>
+                            <div style="display: table-cell; vertical-align: middle; padding-right: 16px;">
+                                <img src="<?php echo e($logoPath); ?>" alt="<?php echo e($club->name ?? 'Club'); ?> Logo"
+                                    style="max-width: 80px; max-height: 80px; object-fit: contain;">
+                            </div>
                         <?php endif; ?>
+                        <div style="display: table-cell; vertical-align: middle;">
+                            <h1><?php echo e($club->name ?? 'Taekwondo Club'); ?></h1>
+                            <?php if($organization->name): ?>
+                                <p><?php echo e($organization->name); ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
                 <div class="header-right">
