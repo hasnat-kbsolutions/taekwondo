@@ -44,6 +44,7 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { route } from "ziggy-js";
 
 interface Student {
     id: number;
@@ -84,7 +85,6 @@ interface Props {
     };
     totalPayments?: number;
     paidPayments?: number;
-    pendingPayments?: number;
     unpaidPayments?: number;
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
@@ -126,7 +126,6 @@ export default function PaymentIndex({
     filters,
     totalPayments,
     paidPayments,
-    pendingPayments,
     unpaidPayments,
     amountsByCurrency,
     defaultCurrencyCode,
@@ -266,6 +265,15 @@ export default function PaymentIndex({
     };
 
     const [initialLoad, setInitialLoad] = useState(true);
+    const [statusChangeDialog, setStatusChangeDialog] = useState<{
+        open: boolean;
+        payment: Payment | null;
+        newStatus: "paid" | "unpaid" | null;
+    }>({
+        open: false,
+        payment: null,
+        newStatus: null,
+    });
 
     useEffect(() => {
         if (initialLoad) {
@@ -370,36 +378,34 @@ export default function PaymentIndex({
                             </Link>
                         </DropdownMenuItem>
                         {row.original.status === "unpaid" && (
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    href={route(
-                                        "club.payments.updateStatus",
-                                        row.original.id
-                                    )}
-                                    method="patch"
-                                    data={{ status: "paid" }}
-                                    as="button"
-                                >
-                                    <CheckCircle className="w-4 h-4 mr-2" />{" "}
-                                    Mark as Paid
-                                </Link>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "paid",
+                                    });
+                                }}
+                            >
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
+                                Paid
                             </DropdownMenuItem>
                         )}
                         {(row.original.status === "paid" ||
                             row.original.status === "success") && (
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    href={route(
-                                        "club.payments.updateStatus",
-                                        row.original.id
-                                    )}
-                                    method="patch"
-                                    data={{ status: "unpaid" }}
-                                    as="button"
-                                >
-                                    <XCircle className="w-4 h-4 mr-2" /> Mark as
-                                    Unpaid
-                                </Link>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "unpaid",
+                                    });
+                                }}
+                            >
+                                <XCircle className="w-4 h-4 mr-2" /> Mark as
+                                Unpaid
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem asChild>
@@ -489,26 +495,12 @@ export default function PaymentIndex({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Pending
+                                Unpaid
                             </CardTitle>
                             <Hourglass className="h-6 w-6 text-yellow-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-yellow-500">
-                                {pendingPayments || 0}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Unpaid
-                            </CardTitle>
-                            <XCircle className="h-6 w-6 text-red-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600">
                                 {unpaidPayments || 0}
                             </div>
                         </CardContent>
@@ -883,6 +875,118 @@ export default function PaymentIndex({
                                     </DialogFooter>
                                 )}
                         </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Status Change Confirmation Dialog */}
+                <Dialog
+                    open={statusChangeDialog.open}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setStatusChangeDialog({
+                                open: false,
+                                payment: null,
+                                newStatus: null,
+                            });
+                        }
+                    }}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirm Status Change</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to change the payment
+                                status from{" "}
+                                <strong>
+                                    {statusChangeDialog.payment?.status ===
+                                    "paid"
+                                        ? "Paid"
+                                        : "Unpaid"}
+                                </strong>{" "}
+                                to{" "}
+                                <strong>
+                                    {statusChangeDialog.newStatus === "paid"
+                                        ? "Paid"
+                                        : "Unpaid"}
+                                </strong>
+                                ?
+                            </DialogDescription>
+                        </DialogHeader>
+                        {statusChangeDialog.payment && (
+                            <div className="py-4">
+                                <div className="text-sm text-muted-foreground">
+                                    <p>
+                                        <strong>Student:</strong>{" "}
+                                        {
+                                            statusChangeDialog.payment.student
+                                                ?.name
+                                        }
+                                    </p>
+                                    <p>
+                                        <strong>Amount:</strong>{" "}
+                                        {statusChangeDialog.payment.currency
+                                            ?.symbol || ""}
+                                        {formatAmount(
+                                            statusChangeDialog.payment.amount,
+                                            statusChangeDialog.payment
+                                                .currency_code || "MYR"
+                                        )}{" "}
+                                        {statusChangeDialog.payment
+                                            .currency_code || "MYR"}
+                                    </p>
+                                    <p>
+                                        <strong>Payment Month:</strong>{" "}
+                                        {
+                                            statusChangeDialog.payment
+                                                .payment_month
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setStatusChangeDialog({
+                                        open: false,
+                                        payment: null,
+                                        newStatus: null,
+                                    });
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    if (
+                                        statusChangeDialog.payment &&
+                                        statusChangeDialog.newStatus
+                                    ) {
+                                        router.patch(
+                                            route(
+                                                "club.payments.updateStatus",
+                                                statusChangeDialog.payment.id
+                                            ),
+                                            {
+                                                status: statusChangeDialog.newStatus,
+                                            },
+                                            {
+                                                onSuccess: () => {
+                                                    setStatusChangeDialog({
+                                                        open: false,
+                                                        payment: null,
+                                                        newStatus: null,
+                                                    });
+                                                },
+                                            }
+                                        );
+                                    }
+                                }}
+                            >
+                                Confirm
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>

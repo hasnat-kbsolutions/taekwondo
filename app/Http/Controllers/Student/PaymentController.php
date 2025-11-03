@@ -29,7 +29,7 @@ class PaymentController extends Controller
         // Calculate payment statistics with currency breakdown
         $totalPayments = $payments->count();
         $paidPayments = $payments->where('status', 'paid')->count();
-        $pendingPayments = $payments->where('status', 'pending')->count();
+        $pendingPayments = $payments->where('status', 'unpaid')->count();
 
         $amountsByCurrency = $payments->groupBy('currency_code')
             ->map(function ($currencyPayments) {
@@ -95,7 +95,7 @@ class PaymentController extends Controller
         $logoPath = null;
         if ($club->logo) {
             $fullPath = null;
-            
+
             // Handle full URL
             if (filter_var($club->logo, FILTER_VALIDATE_URL)) {
                 $parsedUrl = parse_url($club->logo);
@@ -115,7 +115,7 @@ class PaymentController extends Controller
             if ($fullPath && file_exists($fullPath)) {
                 $imageData = file_get_contents($fullPath);
                 $imageInfo = getimagesize($fullPath);
-                
+
                 if ($imageInfo !== false) {
                     $mimeType = $imageInfo['mime'];
                     $base64 = base64_encode($imageData);
@@ -157,7 +157,7 @@ class PaymentController extends Controller
         $dompdf->render();
 
         // Download the PDF
-        $filename = 'Invoice_' . $invoiceNumber . '_' . now()->format('Y-m-d') . '.pdf';
+        $filename = $invoiceNumber . '.pdf';
 
         return response()->streamDownload(function () use ($dompdf) {
             echo $dompdf->output();

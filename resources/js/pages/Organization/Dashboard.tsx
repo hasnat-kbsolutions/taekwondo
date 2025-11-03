@@ -135,7 +135,7 @@ export default function DashboardCards({
             url: route("organization.payments.index"),
         },
         {
-            label: "Pending",
+            label: "Unpaid",
             count: pendingCount,
             icon: <Hourglass className="h-6 w-6 text-yellow-500" />,
             url: route("organization.payments.index"),

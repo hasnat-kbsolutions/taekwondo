@@ -254,11 +254,11 @@ class ClubInsightsController extends Controller
         })->whereYear('pay_at', $year);
 
         $totalPaid = (float) $payments->where('status', 'paid')->sum('amount');
-        $pendingAmount = (float) $payments->where('status', 'pending')->sum('amount');
+        $pendingAmount = (float) $payments->where('status', 'unpaid')->sum('amount');
         $totalAmount = (float) $payments->sum('amount');
 
         // Get monthly payment breakdown
-        $monthlyPayments = $payments->selectRaw('MONTH(pay_at) as month, SUM(amount) as total, SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as pending')
+        $monthlyPayments = $payments->selectRaw('MONTH(pay_at) as month, SUM(amount) as total, SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = "unpaid" THEN amount ELSE 0 END) as pending')
             ->groupBy('month')
             ->orderBy('month')
             ->get()

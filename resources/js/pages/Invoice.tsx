@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { usePage, Link } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
+import { route } from "ziggy-js";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,6 @@ import {
     Calendar,
     User,
     CreditCard,
-    Printer,
     Landmark,
     Download,
     ArrowLeft,
@@ -110,19 +110,44 @@ export default function Invoice() {
                 <div className="min-h-screen bg-background py-8 px-4 print:bg-white print:py-0 print:px-0 print:m-0">
                     {/* Back Button and Actions - Hidden on print */}
                     <div className="max-w-4xl mx-auto mb-4 flex justify-between items-center print:hidden">
-                        <Link href={route("student.payments.index")}>
-                            <Button variant="outline">
-                                <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Payments
-                            </Button>
-                        </Link>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.history.back()}
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back
+                        </Button>
                         <div className="flex gap-2">
                             <Button
-                                onClick={() => window.print()}
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    try {
+                                        const url = route("invoice.download", {
+                                            payment: payment.id,
+                                        });
+                                        const response = await fetch(url);
+                                        const blob = await response.blob();
+                                        const downloadUrl =
+                                            window.URL.createObjectURL(blob);
+                                        const link =
+                                            document.createElement("a");
+                                        link.href = downloadUrl;
+                                        link.download = `${invoiceNumber}.pdf`;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                        window.URL.revokeObjectURL(downloadUrl);
+                                    } catch (error) {
+                                        console.error(
+                                            "Download failed:",
+                                            error
+                                        );
+                                    }
+                                }}
                                 variant="default"
                             >
                                 <Download className="w-4 h-4 mr-2" />
-                                Download/Print
+                                Download Invoice
                             </Button>
                         </div>
                     </div>
@@ -136,23 +161,20 @@ export default function Invoice() {
                                         <img
                                             src={club.logo}
                                             alt={`${club.name} Logo`}
-                                            className="w-14 h-14 rounded-lg object-cover bg-background p-1 border"
+                                            className="w-20 h-20 object-contain"
                                         />
                                     ) : (
-                                        <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center border">
-                                            <Building2 className="w-7 h-7 text-muted-foreground" />
+                                        <div>
+                                            <h1 className="text-lg font-bold text-foreground print:text-black">
+                                                {club.name || "Taekwondo Club"}
+                                            </h1>
+                                            {organization.name && (
+                                                <p className="text-muted-foreground text-xs print:text-gray-700 ml-0">
+                                                    {organization.name}
+                                                </p>
+                                            )}
                                         </div>
                                     )}
-                                    <div>
-                                        <h1 className="text-lg font-bold text-foreground print:text-black">
-                                            {club.name || "Taekwondo Club"}
-                                        </h1>
-                                        {organization.name && (
-                                            <p className="text-muted-foreground text-xs print:text-gray-700 ml-0">
-                                                {organization.name}
-                                            </p>
-                                        )}
-                                    </div>
                                 </div>
                                 <div className="text-right">
                                     <h2 className="text-lg font-bold mb-1 text-foreground print:text-black">
@@ -209,9 +231,11 @@ export default function Invoice() {
                                         From
                                     </h3>
                                     <div className="space-y-1 text-sm text-muted-foreground print:text-gray-700">
-                                        <p className="font-semibold text-foreground print:text-black">
-                                            {club.name || "Taekwondo Club"}
-                                        </p>
+                                        {!club.logo && (
+                                            <p className="font-semibold text-foreground print:text-black">
+                                                {club.name || "Taekwondo Club"}
+                                            </p>
+                                        )}
                                         {club.street && (
                                             <p className="text-xs">
                                                 {club.street}
@@ -464,7 +488,7 @@ export default function Invoice() {
                             </div>
                         </div>
 
-                        {/* Print Button - Bottom */}
+                        {/* Footer - Bottom */}
                         <div className="bg-muted px-6 py-3 print:hidden border-t">
                             <div className="flex justify-between items-center">
                                 <p className="text-xs text-muted-foreground">
@@ -475,14 +499,6 @@ export default function Invoice() {
                                         day: "numeric",
                                     })}
                                 </p>
-                                <Button
-                                    onClick={() => window.print()}
-                                    variant="outline"
-                                    size="sm"
-                                >
-                                    <Printer className="w-4 h-4 mr-2" />
-                                    Print Invoice
-                                </Button>
                             </div>
                         </div>
                     </div>

@@ -46,7 +46,7 @@ class PaymentController extends Controller
         // Calculate payment statistics with currency breakdown
         $totalPayments = $payments->count();
         $paidPayments = $payments->where('status', 'paid')->count();
-        $pendingPayments = $payments->where('status', 'pending')->count();
+        $unpaidPayments = $payments->where('status', 'unpaid')->count();
 
         $amountsByCurrency = $payments->groupBy('currency_code')
             ->map(function ($currencyPayments) {
@@ -60,7 +60,7 @@ class PaymentController extends Controller
             'filters' => $request->only(['status', 'payment_month']),
             'totalPayments' => $totalPayments,
             'paidPayments' => $paidPayments,
-            'pendingPayments' => $pendingPayments,
+            'unpaidPayments' => $unpaidPayments,
             'amountsByCurrency' => $amountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
@@ -91,7 +91,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
             'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'status' => 'required|in:unpaid,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
@@ -141,7 +141,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
             'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'status' => 'required|in:unpaid,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
@@ -173,7 +173,7 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
         $payment->load(['student.club', 'student.organization', 'currency']);
-        return Inertia::render('Club/Payments/Invoice', [
+        return Inertia::render('Invoice', [
             'payment' => $payment,
         ]);
     }

@@ -373,13 +373,14 @@
                                 <img src="{{ $logoPath }}" alt="{{ $club->name ?? 'Club' }} Logo"
                                     style="max-width: 80px; max-height: 80px; object-fit: contain;">
                             </div>
+                        @else
+                            <div style="display: table-cell; vertical-align: middle;">
+                                <h1>{{ $club->name ?? 'Taekwondo Club' }}</h1>
+                                @if ($organization->name)
+                                    <p>{{ $organization->name }}</p>
+                                @endif
+                            </div>
                         @endif
-                        <div style="display: table-cell; vertical-align: middle;">
-                            <h1>{{ $club->name ?? 'Taekwondo Club' }}</h1>
-                            @if ($organization->name)
-                                <p>{{ $organization->name }}</p>
-                            @endif
-                        </div>
                     </div>
                 </div>
                 <div class="header-right">
@@ -416,7 +417,9 @@
                 <div class="detail-box">
                     <h3>From</h3>
                     <div class="detail-content">
-                        <p class="name">{{ $club->name ?? 'Taekwondo Club' }}</p>
+                        @if (!isset($logoPath) || !$logoPath)
+                            <p class="name">{{ $club->name ?? 'Taekwondo Club' }}</p>
+                        @endif
                         @if ($club->street)
                             <p>{{ $club->street }}</p>
                         @endif

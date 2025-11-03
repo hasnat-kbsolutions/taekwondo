@@ -980,7 +980,7 @@ export default function StudentInsights({
                                                 )}
                                             </div>
                                             <div className="text-sm text-muted-foreground">
-                                                Pending
+                                                Unpaid
                                             </div>
                                         </div>
                                     </div>

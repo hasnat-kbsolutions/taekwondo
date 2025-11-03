@@ -922,7 +922,7 @@ export default function OrganizationInsights({
                                                 )}
                                             </div>
                                             <div className="text-sm text-gray-600">
-                                                Pending
+                                                Unpaid
                                             </div>
                                         </div>
                                     </CardContent>

@@ -11,6 +11,7 @@ import {
 import { MoreHorizontal, Eye, Edit, Trash2, FileText, Key } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
+import { route } from "ziggy-js";
 
 export interface Student {
     id: number;
@@ -88,6 +89,10 @@ export const columns = (
         },
     },
     {
+        accessorKey: "email",
+        header: "Email",
+    },
+    {
         id: "profile_image",
         header: "Photo",
         cell: ({ row }) => {
@@ -122,10 +127,6 @@ export const columns = (
     {
         accessorKey: "surname",
         header: "Surname",
-    },
-    {
-        accessorKey: "email",
-        header: "Email",
     },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },

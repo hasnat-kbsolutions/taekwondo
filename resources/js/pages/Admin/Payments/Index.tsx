@@ -35,6 +35,9 @@ import {
     Download,
     Upload,
     FileCheck,
+    Wallet,
+    Hourglass,
+    BadgeCheck,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -86,6 +89,11 @@ interface Props {
         name: string;
         symbol: string;
     }>;
+    totalPayments?: number;
+    paidPayments?: number;
+    unpaidPayments?: number;
+    amountsByCurrency?: Record<string, number>;
+    defaultCurrencyCode?: string;
 }
 
 // Add "All" option to years
@@ -110,7 +118,16 @@ const months = [
     { label: "December", value: "12" },
 ];
 
-export default function PaymentIndex({ payments, filters, currencies }: Props) {
+export default function PaymentIndex({
+    payments,
+    filters,
+    currencies,
+    totalPayments,
+    paidPayments,
+    unpaidPayments,
+    amountsByCurrency,
+    defaultCurrencyCode,
+}: Props) {
     const [status, setStatus] = useState(filters.status || "");
     const [selectedYear, setSelectedYear] = useState(
         filters.payment_month
@@ -146,6 +163,15 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
     const [manageProofOpen, setManageProofOpen] = useState(false);
     const [filePreview, setFilePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [statusChangeDialog, setStatusChangeDialog] = useState<{
+        open: boolean;
+        payment: Payment | null;
+        newStatus: "paid" | "unpaid" | null;
+    }>({
+        open: false,
+        payment: null,
+        newStatus: null,
+    });
 
     const { data, setData, post, processing, errors, reset } = useForm<{
         attachment: File | null;
@@ -401,36 +427,34 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
                             </Link>
                         </DropdownMenuItem>
                         {row.original.status === "unpaid" && (
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    href={route(
-                                        "admin.payments.updateStatus",
-                                        row.original.id
-                                    )}
-                                    method="patch"
-                                    data={{ status: "paid" }}
-                                    as="button"
-                                >
-                                    <CheckCircle className="w-4 h-4 mr-2" />{" "}
-                                    Mark as Paid
-                                </Link>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "paid",
+                                    });
+                                }}
+                            >
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
+                                Paid
                             </DropdownMenuItem>
                         )}
                         {(row.original.status === "paid" ||
                             row.original.status === "success") && (
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    href={route(
-                                        "admin.payments.updateStatus",
-                                        row.original.id
-                                    )}
-                                    method="patch"
-                                    data={{ status: "unpaid" }}
-                                    as="button"
-                                >
-                                    <XCircle className="w-4 h-4 mr-2" /> Mark as
-                                    Unpaid
-                                </Link>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "unpaid",
+                                    });
+                                }}
+                            >
+                                <XCircle className="w-4 h-4 mr-2" /> Mark as
+                                Unpaid
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
@@ -486,7 +510,99 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
     return (
         <AuthenticatedLayout header="Payments">
             <Head title="Payments" />
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-10 space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Payments
+                            </CardTitle>
+                            <Wallet className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {totalPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Paid
+                            </CardTitle>
+                            <BadgeCheck className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {paidPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Unpaid
+                            </CardTitle>
+                            <Hourglass className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-yellow-500">
+                                {unpaidPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Revenue
+                            </CardTitle>
+                            <Wallet className="h-6 w-6 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-1 w-full">
+                                <div className="text-lg font-bold">
+                                    {defaultCurrencyCode === "MYR"
+                                        ? "RM"
+                                        : defaultCurrencyCode || ""}{" "}
+                                    {formatAmount(
+                                        amountsByCurrency?.[
+                                            defaultCurrencyCode || "MYR"
+                                        ] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </div>
+                                {amountsByCurrency &&
+                                    Object.keys(amountsByCurrency).length >
+                                        1 && (
+                                        <div className="text-xs text-muted-foreground space-y-1">
+                                            {Object.entries(amountsByCurrency)
+                                                .filter(
+                                                    ([code]) =>
+                                                        code !==
+                                                        defaultCurrencyCode
+                                                )
+                                                .map(([code, amount]) => (
+                                                    <div key={code}>
+                                                        {code === "MYR"
+                                                            ? "RM"
+                                                            : code}{" "}
+                                                        {formatAmount(
+                                                            amount,
+                                                            code
+                                                        )}
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* Payments Table */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -888,6 +1004,120 @@ export default function PaymentIndex({ payments, filters, currencies }: Props) {
                                     </DialogFooter>
                                 )}
                         </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Status Change Confirmation Dialog */}
+                <Dialog
+                    open={statusChangeDialog.open}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setStatusChangeDialog({
+                                open: false,
+                                payment: null,
+                                newStatus: null,
+                            });
+                        }
+                    }}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirm Status Change</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to change the payment
+                                status from{" "}
+                                <strong>
+                                    {statusChangeDialog.payment?.status ===
+                                    "paid"
+                                        ? "Paid"
+                                        : "Unpaid"}
+                                </strong>{" "}
+                                to{" "}
+                                <strong>
+                                    {statusChangeDialog.newStatus === "paid"
+                                        ? "Paid"
+                                        : "Unpaid"}
+                                </strong>
+                                ?
+                            </DialogDescription>
+                        </DialogHeader>
+                        {statusChangeDialog.payment && (
+                            <div className="py-4">
+                                <div className="text-sm text-muted-foreground">
+                                    <p>
+                                        <strong>Student:</strong>{" "}
+                                        {
+                                            statusChangeDialog.payment.student
+                                                ?.name
+                                        }
+                                    </p>
+                                    <p>
+                                        <strong>Amount:</strong>{" "}
+                                        {statusChangeDialog.payment.currency
+                                            ?.symbol || ""}
+                                        {formatAmount(
+                                            statusChangeDialog.payment.amount,
+                                            statusChangeDialog.payment
+                                                .currency_code
+                                        )}{" "}
+                                        {
+                                            statusChangeDialog.payment
+                                                .currency_code
+                                        }
+                                    </p>
+                                    <p>
+                                        <strong>Payment Month:</strong>{" "}
+                                        {
+                                            statusChangeDialog.payment
+                                                .payment_month
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setStatusChangeDialog({
+                                        open: false,
+                                        payment: null,
+                                        newStatus: null,
+                                    });
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    if (
+                                        statusChangeDialog.payment &&
+                                        statusChangeDialog.newStatus
+                                    ) {
+                                        router.patch(
+                                            route(
+                                                "admin.payments.updateStatus",
+                                                statusChangeDialog.payment.id
+                                            ),
+                                            {
+                                                status: statusChangeDialog.newStatus,
+                                            },
+                                            {
+                                                onSuccess: () => {
+                                                    setStatusChangeDialog({
+                                                        open: false,
+                                                        payment: null,
+                                                        newStatus: null,
+                                                    });
+                                                },
+                                            }
+                                        );
+                                    }
+                                }}
+                            >
+                                Confirm
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>

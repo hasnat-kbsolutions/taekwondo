@@ -137,7 +137,7 @@ class InvoiceController extends Controller
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $filename = 'Invoice_' . $invoiceNumber . '_' . now()->format('Y-m-d') . '.pdf';
+        $filename = $invoiceNumber . '.pdf';
 
         return response()->streamDownload(function () use ($dompdf) {
             echo $dompdf->output();

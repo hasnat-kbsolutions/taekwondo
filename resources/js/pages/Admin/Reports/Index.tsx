@@ -216,7 +216,7 @@ export default function ReportsIndex({
             color: "text-green-600 dark:text-green-400",
         },
         {
-            label: "Pending Payments",
+            label: "Unpaid Payments",
             value: (
                 <div className="text-lg font-bold">
                     {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
@@ -453,7 +453,7 @@ export default function ReportsIndex({
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm text-muted-foreground">
-                                                Pending:
+                                                Unpaid:
                                             </span>
                                             <span className="font-medium text-orange-600 dark:text-orange-400">
                                                 {trend.amounts_by_currency &&
@@ -631,7 +631,7 @@ export default function ReportsIndex({
                                                                         0}
                                                                 </div>
                                                                 <div className="text-xs text-muted-foreground">
-                                                                    Pending
+                                                                    Unpaid
                                                                     Payments
                                                                 </div>
                                                             </div>

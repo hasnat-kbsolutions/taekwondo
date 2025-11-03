@@ -97,7 +97,7 @@ class DashboardController extends Controller
             'paymentsCount' => $payments->count(),
             'totalAmount' => $totalAmount,
             'paidCount' => $payments->where('status', 'paid')->count(),
-            'pendingCount' => $payments->where('status', 'pending')->count(),
+            'pendingCount' => $payments->where('status', 'unpaid')->count(),
             'recentPayments' => $payments->sortByDesc('pay_at')->take(5)->values(),
             'avgStudentRating' => round($avgStudentRating, 1),
             'avgInstructorRating' => round($avgInstructorRating, 1),

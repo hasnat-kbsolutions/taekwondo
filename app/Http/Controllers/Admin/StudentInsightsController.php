@@ -199,7 +199,7 @@ class StudentInsightsController extends Controller
             ->get();
 
         $totalPaid = (float) $payments->where('status', 'paid')->sum('amount');
-        $pendingAmount = (float) $payments->where('status', 'pending')->sum('amount');
+        $pendingAmount = (float) $payments->where('status', 'unpaid')->sum('amount');
         $totalAmount = (float) $payments->sum('amount');
 
         // Get monthly payment breakdown
@@ -210,7 +210,7 @@ class StudentInsightsController extends Controller
                 'month' => Carbon::parse($month . '-01')->format('M Y'),
                 'total' => (float) $monthPayments->sum('amount'),
                 'paid' => (float) $monthPayments->where('status', 'paid')->sum('amount'),
-                'pending' => (float) $monthPayments->where('status', 'pending')->sum('amount'),
+                'pending' => (float) $monthPayments->where('status', 'unpaid')->sum('amount'),
                 'count' => $monthPayments->count(),
             ];
         })->values();

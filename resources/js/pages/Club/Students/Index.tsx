@@ -106,6 +106,7 @@ export const columns = (
     },
     { accessorKey: "code", header: "Code" },
     { accessorKey: "name", header: "Name" },
+    { accessorKey: "email", header: "Email" },
     { accessorKey: "surname", header: "Surname" },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },
@@ -136,8 +137,6 @@ export const columns = (
             return <span className="text-gray-400 italic text-xs">No doc</span>;
         },
     },
-
-    { accessorKey: "email", header: "Email" },
     { accessorKey: "phone", header: "Phone" },
     {
         id: "rating",

@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         $paymentsCount = $payments->count();
         $paidCount = Payment::whereIn('student_id', $studentIds)->where('status', 'paid')->count();
-        $pendingCount = Payment::whereIn('student_id', $studentIds)->where('status', 'pending')->count();
+        $pendingCount = Payment::whereIn('student_id', $studentIds)->where('status', 'unpaid')->count();
 
         // Calculate amounts by currency
         $amountsByCurrency = $payments->get()->groupBy('currency_code')

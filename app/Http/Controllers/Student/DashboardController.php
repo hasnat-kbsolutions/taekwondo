@@ -40,7 +40,7 @@ class DashboardController extends Controller
 
         $totalPayments = $payments->count();
         $paidPayments = $payments->where('status', 'paid')->count();
-        $pendingPayments = $payments->where('status', 'pending')->count();
+        $pendingPayments = $payments->where('status', 'unpaid')->count();
 
         // Calculate amounts by currency
         $amountsByCurrency = $payments->groupBy('currency_code')

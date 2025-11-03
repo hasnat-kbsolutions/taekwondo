@@ -89,7 +89,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
             'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'status' => 'required|in:unpaid,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
@@ -139,7 +139,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
             'currency_code' => 'required|exists:currencies,code',
             'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,pending,paid,failed,refunded',
+            'status' => 'required|in:unpaid,paid,failed,refunded',
             'payment_month' => 'required|string|size:2',
             'pay_at' => 'required|date',
             'notes' => 'nullable|string',
@@ -171,7 +171,7 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
         $payment->load(['student.club', 'student.organization', 'currency']);
-        return Inertia::render('Organization/Payments/Invoice', [
+        return Inertia::render('Invoice', [
             'payment' => $payment,
         ]);
     }

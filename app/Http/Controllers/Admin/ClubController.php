@@ -60,7 +60,7 @@ class ClubController extends Controller
             $club->payment_stats = [
                 'total_payments' => $totalPayments,
                 'paid_count' => $payments->where('status', 'paid')->count(),
-                'pending_count' => $payments->where('status', 'pending')->count(),
+                'pending_count' => $payments->where('status', 'unpaid')->count(),
                 'total_amount' => $totalAmount,
                 'average_amount' => $totalPayments > 0 ? round($totalAmount / $totalPayments, 2) : 0,
                 'amounts_by_currency' => $amountsByCurrency,

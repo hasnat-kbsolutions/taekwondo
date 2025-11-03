@@ -39,17 +39,37 @@ class PaymentController extends Controller
 
         $payments = $query->latest()->get();
 
+        // Calculate payment statistics
+        $totalPayments = $payments->count();
+        $paidPayments = $payments->where('status', 'paid')->count();
+        $unpaidPayments = $payments->where('status', 'unpaid')->count();
+
+        // Calculate amounts by currency
+        $amountsByCurrency = $payments->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        // Get default currency for display
+        $defaultCurrency = Currency::where('is_default', true)->first();
+        $defaultCurrencyCode = $defaultCurrency ? $defaultCurrency->code : 'MYR';
+
         return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
             'filters' => $request->only(['status', 'payment_month', 'currency_code']),
             'currencies' => Currency::where('is_active', true)->get(),
+            'totalPayments' => $totalPayments,
+            'paidPayments' => $paidPayments,
+            'unpaidPayments' => $unpaidPayments,
+            'amountsByCurrency' => $amountsByCurrency,
+            'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
     }
 
     public function invoice(Payment $payment)
     {
         $payment->load(['student.club', 'student.organization', 'currency', 'attachment']);
-        return Inertia::render('Admin/Payments/Invoice', [
+        return Inertia::render('Invoice', [
             'payment' => $payment,
         ]);
     }

@@ -208,7 +208,7 @@ export default function StudentInsights({
             case "issued":
                 return "bg-green-100 text-green-800";
             case "absent":
-            case "pending":
+            case "unpaid":
                 return "bg-red-100 text-red-800";
             case "late":
                 return "bg-yellow-100 text-yellow-800";
@@ -739,7 +739,7 @@ export default function StudentInsights({
                                                 )}
                                             </div>
                                             <div className="text-sm text-gray-600">
-                                                Pending
+                                                Unpaid
                                             </div>
                                         </div>
                                     </CardContent>

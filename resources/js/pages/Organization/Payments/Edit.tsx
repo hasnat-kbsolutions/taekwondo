@@ -28,7 +28,7 @@ interface Payment {
     student_id: number;
     notes: string;
     amount: string;
-    status: "paid" | "unpaid" | "pending" | "failed" | "refunded";
+    status: "paid" | "unpaid" | "failed" | "refunded";
     method: "cash" | "stripe" | "bank" | "other";
     pay_at: string;
     payment_month: string;
@@ -217,9 +217,6 @@ export default function Edit({
                                             </SelectItem>
                                             <SelectItem value="unpaid">
                                                 Unpaid
-                                            </SelectItem>
-                                            <SelectItem value="pending">
-                                                Pending
                                             </SelectItem>
                                             <SelectItem value="failed">
                                                 Failed

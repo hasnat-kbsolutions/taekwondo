@@ -15,7 +15,7 @@ class ClubController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Club::with(['organization', 'user'])
+        $query = Club::with(['organization', 'user', 'students'])
             ->where('organization_id', Auth::user()->userable_id);
 
         if ($request->filled('country')) {
@@ -23,7 +23,7 @@ class ClubController extends Controller
         }
 
         return Inertia::render('Organization/Clubs/Index', [
-            'clubs' => $query->get(),
+            'clubs' => $query->latest()->get(),
             'filters' => [
                 'country' => $request->country,
             ],

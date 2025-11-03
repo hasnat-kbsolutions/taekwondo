@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
+import { route } from "ziggy-js";
 import { Button } from "@/components/ui/button";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -10,7 +11,15 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2, Key } from "lucide-react";
+import {
+    MoreHorizontal,
+    Eye,
+    Edit,
+    Trash2,
+    Key,
+    Building2,
+    Users,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
@@ -121,8 +130,10 @@ export default function Index({ organizations, student, supporter }: Props) {
                         organization_id: row.original.id,
                     })}
                 >
-                    <Eye className="w-4 h-4" />
-                    {row.original.students?.length ?? 0}
+                    <Users className="w-4 h-4 text-muted-foreground/50" />
+                    <span className="text-muted-foreground">
+                        {row.original.students?.length ?? 0}
+                    </span>
                 </Link>
             ),
         },
@@ -135,10 +146,32 @@ export default function Index({ organizations, student, supporter }: Props) {
                         organization_id: row.original.id,
                     })}
                 >
-                    <Eye className="w-4 h-4" />
-                    {row.original.supporters?.length ?? 0}
+                    <Users className="w-4 h-4 text-muted-foreground/50" />
+                    <span className="text-muted-foreground">
+                        {row.original.supporters?.length ?? 0}
+                    </span>
                 </Link>
             ),
+        },
+        {
+            header: "Clubs",
+            cell: ({ row }) => {
+                const clubCount = row.original.clubs?.length || 0;
+                const organizationId = row.original.id;
+                return (
+                    <Link
+                        className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                        href={route("admin.clubs.index", {
+                            organization_id: organizationId,
+                        })}
+                    >
+                        <Building2 className="w-4 h-4 text-muted-foreground/50" />
+                        <span className="text-muted-foreground">
+                            {clubCount}
+                        </span>
+                    </Link>
+                );
+            },
         },
         {
             header: "Status",

@@ -35,6 +35,15 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { route } from "ziggy-js";
 
 interface Student {
     id: number;
@@ -84,147 +93,16 @@ interface Props {
     }>;
 }
 
-const columns: ColumnDef<Payment>[] = [
-    {
-        header: "#",
-        cell: ({ row }) => row.index + 1,
-    },
-    {
-        header: "Student",
-        cell: ({ row }) => row.original.student?.name || "-",
-    },
-    {
-        header: "Amount",
-        cell: ({ row }) => {
-            const payment = row.original;
-            const amount = payment.amount;
-            const currencyCode = payment.currency_code;
-            const currencySymbol = payment.currency?.symbol || currencyCode;
+// Utility function to safely format amounts
+const formatAmount = (amount: any, currencyCode: string) => {
+    const numAmount = Number(amount) || 0;
 
-            // Use utility function to safely format amount
-            const formattedAmount = formatAmount(amount, currencyCode);
-
-            return (
-                <div className="text-right">
-                    <div className="font-medium">
-                        {currencyCode === "MYR" ? "RM " : currencySymbol}
-                        {formattedAmount}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        {currencyCode}
-                    </div>
-                </div>
-            );
-        },
-    },
-    {
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge
-                variant={
-                    row.original.status === "paid" ||
-                    row.original.status === "success"
-                        ? "default"
-                        : "destructive"
-                }
-            >
-                {row.original.status}
-            </Badge>
-        ),
-    },
-    { header: "Method", accessorKey: "method" },
-    { header: "Payment Month", accessorKey: "payment_month" },
-    { header: "Pay At", accessorKey: "pay_at" },
-    {
-        header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "organization.payments.edit",
-                                row.original.id
-                            )}
-                        >
-                            <Edit className="w-4 h-4 mr-2" /> Edit
-                        </Link>
-                    </DropdownMenuItem>
-                    {row.original.status === "unpaid" && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route(
-                                    "organization.payments.updateStatus",
-                                    row.original.id
-                                )}
-                                method="patch"
-                                data={{ status: "paid" }}
-                                as="button"
-                            >
-                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
-                                Paid
-                            </Link>
-                        </DropdownMenuItem>
-                    )}
-                    {(row.original.status === "paid" ||
-                        row.original.status === "success") && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route(
-                                    "organization.payments.updateStatus",
-                                    row.original.id
-                                )}
-                                method="patch"
-                                data={{ status: "unpaid" }}
-                                as="button"
-                            >
-                                <XCircle className="w-4 h-4 mr-2" /> Mark as
-                                Unpaid
-                            </Link>
-                        </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route(
-                                "organization.payments.destroy",
-                                row.original.id
-                            )}
-                            method="delete"
-                            as="button"
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            href={route("invoice.show", {
-                                payment: row.original.id,
-                            })}
-                        >
-                            <FileText className="w-4 h-4 mr-2" /> Invoice
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={(e) => {
-                            e.preventDefault();
-                            const url = route("invoice.download", {
-                                payment: row.original.id,
-                            });
-                            window.open(url, "_blank");
-                        }}
-                    >
-                        <Download className="w-4 h-4 mr-2" /> Download Invoice
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+    if (currencyCode === "JPY") {
+        return numAmount.toLocaleString();
+    } else {
+        return numAmount.toFixed(2);
+    }
+};
 
 const currentYear = new Date().getFullYear();
 const years = [
@@ -246,17 +124,6 @@ const months = [
     { label: "November", value: "11" },
     { label: "December", value: "12" },
 ];
-
-// Utility function to safely format amounts
-const formatAmount = (amount: any, currencyCode: string) => {
-    const numAmount = Number(amount) || 0;
-
-    if (currencyCode === "JPY") {
-        return numAmount.toLocaleString();
-    } else {
-        return numAmount.toFixed(2);
-    }
-};
 
 export default function PaymentIndex({
     payments,
@@ -314,6 +181,15 @@ export default function PaymentIndex({
     };
 
     const [initialLoad, setInitialLoad] = useState(true);
+    const [statusChangeDialog, setStatusChangeDialog] = useState<{
+        open: boolean;
+        payment: Payment | null;
+        newStatus: "paid" | "unpaid" | null;
+    }>({
+        open: false,
+        payment: null,
+        newStatus: null,
+    });
 
     useEffect(() => {
         if (initialLoad) {
@@ -344,6 +220,147 @@ export default function PaymentIndex({
             }
         );
     };
+
+    const columns: ColumnDef<Payment>[] = [
+        {
+            header: "#",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            header: "Student",
+            cell: ({ row }) => row.original.student?.name || "-",
+        },
+        {
+            header: "Amount",
+            cell: ({ row }) => {
+                const payment = row.original;
+                const amount = payment.amount;
+                const currencyCode = payment.currency_code;
+                const currencySymbol = payment.currency?.symbol || currencyCode;
+
+                // Use utility function to safely format amount
+                const formattedAmount = formatAmount(amount, currencyCode);
+
+                return (
+                    <div className="text-right">
+                        <div className="font-medium">
+                            {currencyCode === "MYR" ? "RM " : currencySymbol}
+                            {formattedAmount}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            {currencyCode}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge
+                    variant={
+                        row.original.status === "paid" ||
+                        row.original.status === "success"
+                            ? "default"
+                            : "destructive"
+                    }
+                >
+                    {row.original.status}
+                </Badge>
+            ),
+        },
+        { header: "Method", accessorKey: "method" },
+        { header: "Payment Month", accessorKey: "payment_month" },
+        { header: "Pay At", accessorKey: "pay_at" },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "organization.payments.edit",
+                                    row.original.id
+                                )}
+                            >
+                                <Edit className="w-4 h-4 mr-2" /> Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        {row.original.status === "unpaid" && (
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "paid",
+                                    });
+                                }}
+                            >
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
+                                Paid
+                            </DropdownMenuItem>
+                        )}
+                        {(row.original.status === "paid" ||
+                            row.original.status === "success") && (
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "unpaid",
+                                    });
+                                }}
+                            >
+                                <XCircle className="w-4 h-4 mr-2" /> Mark as
+                                Unpaid
+                            </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route(
+                                    "organization.payments.destroy",
+                                    row.original.id
+                                )}
+                                method="delete"
+                                as="button"
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={route("invoice.show", {
+                                    payment: row.original.id,
+                                })}
+                            >
+                                <FileText className="w-4 h-4 mr-2" /> Invoice
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const url = route("invoice.download", {
+                                    payment: row.original.id,
+                                });
+                                window.open(url, "_blank");
+                            }}
+                        >
+                            <Download className="w-4 h-4 mr-2" /> Download
+                            Invoice
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
 
     return (
         <AuthenticatedLayout header="Payments">
@@ -449,7 +466,7 @@ export default function PaymentIndex({
                         <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
-                                    Pending
+                                    Unpaid
                                 </CardTitle>
                                 <div className="flex items-center gap-2">
                                     <Hourglass className="h-6 w-6 text-yellow-500" />
@@ -457,26 +474,6 @@ export default function PaymentIndex({
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold group-hover:text-primary transition-colors">
-                                    {
-                                        payments.filter(
-                                            (p) => p.status === "pending"
-                                        ).length
-                                    }
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
-                                    Unpaid
-                                </CardTitle>
-                                <div className="flex items-center gap-2">
-                                    <XCircle className="h-6 w-6 text-red-600" />
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold group-hover:text-primary transition-colors text-red-600">
                                     {
                                         payments.filter(
                                             (p) => p.status === "unpaid"
@@ -637,6 +634,109 @@ export default function PaymentIndex({
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Status Change Confirmation Dialog */}
+            <Dialog
+                open={statusChangeDialog.open}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setStatusChangeDialog({
+                            open: false,
+                            payment: null,
+                            newStatus: null,
+                        });
+                    }
+                }}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Status Change</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to change the payment status
+                            from{" "}
+                            <strong>
+                                {statusChangeDialog.payment?.status === "paid"
+                                    ? "Paid"
+                                    : "Unpaid"}
+                            </strong>{" "}
+                            to{" "}
+                            <strong>
+                                {statusChangeDialog.newStatus === "paid"
+                                    ? "Paid"
+                                    : "Unpaid"}
+                            </strong>
+                            ?
+                        </DialogDescription>
+                    </DialogHeader>
+                    {statusChangeDialog.payment && (
+                        <div className="py-4">
+                            <div className="text-sm text-muted-foreground">
+                                <p>
+                                    <strong>Student:</strong>{" "}
+                                    {statusChangeDialog.payment.student?.name}
+                                </p>
+                                <p>
+                                    <strong>Amount:</strong>{" "}
+                                    {statusChangeDialog.payment.currency
+                                        ?.symbol || ""}
+                                    {formatAmount(
+                                        statusChangeDialog.payment.amount,
+                                        statusChangeDialog.payment.currency_code
+                                    )}{" "}
+                                    {statusChangeDialog.payment.currency_code}
+                                </p>
+                                <p>
+                                    <strong>Payment Month:</strong>{" "}
+                                    {statusChangeDialog.payment.payment_month}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setStatusChangeDialog({
+                                    open: false,
+                                    payment: null,
+                                    newStatus: null,
+                                });
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (
+                                    statusChangeDialog.payment &&
+                                    statusChangeDialog.newStatus
+                                ) {
+                                    router.patch(
+                                        route(
+                                            "organization.payments.updateStatus",
+                                            statusChangeDialog.payment.id
+                                        ),
+                                        {
+                                            status: statusChangeDialog.newStatus,
+                                        },
+                                        {
+                                            onSuccess: () => {
+                                                setStatusChangeDialog({
+                                                    open: false,
+                                                    payment: null,
+                                                    newStatus: null,
+                                                });
+                                            },
+                                        }
+                                    );
+                                }
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }

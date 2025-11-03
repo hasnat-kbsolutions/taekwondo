@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Head, Link, router, usePage, useForm } from "@inertiajs/react";
+import { route } from "ziggy-js";
 import { Button } from "@/components/ui/button";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -15,7 +16,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Key } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Key, Users } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -32,6 +33,11 @@ interface User {
     email: string;
 }
 
+interface Student {
+    id: number;
+    name: string;
+}
+
 interface Club {
     id: number;
     name: string;
@@ -43,6 +49,7 @@ interface Club {
     invoice_prefix?: string;
     status: boolean;
     user?: User;
+    students?: Student[];
 }
 
 interface Props {
@@ -77,6 +84,10 @@ const columns = (
         cell: ({ row }) => row.original.user?.name ?? "-",
     },
     {
+        header: "Email",
+        cell: ({ row }) => row.original.user?.email ?? "-",
+    },
+    {
         header: "City",
         accessorKey: "city",
     },
@@ -96,11 +107,6 @@ const columns = (
         header: "Invoice Prefix",
         accessorKey: "invoice_prefix",
     },
-
-    {
-        header: "Email",
-        cell: ({ row }) => row.original.user?.email ?? "-",
-    },
     {
         header: "Status",
         cell: ({ row }) => (
@@ -108,6 +114,26 @@ const columns = (
                 {row.original.status ? "Active" : "Inactive"}
             </Badge>
         ),
+    },
+    {
+        header: "Students",
+        cell: ({ row }) => {
+            const studentCount = row.original.students?.length || 0;
+            const clubId = row.original.id;
+            return (
+                <Link
+                    href={route("organization.students.index", {
+                        club_id: clubId,
+                    })}
+                    className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer"
+                >
+                    <Users className="h-4 w-4 text-muted-foreground/50" />
+                    <span className="text-muted-foreground">
+                        {studentCount}
+                    </span>
+                </Link>
+            );
+        },
     },
     {
         header: "Actions",

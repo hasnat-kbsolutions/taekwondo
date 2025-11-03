@@ -31,7 +31,7 @@ class ReportController extends Controller
             'total_instructors' => (int) Instructor::count(),
             'total_supporters' => (int) Supporter::count(),
             'total_revenue' => (float) (Payment::where('status', 'paid')->sum('amount') ?? 0),
-            'pending_payments' => (float) (Payment::where('status', 'pending')->sum('amount') ?? 0),
+            'pending_payments' => (float) (Payment::where('status', 'unpaid')->sum('amount') ?? 0),
             'total_certifications' => (int) Certification::count(),
             'total_ratings' => (int) Rating::count(),
         ];
@@ -54,7 +54,7 @@ class ReportController extends Controller
         $defaultCurrencyCode = $defaultCurrency ? $defaultCurrency->code : 'MYR';
 
         // Group by organization for financial summary
-        $organizationPayments = $payments->groupBy(function($payment) {
+        $organizationPayments = $payments->groupBy(function ($payment) {
             return $payment->student->organization->name ?? 'Unknown';
         })->map(function ($orgPayments, $orgName) {
             // Calculate amounts by currency for this organization
@@ -71,10 +71,10 @@ class ReportController extends Controller
                 'organization' => $orgName,
                 'total_amount' => $orgPayments->sum('amount'),
                 'paid_amount' => $orgPayments->where('status', 'paid')->sum('amount'),
-                'pending_amount' => $orgPayments->where('status', 'pending')->sum('amount'),
+                'pending_amount' => $orgPayments->where('status', 'unpaid')->sum('amount'),
                 'payment_count' => $orgPayments->count(),
                 'paid_count' => $orgPayments->where('status', 'paid')->count(),
-                'pending_count' => $orgPayments->where('status', 'pending')->count(),
+                'pending_count' => $orgPayments->where('status', 'unpaid')->count(),
                 'amounts_by_currency' => $orgAmountsByCurrency,
             ];
         });
@@ -86,9 +86,9 @@ class ReportController extends Controller
             // Calculate amounts by currency for this month
             try {
                 $monthlyAmountsByCurrency = $monthPayments->groupBy('currency_code')
-                ->map(function ($currencyPayments) {
-                    return (float) $currencyPayments->sum('amount');
-                });
+                    ->map(function ($currencyPayments) {
+                        return (float) $currencyPayments->sum('amount');
+                    });
             } catch (\Exception $e) {
                 $monthlyAmountsByCurrency = [];
             }
@@ -97,7 +97,7 @@ class ReportController extends Controller
                 'month' => $month,
                 'total_amount' => $monthPayments->sum('amount'),
                 'paid_amount' => $monthPayments->where('status', 'paid')->sum('amount'),
-                'pending_amount' => $monthPayments->where('status', 'pending')->sum('amount'),
+                'pending_amount' => $monthPayments->where('status', 'unpaid')->sum('amount'),
                 'payment_count' => $monthPayments->count(),
                 'amounts_by_currency' => $monthlyAmountsByCurrency,
             ];
@@ -131,7 +131,7 @@ class ReportController extends Controller
                     $clubStudentIds = Student::where('club_id', $club->id)->pluck('id');
                     $clubCertificationsCount = Certification::whereIn('student_id', $clubStudentIds)->count();
                     $clubPendingPayments = Payment::whereIn('student_id', $clubStudentIds)
-                        ->where('status', 'pending')
+                        ->where('status', 'unpaid')
                         ->sum('amount');
 
                     return [
@@ -270,10 +270,10 @@ class ReportController extends Controller
                 'organization' => $orgName,
                 'total_amount' => $orgPayments->sum('amount'),
                 'paid_amount' => $orgPayments->where('status', 'paid')->sum('amount'),
-                'pending_amount' => $orgPayments->where('status', 'pending')->sum('amount'),
+                'pending_amount' => $orgPayments->where('status', 'unpaid')->sum('amount'),
                 'payment_count' => $orgPayments->count(),
                 'paid_count' => $orgPayments->where('status', 'paid')->count(),
-                'pending_count' => $orgPayments->where('status', 'pending')->count(),
+                'pending_count' => $orgPayments->where('status', 'unpaid')->count(),
             ];
         });
 
@@ -285,7 +285,7 @@ class ReportController extends Controller
                 'month' => $month,
                 'total_amount' => $monthPayments->sum('amount'),
                 'paid_amount' => $monthPayments->where('status', 'paid')->sum('amount'),
-                'pending_amount' => $monthPayments->where('status', 'pending')->sum('amount'),
+                'pending_amount' => $monthPayments->where('status', 'unpaid')->sum('amount'),
                 'payment_count' => $monthPayments->count(),
             ];
         });
@@ -298,10 +298,10 @@ class ReportController extends Controller
             'summary' => [
                 'total_amount' => (float) ($payments->sum('amount') ?? 0),
                 'paid_amount' => (float) ($payments->where('status', 'paid')->sum('amount') ?? 0),
-                'pending_amount' => (float) ($payments->where('status', 'pending')->sum('amount') ?? 0),
+                'pending_amount' => (float) ($payments->where('status', 'unpaid')->sum('amount') ?? 0),
                 'total_count' => (int) $payments->count(),
                 'paid_count' => (int) $payments->where('status', 'paid')->count(),
-                'pending_count' => (int) $payments->where('status', 'pending')->count(),
+                'pending_count' => (int) $payments->where('status', 'unpaid')->count(),
             ],
         ]);
     }
@@ -487,7 +487,7 @@ class ReportController extends Controller
                 $avgRating = $student->ratingsReceived()->avg('rating') ?? 0;
 
                 // Get payment status
-                $pendingPayments = $student->payments()->where('status', 'pending')->sum('amount');
+                $pendingPayments = $student->payments()->where('status', 'unpaid')->sum('amount');
 
                 return [
                     'id' => $student->id,

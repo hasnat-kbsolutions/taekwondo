@@ -154,6 +154,10 @@ const columns = (
         cell: ({ row }) => row.original.user?.name ?? "-",
     },
     {
+        header: "Email",
+        cell: ({ row }) => row.original.user?.email ?? "-",
+    },
+    {
         header: "Organization",
         cell: ({ row }) => row.original.organization?.name ?? "-",
     },
@@ -197,7 +201,24 @@ const columns = (
             );
         },
     },
-
+    {
+        header: "Students",
+        cell: ({ row }) => {
+            const studentCount = row.original.students?.length || 0;
+            const clubId = row.original.id;
+            return (
+                <Link
+                    href={route("admin.students.index", { club_id: clubId })}
+                    className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer"
+                >
+                    <Users className="h-4 w-4 text-muted-foreground/50" />
+                    <span className="text-muted-foreground">
+                        {studentCount}
+                    </span>
+                </Link>
+            );
+        },
+    },
     {
         header: "Actions",
         cell: ({ row }) => (

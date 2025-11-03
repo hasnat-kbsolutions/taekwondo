@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $payments = \App\Models\Payment::with('currency')->get();
         $paymentsCount = $payments->count();
         $paidCount = $payments->where('status', 'paid')->count();
-        $pendingCount = $payments->where('status', 'pending')->count();
+        $pendingCount = $payments->where('status', 'unpaid')->count();
 
         // Calculate total amount by currency
         $amountsByCurrency = $payments->groupBy('currency_code')
