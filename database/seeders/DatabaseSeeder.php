@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CertificationSeeder::class,
             AttendanceSeeder::class,
-            PaymentSeeder::class,
+            // PaymentSeeder::class,
             RatingSeeder::class,
         ]);
     }

@@ -24,18 +24,22 @@ import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Create() {
-    const { students, currencies, bank_information, errors } = usePage()
-        .props as any;
+    const {
+        studentFees = [],
+        currencies = [],
+        bank_information = [],
+        errors = {},
+    } = usePage().props as any;
 
     const [form, setForm] = useState({
-        student_id: "",
+        student_fee_id: "",
         amount: "",
         currency_code: "MYR",
-        status: "paid",
+        status: "successful",
         method: "cash",
         pay_at: "",
-        payment_month: "",
         notes: "",
+        transaction_id: "",
         bank_information: [] as number[],
     });
 
@@ -74,30 +78,45 @@ export default function Create() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label>
-                                        Student
+                                        Student Fee
                                         <span className="text-red-500">*</span>
                                     </Label>
                                     <Select
-                                        value={form.student_id}
+                                        value={form.student_fee_id}
                                         onValueChange={(value) =>
-                                            handleChange("student_id", value)
+                                            handleChange(
+                                                "student_fee_id",
+                                                value
+                                            )
                                         }
                                     >
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Student" />
+                                            <SelectValue placeholder="Select Student Fee" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {students.map((s: any) => (
-                                                <SelectItem
-                                                    key={s.id}
-                                                    value={String(s.id)}
-                                                >
-                                                    {s.name}
-                                                </SelectItem>
-                                            ))}
+                                            {studentFees &&
+                                            Array.isArray(studentFees) &&
+                                            studentFees.length > 0 ? (
+                                                studentFees.map((sf: any) => (
+                                                    <SelectItem
+                                                        key={sf.id}
+                                                        value={String(sf.id)}
+                                                    >
+                                                        {sf.student?.name}{" "}
+                                                        {sf.student?.surname} -{" "}
+                                                        {sf.fee_type?.name} (
+                                                        {sf.month}) -{" "}
+                                                        {sf.status}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                                    No pending fees available
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
-                                    {renderError("student_id")}
+                                    {renderError("student_fee_id")}
                                 </div>
                                 <div>
                                     <Label>
@@ -160,11 +179,14 @@ export default function Create() {
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="paid">
-                                                Paid
+                                            <SelectItem value="pending">
+                                                Pending
                                             </SelectItem>
-                                            <SelectItem value="unpaid">
-                                                Unpaid
+                                            <SelectItem value="successful">
+                                                Successful
+                                            </SelectItem>
+                                            <SelectItem value="failed">
+                                                Failed
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -189,6 +211,9 @@ export default function Create() {
                                             <SelectItem value="cash">
                                                 Cash
                                             </SelectItem>
+                                            <SelectItem value="card">
+                                                Card
+                                            </SelectItem>
                                             <SelectItem value="stripe">
                                                 Stripe
                                             </SelectItem>
@@ -198,56 +223,23 @@ export default function Create() {
                                 </div>
 
                                 <div>
-                                    <Label>
-                                        Month
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={form.payment_month}
-                                        onValueChange={(value) =>
-                                            handleChange("payment_month", value)
+                                    <Label>Transaction ID</Label>
+                                    <Input
+                                        type="text"
+                                        value={form.transaction_id}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "transaction_id",
+                                                e.target.value
+                                            )
                                         }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Month" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {[
-                                                "01",
-                                                "02",
-                                                "03",
-                                                "04",
-                                                "05",
-                                                "06",
-                                                "07",
-                                                "08",
-                                                "09",
-                                                "10",
-                                                "11",
-                                                "12",
-                                            ].map((m) => (
-                                                <SelectItem key={m} value={m}>
-                                                    {new Date(
-                                                        0,
-                                                        parseInt(m) - 1
-                                                    ).toLocaleString(
-                                                        "default",
-                                                        {
-                                                            month: "long",
-                                                        }
-                                                    )}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("payment_month")}
+                                        placeholder="Optional transaction ID"
+                                    />
+                                    {renderError("transaction_id")}
                                 </div>
 
                                 <div>
-                                    <Label>
-                                        Pay At
-                                        <span className="text-red-500">*</span>
-                                    </Label>
+                                    <Label>Pay At</Label>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <ShadButton

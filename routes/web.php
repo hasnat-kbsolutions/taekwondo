@@ -121,6 +121,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
+    // Fee Types Routes
+    Route::get('/fee-types', [App\Http\Controllers\Admin\FeeTypeController::class, 'index'])->name('fee-types.index');
+    Route::get('/fee-types/create', [App\Http\Controllers\Admin\FeeTypeController::class, 'create'])->name('fee-types.create');
+    Route::post('/fee-types', [App\Http\Controllers\Admin\FeeTypeController::class, 'store'])->name('fee-types.store');
+    Route::get('/fee-types/{feeType}/edit', [App\Http\Controllers\Admin\FeeTypeController::class, 'edit'])->name('fee-types.edit');
+    Route::put('/fee-types/{feeType}', [App\Http\Controllers\Admin\FeeTypeController::class, 'update'])->name('fee-types.update');
+    Route::delete('/fee-types/{feeType}', [App\Http\Controllers\Admin\FeeTypeController::class, 'destroy'])->name('fee-types.destroy');
+
+    // Student Fees Routes
+    Route::get('/student-fees', [App\Http\Controllers\Admin\StudentFeeController::class, 'index'])->name('student-fees.index');
+    Route::get('/student-fees/create', [App\Http\Controllers\Admin\StudentFeeController::class, 'create'])->name('student-fees.create');
+    Route::post('/student-fees', [App\Http\Controllers\Admin\StudentFeeController::class, 'store'])->name('student-fees.store');
+    Route::get('/student-fees/{studentFee}/edit', [App\Http\Controllers\Admin\StudentFeeController::class, 'edit'])->name('student-fees.edit');
+    Route::put('/student-fees/{studentFee}', [App\Http\Controllers\Admin\StudentFeeController::class, 'update'])->name('student-fees.update');
+    Route::delete('/student-fees/{studentFee}', [App\Http\Controllers\Admin\StudentFeeController::class, 'destroy'])->name('student-fees.destroy');
+
+    // Payments Routes
     Route::get('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Admin\PaymentController::class, 'create'])->name('payments.create');
     Route::post('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('payments.store');

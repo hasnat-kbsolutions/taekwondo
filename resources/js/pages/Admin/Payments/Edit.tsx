@@ -25,20 +25,43 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 interface Payment {
     id: number;
-    student_id: number;
+    student_fee_id: number;
     notes: string;
     amount: string;
-    status: "paid" | "unpaid";
-    method: "cash" | "stripe";
+    status: "pending" | "successful" | "failed";
+    method: "cash" | "card" | "stripe";
     pay_at: string;
-    payment_month: string;
+    transaction_id?: string;
     currency_code: string;
     bank_information?: any[];
+    student_fee?: {
+        id: number;
+        student: {
+            id: number;
+            name: string;
+            surname?: string;
+        };
+        fee_type: {
+            id: number;
+            name: string;
+        };
+        month: string;
+    };
 }
 
-interface Student {
+interface StudentFee {
     id: number;
-    name: string;
+    student: {
+        id: number;
+        name: string;
+        surname?: string;
+    };
+    fee_type: {
+        id: number;
+        name: string;
+    };
+    month: string;
+    status: string;
 }
 
 interface BankInformation {
@@ -57,28 +80,25 @@ interface Currency {
 
 interface Props {
     payment: Payment;
-    students: Student[];
+    studentFees: StudentFee[];
     bank_information: BankInformation[];
     currencies: Currency[];
 }
 
 export default function Edit({
     payment,
-    students,
-    bank_information,
-    currencies,
+    studentFees = [],
+    bank_information = [],
+    currencies = [],
 }: Props) {
     const { data, setData, put, processing, errors } = useForm({
-        student_id: payment.student_id || "",
+        student_fee_id: payment.student_fee_id || "",
         notes: payment.notes || "",
         amount: payment.amount || "",
-        status: payment.status || "unpaid",
+        status: payment.status || "pending",
         method: payment.method || "cash",
         pay_at: payment.pay_at || "",
-        payment_month:
-            payment.payment_month.length === 2
-                ? payment.payment_month
-                : payment.payment_month.split("-")[1] || "",
+        transaction_id: payment.transaction_id || "",
         currency_code: payment.currency_code || "MYR",
         bank_information:
             payment.bank_information?.map((bank: any) => bank.id) || [],
@@ -117,33 +137,46 @@ export default function Edit({
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Student */}
+                                {/* Student Fee */}
                                 <div>
                                     <Label>
-                                        Student
+                                        Student Fee
                                         <span className="text-red-500">*</span>
                                     </Label>
                                     <Select
-                                        value={data.student_id.toString()}
+                                        value={data.student_fee_id.toString()}
                                         onValueChange={(value) =>
-                                            handleChange("student_id", value)
+                                            handleChange(
+                                                "student_fee_id",
+                                                value
+                                            )
                                         }
                                     >
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Student" />
+                                            <SelectValue placeholder="Select Student Fee" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {students.map((s) => (
-                                                <SelectItem
-                                                    key={s.id}
-                                                    value={String(s.id)}
-                                                >
-                                                    {s.name}
-                                                </SelectItem>
-                                            ))}
+                                            {studentFees &&
+                                            studentFees.length > 0 ? (
+                                                studentFees.map((sf) => (
+                                                    <SelectItem
+                                                        key={sf.id}
+                                                        value={String(sf.id)}
+                                                    >
+                                                        {sf.student?.name}{" "}
+                                                        {sf.student?.surname} -{" "}
+                                                        {sf.fee_type?.name} (
+                                                        {sf.month})
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                                    No student fees available
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
-                                    {renderError("student_id")}
+                                    {renderError("student_fee_id")}
                                 </div>
 
                                 {/* Amount */}
@@ -212,11 +245,14 @@ export default function Edit({
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="paid">
-                                                Paid
+                                            <SelectItem value="pending">
+                                                Pending
                                             </SelectItem>
-                                            <SelectItem value="unpaid">
-                                                Unpaid
+                                            <SelectItem value="successful">
+                                                Successful
+                                            </SelectItem>
+                                            <SelectItem value="failed">
+                                                Failed
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -242,6 +278,9 @@ export default function Edit({
                                             <SelectItem value="cash">
                                                 Cash
                                             </SelectItem>
+                                            <SelectItem value="card">
+                                                Card
+                                            </SelectItem>
                                             <SelectItem value="stripe">
                                                 Stripe
                                             </SelectItem>
@@ -250,65 +289,26 @@ export default function Edit({
                                     {renderError("method")}
                                 </div>
 
-                                {/* Payment Month */}
+                                {/* Transaction ID */}
                                 <div>
-                                    <Label>
-                                        Month
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={
-                                            data.payment_month.length === 2
-                                                ? data.payment_month
-                                                : data.payment_month.split(
-                                                      "-"
-                                                  )[1] || ""
+                                    <Label>Transaction ID</Label>
+                                    <Input
+                                        type="text"
+                                        value={data.transaction_id}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "transaction_id",
+                                                e.target.value
+                                            )
                                         }
-                                        onValueChange={(value) =>
-                                            handleChange("payment_month", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Month" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {[
-                                                "01",
-                                                "02",
-                                                "03",
-                                                "04",
-                                                "05",
-                                                "06",
-                                                "07",
-                                                "08",
-                                                "09",
-                                                "10",
-                                                "11",
-                                                "12",
-                                            ].map((m) => (
-                                                <SelectItem key={m} value={m}>
-                                                    {new Date(
-                                                        0,
-                                                        parseInt(m) - 1
-                                                    ).toLocaleString(
-                                                        "default",
-                                                        {
-                                                            month: "long",
-                                                        }
-                                                    )}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("payment_month")}
+                                        placeholder="Optional transaction ID"
+                                    />
+                                    {renderError("transaction_id")}
                                 </div>
 
                                 {/* Pay At */}
                                 <div>
-                                    <Label>
-                                        Pay At
-                                        <span className="text-red-500">*</span>
-                                    </Label>
+                                    <Label>Pay At</Label>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <ShadButton

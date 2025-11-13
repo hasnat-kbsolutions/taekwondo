@@ -12,16 +12,15 @@ return new class extends Migration {
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->foreignId('student_fee_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2);
-            $table->string('method'); // e.g., cash, stripe
-            $table->string('status'); // e.g., pending, paid
-            $table->string('payment_month'); // YYYY-MM
+            $table->string('method'); // cash, card, stripe, etc.
+            $table->enum('status', ['pending', 'successful', 'failed'])->default('pending');
+            $table->string('transaction_id')->nullable();
             $table->date('pay_at')->nullable();
             $table->text('notes')->nullable();
-            $table->string('transaction_id')->nullable();
             $table->string('currency_code', 3)->default('MYR');
-
+            $table->json('bank_information')->nullable();
             $table->timestamps();
         });
     }

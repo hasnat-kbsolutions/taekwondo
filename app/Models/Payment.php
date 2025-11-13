@@ -9,29 +9,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Payment extends Model
 {
     protected $fillable = [
-        'student_id',
+        'student_fee_id',
         'amount',
-        'currency_code',
-        'method',         // e.g., 'cash' or 'stripe'
-        'status',         // e.g., 'pending', 'paid'
-        'payment_month',  // format: YYYY-MM
-        'pay_at',         // date the payment was made
+        'method',
+        'status',
+        'transaction_id',
+        'pay_at',
         'notes',
-        'transaction_id', // optional: for Stripe or other gateways
-        'bank_information', // JSON array of selected bank information
+        'currency_code',
+        'bank_information',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'pay_at' => 'date',
         'bank_information' => 'array',
     ];
 
     /**
-     * Get the student for this payment
+     * Get the student fee for this payment
      */
-    public function student(): BelongsTo
+    public function studentFee(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(StudentFee::class);
+    }
+
+    /**
+     * Get student via studentFee relationship (accessor)
+     */
+    public function getStudentAttribute()
+    {
+        return $this->studentFee?->student;
     }
 
     /**
@@ -77,5 +85,35 @@ class Payment extends Model
     public function hasAttachment(): bool
     {
         return $this->attachment()->exists();
+    }
+
+    /**
+     * Boot method to handle payment status changes
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saved(function ($payment) {
+            if ($payment->studentFee) {
+                $payment->studentFee->updatePaymentStatus();
+
+                // Update student balance
+                if ($payment->studentFee->student) {
+                    StudentBalance::updateBalance($payment->studentFee->student_id);
+                }
+            }
+        });
+
+        static::deleted(function ($payment) {
+            if ($payment->studentFee) {
+                $payment->studentFee->updatePaymentStatus();
+
+                // Update student balance
+                if ($payment->studentFee->student) {
+                    StudentBalance::updateBalance($payment->studentFee->student_id);
+                }
+            }
+        });
     }
 }

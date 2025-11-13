@@ -5,9 +5,11 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\StudentFee;
 use App\Models\Currency;
 use App\Models\BankInformation;
 use App\Models\PaymentAttachment;
+use App\Models\StudentBalance;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,7 +17,7 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['student.club', 'student.organization', 'currency', 'attachment']);
+        $query = Payment::with(['studentFee.student.club', 'studentFee.student.organization', 'studentFee.feeType', 'currency', 'attachment']);
 
         // Filter by status
         if ($request->status) {
@@ -27,22 +29,32 @@ class PaymentController extends Controller
             $query->where('currency_code', $request->currency_code);
         }
 
-        // Filter by payment_month (support year-only or full YYYY-MM)
-        if ($request->payment_month) {
-            $paymentMonth = $request->payment_month;
-            if (strlen($paymentMonth) === 4) { // Year only (e.g., "2025")
-                $query->where('payment_month', 'LIKE', "$paymentMonth-%");
-            } elseif (strlen($paymentMonth) === 7) { // Full YYYY-MM (e.g., "2025-07")
-                $query->where('payment_month', $paymentMonth);
-            }
+        // Filter by student
+        if ($request->student_id) {
+            $query->whereHas('studentFee', function ($q) use ($request) {
+                $q->where('student_id', $request->student_id);
+            });
+        }
+
+        // Filter by month (support year-only or full YYYY-MM)
+        if ($request->month) {
+            $month = $request->month;
+            $query->whereHas('studentFee', function ($q) use ($month) {
+                if (strlen($month) === 4) { // Year only (e.g., "2025")
+                    $q->where('month', 'LIKE', "$month-%");
+                } elseif (strlen($month) === 7) { // Full YYYY-MM (e.g., "2025-07")
+                    $q->where('month', $month);
+                }
+            });
         }
 
         $payments = $query->latest()->get();
 
         // Calculate payment statistics
         $totalPayments = $payments->count();
-        $paidPayments = $payments->where('status', 'paid')->count();
-        $unpaidPayments = $payments->where('status', 'unpaid')->count();
+        $successfulPayments = $payments->where('status', 'successful')->count();
+        $pendingPayments = $payments->where('status', 'pending')->count();
+        $failedPayments = $payments->where('status', 'failed')->count();
 
         // Calculate amounts by currency
         $amountsByCurrency = $payments->groupBy('currency_code')
@@ -56,11 +68,13 @@ class PaymentController extends Controller
 
         return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
-            'filters' => $request->only(['status', 'payment_month', 'currency_code']),
+            'students' => Student::all(),
+            'filters' => $request->only(['status', 'month', 'currency_code', 'student_id']),
             'currencies' => Currency::where('is_active', true)->get(),
             'totalPayments' => $totalPayments,
-            'paidPayments' => $paidPayments,
-            'unpaidPayments' => $unpaidPayments,
+            'successfulPayments' => $successfulPayments,
+            'pendingPayments' => $pendingPayments,
+            'failedPayments' => $failedPayments,
             'amountsByCurrency' => $amountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
         ]);
@@ -68,7 +82,7 @@ class PaymentController extends Controller
 
     public function invoice(Payment $payment)
     {
-        $payment->load(['student.club', 'student.organization', 'currency', 'attachment']);
+        $payment->load(['studentFee.student.club', 'studentFee.student.organization', 'studentFee.feeType', 'currency', 'attachment']);
         return Inertia::render('Invoice', [
             'payment' => $payment,
         ]);
@@ -76,31 +90,31 @@ class PaymentController extends Controller
 
     public function create()
     {
+        $studentFees = StudentFee::with(['student', 'feeType'])
+            ->whereIn('status', ['pending', 'partial'])
+            ->get();
+
         return Inertia::render('Admin/Payments/Create', [
-            'students' => Student::all(),
-            'currencies' => Currency::getActive(),
-            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')->get(),
+            'studentFees' => $studentFees ?? [],
+            'currencies' => Currency::getActive() ?? [],
+            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')->get() ?? [],
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_fee_id' => 'required|exists:student_fees,id',
             'amount' => 'required|numeric|min:0',
             'currency_code' => 'required|exists:currencies,code',
-            'status' => 'required|in:paid,unpaid',
-            'method' => 'required|in:cash,stripe',
-            'payment_month' => 'required|string|size:2',
-            'pay_at' => 'required|date',
+            'status' => 'required|in:pending,successful,failed',
+            'method' => 'required|in:cash,card,stripe',
+            'pay_at' => 'nullable|date',
             'notes' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
             'bank_information' => 'nullable|array',
             'bank_information.*' => 'exists:bank_information,id',
         ]);
-
-        // Combine current year with selected month for "YYYY-MM" format
-        $year = now()->year;
-        $payment_month = $year . '-' . $validated['payment_month'];
 
         // Get selected bank information details
         $selectedBanks = [];
@@ -108,15 +122,18 @@ class PaymentController extends Controller
             $selectedBanks = BankInformation::whereIn('id', $validated['bank_information'])->get()->toArray();
         }
 
+        // Get student fee to get student_id for balance update
+        $studentFee = StudentFee::findOrFail($validated['student_fee_id']);
+
         Payment::create([
-            'student_id' => $validated['student_id'],
+            'student_fee_id' => $validated['student_fee_id'],
             'amount' => $validated['amount'],
             'currency_code' => $validated['currency_code'],
             'status' => $validated['status'],
             'method' => $validated['method'],
-            'payment_month' => $payment_month,
-            'pay_at' => $validated['pay_at'],
+            'pay_at' => $validated['pay_at'] ?? now(),
             'notes' => $validated['notes'] ?? null,
+            'transaction_id' => $validated['transaction_id'] ?? null,
             'bank_information' => $selectedBanks,
         ]);
 
@@ -126,8 +143,8 @@ class PaymentController extends Controller
     public function edit(Payment $payment)
     {
         return Inertia::render('Admin/Payments/Edit', [
-            'payment' => $payment,
-            'students' => Student::all(),
+            'payment' => $payment->load(['studentFee.student', 'studentFee.feeType']),
+            'studentFees' => StudentFee::with(['student', 'feeType'])->get(),
             'currencies' => Currency::getActive(),
             'bank_information' => BankInformation::where('userable_type', 'App\Models\User')->get(),
         ]);
@@ -136,22 +153,17 @@ class PaymentController extends Controller
     public function update(Request $request, Payment $payment)
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_fee_id' => 'required|exists:student_fees,id',
             'amount' => 'required|numeric|min:0',
             'currency_code' => 'required|exists:currencies,code',
-            'status' => 'required|in:paid,unpaid',
-            'method' => 'required|in:cash,stripe',
-            'payment_month' => 'required|string|size:2',
-            'pay_at' => 'required|date',
+            'status' => 'required|in:pending,successful,failed',
+            'method' => 'required|in:cash,card,stripe',
+            'pay_at' => 'nullable|date',
             'notes' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
             'bank_information' => 'nullable|array',
             'bank_information.*' => 'exists:bank_information,id',
         ]);
-
-
-        // Combine current year with selected month for "YYYY-MM" format
-        $year = now()->year;
-        $payment_month = $year . '-' . $validated['payment_month'];
 
         // Get selected bank information details
         $selectedBanks = [];
@@ -160,14 +172,14 @@ class PaymentController extends Controller
         }
 
         $payment->update([
-            'student_id' => $validated['student_id'],
+            'student_fee_id' => $validated['student_fee_id'],
             'amount' => $validated['amount'],
             'currency_code' => $validated['currency_code'],
             'status' => $validated['status'],
             'method' => $validated['method'],
-            'payment_month' => $payment_month,
-            'pay_at' => $validated['pay_at'],
+            'pay_at' => $validated['pay_at'] ?? $payment->pay_at,
             'notes' => $validated['notes'] ?? null,
+            'transaction_id' => $validated['transaction_id'] ?? null,
             'bank_information' => $selectedBanks,
         ]);
 
@@ -176,7 +188,10 @@ class PaymentController extends Controller
 
     public function destroy(Payment $payment)
     {
+        $studentFee = $payment->studentFee;
         $payment->delete();
+
+        // Balance will be updated automatically via model events
 
         return redirect()->route('admin.payments.index')->with('success', 'Payment deleted successfully');
     }
@@ -184,7 +199,7 @@ class PaymentController extends Controller
     public function updateStatus(Request $request, Payment $payment)
     {
         $validated = $request->validate([
-            'status' => 'required|in:paid,unpaid',
+            'status' => 'required|in:pending,successful,failed',
         ]);
 
         $payment->update([

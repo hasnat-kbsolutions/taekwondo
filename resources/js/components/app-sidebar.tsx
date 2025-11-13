@@ -93,7 +93,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             url: "/admin/payments",
             icon: SquareTerminal,
             isActive: false,
-            items: [{ title: "Payments", url: "/admin/payments" }],
+            items: [
+                { title: "Payments", url: "/admin/payments" },
+                { title: "Fee Types", url: "/admin/fee-types" },
+                { title: "Student Fees", url: "/admin/student-fees" },
+            ],
         },
         {
             title: "Certifications",

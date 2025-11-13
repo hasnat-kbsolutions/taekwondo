@@ -48,6 +48,7 @@ import { Label } from "@/components/ui/label";
 interface Student {
     id: number;
     name: string;
+    surname?: string;
 }
 
 interface PaymentAttachment {
@@ -61,7 +62,15 @@ interface PaymentAttachment {
 
 interface Payment {
     id: number;
-    student: Student;
+    student_fee: {
+        id: number;
+        student: Student;
+        fee_type: {
+            id: number;
+            name: string;
+        };
+        month: string;
+    };
     amount: number;
     currency_code: string;
     currency?: {
@@ -69,20 +78,22 @@ interface Payment {
         symbol: string;
         name: string;
     };
-    status: string;
+    status: "pending" | "successful" | "failed";
     method: string;
-    payment_month: string;
     pay_at: string;
+    transaction_id?: string;
     notes?: string;
     attachment?: PaymentAttachment;
 }
 
 interface Props {
     payments: Payment[];
+    students?: Student[];
     filters: {
         status?: string;
-        payment_month?: string;
+        month?: string;
         currency_code?: string;
+        student_id?: string;
     };
     currencies: Array<{
         code: string;
@@ -90,8 +101,9 @@ interface Props {
         symbol: string;
     }>;
     totalPayments?: number;
-    paidPayments?: number;
-    unpaidPayments?: number;
+    successfulPayments?: number;
+    pendingPayments?: number;
+    failedPayments?: number;
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
 }
@@ -120,27 +132,32 @@ const months = [
 
 export default function PaymentIndex({
     payments,
+    students = [],
     filters,
     currencies,
-    totalPayments,
-    paidPayments,
-    unpaidPayments,
-    amountsByCurrency,
-    defaultCurrencyCode,
+    totalPayments = 0,
+    successfulPayments = 0,
+    pendingPayments = 0,
+    failedPayments = 0,
+    amountsByCurrency = {},
+    defaultCurrencyCode = "MYR",
 }: Props) {
     const [status, setStatus] = useState(filters.status || "");
     const [selectedYear, setSelectedYear] = useState(
-        filters.payment_month
-            ? filters.payment_month.length === 4
-                ? filters.payment_month
-                : filters.payment_month.split("-")[0]
+        filters.month
+            ? filters.month.length === 4
+                ? filters.month
+                : filters.month.split("-")[0]
             : "All"
     );
     const [selectedMonth, setSelectedMonth] = useState(
-        filters.payment_month?.split("-")[1] || ""
+        filters.month?.split("-")[1] || ""
     );
     const [selectedCurrency, setSelectedCurrency] = useState(
         filters.currency_code || ""
+    );
+    const [selectedStudent, setSelectedStudent] = useState(
+        filters.student_id || ""
     );
 
     // Utility function to safely format amounts
@@ -166,7 +183,7 @@ export default function PaymentIndex({
     const [statusChangeDialog, setStatusChangeDialog] = useState<{
         open: boolean;
         payment: Payment | null;
-        newStatus: "paid" | "unpaid" | null;
+        newStatus: "pending" | "successful" | "failed" | null;
     }>({
         open: false,
         payment: null,
@@ -270,31 +287,27 @@ export default function PaymentIndex({
         month,
         status,
         currency,
+        student,
     }: {
         year: string;
         month: string;
         status: string;
         currency: string;
+        student: string;
     }) => {
-        // Ensure a valid payment_month format
-        // - If year is "All", clear payment_month
+        // Ensure a valid month format
+        // - If year is "All", clear month
         // - If month is empty/not selected, send year only (for year-wide filtering)
         // - If month is selected, send year-month
-        const paymentMonth =
+        const monthFilter =
             year === "All" ? "" : month ? `${year}-${month}` : year;
-        console.log("Filter Values:", {
-            year,
-            month,
-            status,
-            currency,
-            paymentMonth,
-        }); // Debug log
         router.get(
             route("admin.payments.index"),
             {
                 status: status || null,
-                payment_month: paymentMonth || null,
+                month: monthFilter || null,
                 currency_code: currency || null,
+                student_id: student || null,
             },
             {
                 preserveScroll: true,
@@ -316,14 +329,22 @@ export default function PaymentIndex({
             month: selectedMonth,
             status: status,
             currency: selectedCurrency,
+            student: selectedStudent,
         });
-    }, [selectedYear, selectedMonth, status, selectedCurrency]);
+    }, [
+        selectedYear,
+        selectedMonth,
+        status,
+        selectedCurrency,
+        selectedStudent,
+    ]);
 
     const resetFilters = () => {
         setStatus("");
         setSelectedYear("All");
         setSelectedMonth("");
         setSelectedCurrency("");
+        setSelectedStudent("");
         router.get(
             route("admin.payments.index"),
             {},
@@ -342,7 +363,20 @@ export default function PaymentIndex({
         },
         {
             header: "Student",
-            cell: ({ row }) => row.original.student?.name || "-",
+            cell: ({ row }) => {
+                const student = row.original.student_fee?.student;
+                return student
+                    ? `${student.name} ${student.surname || ""}`.trim()
+                    : "-";
+            },
+        },
+        {
+            header: "Fee Type",
+            cell: ({ row }) => row.original.student_fee?.fee_type?.name || "-",
+        },
+        {
+            header: "Month",
+            cell: ({ row }) => row.original.student_fee?.month || "-",
         },
         {
             header: "Amount",
@@ -370,21 +404,22 @@ export default function PaymentIndex({
         },
         {
             header: "Status",
-            cell: ({ row }) => (
-                <Badge
-                    variant={
-                        row.original.status === "paid" ||
-                        row.original.status === "success"
-                            ? "default"
-                            : "destructive"
-                    }
-                >
-                    {row.original.status}
-                </Badge>
-            ),
+            cell: ({ row }) => {
+                const status = row.original.status;
+                const variant =
+                    status === "successful"
+                        ? "default"
+                        : status === "pending"
+                        ? "secondary"
+                        : "destructive";
+                return (
+                    <Badge variant={variant}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Badge>
+                );
+            },
         },
         { header: "Method", accessorKey: "method" },
-        { header: "Payment Month", accessorKey: "payment_month" },
         { header: "Pay At", accessorKey: "pay_at" },
         {
             header: "Proof",
@@ -426,35 +461,49 @@ export default function PaymentIndex({
                                 <Edit className="w-4 h-4 mr-2" /> Edit
                             </Link>
                         </DropdownMenuItem>
-                        {row.original.status === "unpaid" && (
+                        {row.original.status === "pending" && (
                             <DropdownMenuItem
                                 onClick={(e) => {
                                     e.preventDefault();
                                     setStatusChangeDialog({
                                         open: true,
                                         payment: row.original,
-                                        newStatus: "paid",
+                                        newStatus: "successful",
                                     });
                                 }}
                             >
                                 <CheckCircle className="w-4 h-4 mr-2" /> Mark as
-                                Paid
+                                Successful
                             </DropdownMenuItem>
                         )}
-                        {(row.original.status === "paid" ||
-                            row.original.status === "success") && (
+                        {row.original.status === "successful" && (
                             <DropdownMenuItem
                                 onClick={(e) => {
                                     e.preventDefault();
                                     setStatusChangeDialog({
                                         open: true,
                                         payment: row.original,
-                                        newStatus: "unpaid",
+                                        newStatus: "pending",
                                     });
                                 }}
                             >
-                                <XCircle className="w-4 h-4 mr-2" /> Mark as
-                                Unpaid
+                                <Hourglass className="w-4 h-4 mr-2" /> Mark as
+                                Pending
+                            </DropdownMenuItem>
+                        )}
+                        {row.original.status === "failed" && (
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setStatusChangeDialog({
+                                        open: true,
+                                        payment: row.original,
+                                        newStatus: "successful",
+                                    });
+                                }}
+                            >
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark as
+                                Successful
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
@@ -530,13 +579,13 @@ export default function PaymentIndex({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Paid
+                                Successful
                             </CardTitle>
                             <BadgeCheck className="h-6 w-6 text-green-600" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-green-600">
-                                {paidPayments || 0}
+                                {successfulPayments || 0}
                             </div>
                         </CardContent>
                     </Card>
@@ -544,13 +593,27 @@ export default function PaymentIndex({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Unpaid
+                                Pending
                             </CardTitle>
                             <Hourglass className="h-6 w-6 text-yellow-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-yellow-500">
-                                {unpaidPayments || 0}
+                                {pendingPayments || 0}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Failed
+                            </CardTitle>
+                            <XCircle className="h-6 w-6 text-red-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-500">
+                                {failedPayments || 0}
                             </div>
                         </CardContent>
                     </Card>
@@ -689,11 +752,14 @@ export default function PaymentIndex({
                                             <SelectItem value="all">
                                                 All
                                             </SelectItem>
-                                            <SelectItem value="paid">
-                                                Paid
+                                            <SelectItem value="pending">
+                                                Pending
                                             </SelectItem>
-                                            <SelectItem value="unpaid">
-                                                Unpaid
+                                            <SelectItem value="successful">
+                                                Successful
+                                            </SelectItem>
+                                            <SelectItem value="failed">
+                                                Failed
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -731,6 +797,42 @@ export default function PaymentIndex({
                                     </Select>
                                 </div>
 
+                                {students && students.length > 0 && (
+                                    <div className="flex flex-col w-[160px]">
+                                        <Label className="text-sm mb-1">
+                                            Student
+                                        </Label>
+                                        <Select
+                                            value={selectedStudent}
+                                            onValueChange={(val) =>
+                                                setSelectedStudent(
+                                                    val === "all" ? "" : val
+                                                )
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="All Students" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">
+                                                    All
+                                                </SelectItem>
+                                                {students.map((student) => (
+                                                    <SelectItem
+                                                        key={student.id}
+                                                        value={String(
+                                                            student.id
+                                                        )}
+                                                    >
+                                                        {student.name}{" "}
+                                                        {student.surname || ""}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+
                                 <div className="flex items-end">
                                     <Button
                                         variant="secondary"
@@ -762,7 +864,16 @@ export default function PaymentIndex({
                             <div className="space-y-2 text-sm ">
                                 <p className="flex justify-between">
                                     <strong>Student:</strong>{" "}
-                                    {selectedPayment.student?.name}
+                                    {selectedPayment.student_fee?.student?.name}{" "}
+                                    {selectedPayment.student_fee?.student
+                                        ?.surname || ""}
+                                </p>
+                                <p className="flex justify-between">
+                                    <strong>Fee Type:</strong>{" "}
+                                    {
+                                        selectedPayment.student_fee?.fee_type
+                                            ?.name
+                                    }
                                 </p>
                                 <p className="flex justify-between">
                                     <strong>Amount:</strong>{" "}
@@ -772,15 +883,18 @@ export default function PaymentIndex({
                                 </p>
                                 <p className="flex justify-between">
                                     <strong>Status:</strong>{" "}
-                                    {selectedPayment.status}
+                                    {selectedPayment.status
+                                        ?.charAt(0)
+                                        .toUpperCase() +
+                                        selectedPayment.status?.slice(1)}
                                 </p>
                                 <p className="flex justify-between">
                                     <strong>Method:</strong>{" "}
                                     {selectedPayment.method}
                                 </p>
                                 <p className="flex justify-between">
-                                    <strong>Payment Month:</strong>{" "}
-                                    {selectedPayment.payment_month}
+                                    <strong>Month:</strong>{" "}
+                                    {selectedPayment.student_fee?.month}
                                 </p>
                                 <p className="flex justify-between">
                                     <strong>Pay At:</strong>{" "}
@@ -1027,16 +1141,23 @@ export default function PaymentIndex({
                                 Are you sure you want to change the payment
                                 status from{" "}
                                 <strong>
-                                    {statusChangeDialog.payment?.status ===
-                                    "paid"
-                                        ? "Paid"
-                                        : "Unpaid"}
+                                    {statusChangeDialog.payment?.status
+                                        ? statusChangeDialog.payment.status
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                          statusChangeDialog.payment.status.slice(
+                                              1
+                                          )
+                                        : "Unknown"}
                                 </strong>{" "}
                                 to{" "}
                                 <strong>
-                                    {statusChangeDialog.newStatus === "paid"
-                                        ? "Paid"
-                                        : "Unpaid"}
+                                    {statusChangeDialog.newStatus
+                                        ? statusChangeDialog.newStatus
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                          statusChangeDialog.newStatus.slice(1)
+                                        : "Unknown"}
                                 </strong>
                                 ?
                             </DialogDescription>
@@ -1047,9 +1168,11 @@ export default function PaymentIndex({
                                     <p>
                                         <strong>Student:</strong>{" "}
                                         {
-                                            statusChangeDialog.payment.student
-                                                ?.name
-                                        }
+                                            statusChangeDialog.payment
+                                                .student_fee?.student?.name
+                                        }{" "}
+                                        {statusChangeDialog.payment.student_fee
+                                            ?.student?.surname || ""}
                                     </p>
                                     <p>
                                         <strong>Amount:</strong>{" "}
@@ -1066,10 +1189,10 @@ export default function PaymentIndex({
                                         }
                                     </p>
                                     <p>
-                                        <strong>Payment Month:</strong>{" "}
+                                        <strong>Month:</strong>{" "}
                                         {
                                             statusChangeDialog.payment
-                                                .payment_month
+                                                .student_fee?.month
                                         }
                                     </p>
                                 </div>

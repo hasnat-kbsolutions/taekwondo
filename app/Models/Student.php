@@ -63,7 +63,17 @@ class Student extends Model
     }
     public function payments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasManyThrough(Payment::class, StudentFee::class);
+    }
+
+    public function studentFees()
+    {
+        return $this->hasMany(StudentFee::class);
+    }
+
+    public function balance()
+    {
+        return $this->hasOne(StudentBalance::class);
     }
 
     public function instructors()
