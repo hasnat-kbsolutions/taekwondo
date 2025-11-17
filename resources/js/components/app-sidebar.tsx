@@ -95,8 +95,8 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             isActive: false,
             items: [
                 { title: "Payments", url: "/admin/payments" },
-                { title: "Fee Types", url: "/admin/fee-types" },
-                { title: "Student Fees", url: "/admin/student-fees" },
+                { title: "Plans", url: "/admin/plans" },
+                { title: "Student Fee Plans", url: "/admin/student-fee-plans" },
             ],
         },
         {
@@ -158,9 +158,18 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: SquareTerminal,
         },
         {
-            title: "Payments",
+            title: "Payment",
             url: "/organization/payments",
             icon: SquareTerminal,
+            isActive: false,
+            items: [
+                { title: "Payments", url: "/organization/payments" },
+                { title: "Plans", url: "/organization/plans" },
+                {
+                    title: "Student Fee Plans",
+                    url: "/organization/student-fee-plans",
+                },
+            ],
         },
         {
             title: "Attendance",
@@ -198,9 +207,18 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: SquareTerminal,
         },
         {
-            title: "Payments",
+            title: "Payment",
             url: "/club/payments",
             icon: SquareTerminal,
+            isActive: false,
+            items: [
+                { title: "Payments", url: "/club/payments" },
+                { title: "Plans", url: "/club/plans" },
+                {
+                    title: "Student Fee Plans",
+                    url: "/club/student-fee-plans",
+                },
+            ],
         },
         {
             title: "Attendance",

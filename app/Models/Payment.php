@@ -9,12 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Payment extends Model
 {
     protected $fillable = [
-        'student_fee_id',
+        'student_id',
+        'month',
         'amount',
         'method',
         'status',
         'transaction_id',
         'pay_at',
+        'due_date',
         'notes',
         'currency_code',
         'bank_information',
@@ -23,23 +25,16 @@ class Payment extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'pay_at' => 'date',
+        'due_date' => 'date',
         'bank_information' => 'array',
     ];
 
     /**
-     * Get the student fee for this payment
+     * Student for this payment
      */
-    public function studentFee(): BelongsTo
+    public function student(): BelongsTo
     {
-        return $this->belongsTo(StudentFee::class);
-    }
-
-    /**
-     * Get student via studentFee relationship (accessor)
-     */
-    public function getStudentAttribute()
-    {
-        return $this->studentFee?->student;
+        return $this->belongsTo(Student::class);
     }
 
     /**
@@ -87,33 +82,5 @@ class Payment extends Model
         return $this->attachment()->exists();
     }
 
-    /**
-     * Boot method to handle payment status changes
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saved(function ($payment) {
-            if ($payment->studentFee) {
-                $payment->studentFee->updatePaymentStatus();
-
-                // Update student balance
-                if ($payment->studentFee->student) {
-                    StudentBalance::updateBalance($payment->studentFee->student_id);
-                }
-            }
-        });
-
-        static::deleted(function ($payment) {
-            if ($payment->studentFee) {
-                $payment->studentFee->updatePaymentStatus();
-
-                // Update student balance
-                if ($payment->studentFee->student) {
-                    StudentBalance::updateBalance($payment->studentFee->student_id);
-                }
-            }
-        });
-    }
+    // Removed model events that depended on StudentFee/StudentBalance
 }

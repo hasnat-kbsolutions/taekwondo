@@ -5,12 +5,14 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\StudentFeePlan;
 use App\Models\Currency;
 use App\Models\BankInformation;
 use App\Models\PaymentAttachment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+
 class PaymentController extends Controller
 {
     public function index(Request $request)
@@ -30,13 +32,13 @@ class PaymentController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by payment_month (support year-only or full YYYY-MM)
-        if ($request->payment_month) {
-            $paymentMonth = $request->payment_month;
-            if (strlen($paymentMonth) === 4) { // Year only (e.g., "2025")
-                $query->where('payment_month', 'LIKE', "$paymentMonth-%");
-            } elseif (strlen($paymentMonth) === 7) { // Full YYYY-MM (e.g., "2025-07")
-                $query->where('payment_month', $paymentMonth);
+        // Filter by month (support year-only or full YYYY-MM)
+        if ($request->month) {
+            $month = $request->month;
+            if (strlen($month) === 4) {
+                $query->where('month', 'LIKE', "$month-%");
+            } elseif (strlen($month) === 7) {
+                $query->where('month', $month);
             }
         }
 
@@ -45,7 +47,17 @@ class PaymentController extends Controller
             $query->where('currency_code', $request->currency_code);
         }
 
+        // Filter by student
+        if ($request->student_id) {
+            $query->where('student_id', $request->student_id);
+        }
+
         $payments = $query->latest()->get();
+
+        // Calculate payment statistics
+        $totalPayments = $payments->count();
+        $paidPayments = $payments->where('status', 'paid')->count();
+        $unpaidPayments = $payments->where('status', 'unpaid')->count();
 
         // Calculate amounts by currency for summary
         $amountsByCurrency = $payments->groupBy('currency_code')
@@ -57,10 +69,14 @@ class PaymentController extends Controller
 
         return Inertia::render('Organization/Payments/Index', [
             'payments' => $payments,
-            'filters' => $request->only(['status', 'payment_month', 'currency_code']),
+            'students' => Student::where('organization_id', $user->userable_id)->get(),
+            'filters' => $request->only(['status', 'month', 'currency_code', 'student_id']),
+            'currencies' => Currency::getActive(),
+            'totalPayments' => $totalPayments,
+            'paidPayments' => $paidPayments,
+            'unpaidPayments' => $unpaidPayments,
             'amountsByCurrency' => $amountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
-            'currencies' => Currency::getActive(),
         ]);
     }
 
@@ -71,34 +87,63 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $students = Student::where('organization_id', $user->userable_id)->get();
+        $organizationId = $user->userable_id;
+
+        // Get students with fee plans in this organization
+        $feePlans = StudentFeePlan::with(['plan', 'student'])
+            ->whereHas('student', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->get();
+
+        $studentIdsWithPlans = $feePlans->pluck('student_id')->unique()->values();
+        $studentsWithPlans = Student::where('organization_id', $organizationId)
+            ->whereIn('id', $studentIdsWithPlans)
+            ->get();
 
         return Inertia::render('Organization/Payments/Create', [
-            'students' => $students,
-            'currencies' => Currency::getActive(),
-            'defaultCurrency' => $user->userable->default_currency ?? 'MYR',
-            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')
-                ->where('userable_id', $user->id)->get(),
+            'students' => $studentsWithPlans,
+            'studentFeePlans' => $feePlans,
+            'currencies' => Currency::getActive() ?? [],
+            'bank_information' => BankInformation::where('userable_type', 'App\Models\Organization')
+                ->where('userable_id', $organizationId)
+                ->orWhere(function ($q) use ($user) {
+                    $q->where('userable_type', 'App\Models\User')
+                        ->where('userable_id', $user->id);
+                })
+                ->get() ?? [],
         ]);
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'amount' => 'required|numeric',
+            'month' => 'nullable|string|size:7|regex:/^\d{4}-\d{2}$/',
+            'amount' => 'required|numeric|min:0',
             'currency_code' => 'required|exists:currencies,code',
-            'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,paid,failed,refunded',
-            'payment_month' => 'required|string|size:2',
-            'pay_at' => 'required|date',
+            'status' => 'required|in:paid,unpaid',
+            'method' => 'required|in:cash,card,stripe',
+            'pay_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
             'notes' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
             'bank_information' => 'nullable|array',
             'bank_information.*' => 'exists:bank_information,id',
         ]);
 
-        $year = now()->year;
-        $validated['payment_month'] = $year . '-' . $validated['payment_month'];
+        // Verify student belongs to organization
+        $student = Student::findOrFail($validated['student_id']);
+        if ($student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to create payment for this student.');
+        }
 
         // Get selected bank information details
         $selectedBanks = [];
@@ -106,12 +151,21 @@ class PaymentController extends Controller
             $selectedBanks = BankInformation::whereIn('id', $validated['bank_information'])->get()->toArray();
         }
 
-        $paymentData = $validated;
-        $paymentData['bank_information'] = $selectedBanks;
+        Payment::create([
+            'student_id' => $validated['student_id'],
+            'month' => $validated['month'] ?? null,
+            'amount' => $validated['amount'],
+            'currency_code' => $validated['currency_code'],
+            'status' => $validated['status'],
+            'method' => $validated['method'],
+            'pay_at' => $validated['pay_at'] ?? now(),
+            'due_date' => $validated['due_date'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'transaction_id' => $validated['transaction_id'] ?? null,
+            'bank_information' => $selectedBanks,
+        ]);
 
-        Payment::create($paymentData);
-
-        return redirect()->route('organization.payments.index')->with('success', 'Payment created successfully');
+        return redirect()->route('organization.payments.index')->with('success', 'Payment added successfully.');
     }
 
     public function edit(Payment $payment)
@@ -121,34 +175,69 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $students = Student::where('organization_id', $user->userable_id)->get();
+        $organizationId = $user->userable_id;
+
+        // Verify payment belongs to organization
+        if ($payment->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to access this payment.');
+        }
+
+        // Get students with fee plans in this organization
+        $feePlans = StudentFeePlan::with(['plan', 'student'])
+            ->whereHas('student', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->get();
 
         return Inertia::render('Organization/Payments/Edit', [
-            'payment' => $payment,
-            'students' => $students,
+            'payment' => $payment->load(['student']),
+            'students' => Student::where('organization_id', $organizationId)->whereHas('feePlan')->get(),
+            'studentFeePlans' => $feePlans,
             'currencies' => Currency::getActive(),
-            'bank_information' => BankInformation::where('userable_type', 'App\Models\User')
-                ->where('userable_id', $user->id)->get(),
+            'bank_information' => BankInformation::where('userable_type', 'App\Models\Organization')
+                ->where('userable_id', $organizationId)
+                ->orWhere(function ($q) use ($user) {
+                    $q->where('userable_type', 'App\Models\User')
+                        ->where('userable_id', $user->id);
+                })
+                ->get(),
         ]);
     }
 
     public function update(Request $request, Payment $payment)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
+        // Verify payment belongs to organization
+        if ($payment->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to update this payment.');
+        }
+
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'amount' => 'required|numeric',
+            'month' => 'nullable|string|size:7|regex:/^\d{4}-\d{2}$/',
+            'amount' => 'required|numeric|min:0',
             'currency_code' => 'required|exists:currencies,code',
-            'method' => 'required|in:cash,stripe,bank,other',
-            'status' => 'required|in:unpaid,paid,failed,refunded',
-            'payment_month' => 'required|string|size:2',
-            'pay_at' => 'required|date',
+            'status' => 'required|in:paid,unpaid',
+            'method' => 'required|in:cash,card,stripe',
+            'pay_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
             'notes' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
             'bank_information' => 'nullable|array',
             'bank_information.*' => 'exists:bank_information,id',
         ]);
 
-        $year = now()->year;
-        $validated['payment_month'] = $year . '-' . $validated['payment_month'];
+        // Verify student belongs to organization
+        $student = Student::findOrFail($validated['student_id']);
+        if ($student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to update payment for this student.');
+        }
 
         // Get selected bank information details
         $selectedBanks = [];
@@ -156,12 +245,40 @@ class PaymentController extends Controller
             $selectedBanks = BankInformation::whereIn('id', $validated['bank_information'])->get()->toArray();
         }
 
-        $paymentData = $validated;
-        $paymentData['bank_information'] = $selectedBanks;
-
-        $payment->update($paymentData);
+        $payment->update([
+            'student_id' => $validated['student_id'],
+            'month' => $validated['month'] ?? null,
+            'amount' => $validated['amount'],
+            'currency_code' => $validated['currency_code'],
+            'status' => $validated['status'],
+            'method' => $validated['method'],
+            'pay_at' => $validated['pay_at'] ?? $payment->pay_at,
+            'due_date' => $validated['due_date'] ?? $payment->due_date,
+            'notes' => $validated['notes'] ?? null,
+            'transaction_id' => $validated['transaction_id'] ?? null,
+            'bank_information' => $selectedBanks,
+        ]);
 
         return redirect()->route('organization.payments.index')->with('success', 'Payment updated successfully');
+    }
+
+    public function destroy(Payment $payment)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
+        // Verify payment belongs to organization
+        if ($payment->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to delete this payment.');
+        }
+
+        $payment->delete();
+
+        return redirect()->route('organization.payments.index')->with('success', 'Payment deleted successfully');
     }
 
     public function invoice(Payment $payment)

@@ -11,6 +11,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Button as ShadButton } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -23,23 +24,58 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Create() {
-    const { students, currencies, defaultCurrency, bank_information } =
-        usePage().props as any;
+    const {
+        students = [],
+        studentFeePlans = [],
+        currencies = [],
+        bank_information = [],
+        errors = {},
+    } = usePage().props as any;
 
     const [form, setForm] = useState({
         student_id: "",
-        amount: "",
-        currency_code: defaultCurrency || "MYR",
+        month: "",
+        amount: "", // will be auto-set from fee plan
+        currency_code: "MYR", // will be auto-set from fee plan
         status: "paid",
         method: "cash",
         pay_at: "",
-        payment_month: "",
+        due_date: "",
         notes: "",
+        transaction_id: "",
         bank_information: [] as number[],
     });
 
+    const selectedPlan = React.useMemo(() => {
+        if (!form.student_id) return null;
+        return (studentFeePlans as any[]).find(
+            (p) => String(p.student_id) === String(form.student_id)
+        );
+    }, [form.student_id, studentFeePlans]);
+
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+        if (field === "student_id") {
+            const plan = (studentFeePlans as any[]).find(
+                (p) => String(p.student_id) === String(value)
+            );
+            if (plan) {
+                if (typeof plan.effective_amount !== "undefined") {
+                    setForm((prev) => ({
+                        ...prev,
+                        amount: String(plan.effective_amount),
+                    }));
+                }
+                const planCurrency =
+                    plan.currency_code || plan.plan?.currency_code;
+                if (planCurrency) {
+                    setForm((prev) => ({
+                        ...prev,
+                        currency_code: planCurrency,
+                    }));
+                }
+            }
+        }
     };
 
     const handleBankSelection = (bankId: number, checked: boolean) => {
@@ -56,6 +92,10 @@ export default function Create() {
         router.post(route("club.payments.store"), form);
     };
 
+    const renderError = (field: keyof typeof errors) =>
+        errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+        );
     return (
         <AuthenticatedLayout header="Add Payment">
             <Head title="Add Payment" />
@@ -66,9 +106,12 @@ export default function Create() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Student</Label>
+                                    <Label>
+                                        Student
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.student_id}
                                         onValueChange={(value) =>
@@ -79,57 +122,45 @@ export default function Create() {
                                             <SelectValue placeholder="Select Student" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {students.map((s: any) => (
-                                                <SelectItem
-                                                    key={s.id}
-                                                    value={String(s.id)}
-                                                >
-                                                    {s.name}
-                                                </SelectItem>
-                                            ))}
+                                            {Array.isArray(students) &&
+                                            students.length > 0 ? (
+                                                students.map((s: any) => (
+                                                    <SelectItem
+                                                        key={s.id}
+                                                        value={String(s.id)}
+                                                    >
+                                                        {s.name}{" "}
+                                                        {s.surname || ""}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                                    No students available
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
+                                    {renderError("student_id")}
                                 </div>
                                 <div>
-                                    <Label>Amount</Label>
+                                    <Label>Month (YYYY-MM)</Label>
                                     <Input
-                                        type="number"
-                                        value={form.amount}
+                                        type="month"
+                                        value={form.month}
                                         onChange={(e) =>
                                             handleChange(
-                                                "amount",
+                                                "month",
                                                 e.target.value
                                             )
                                         }
                                     />
+                                    {renderError("month")}
                                 </div>
                                 <div>
-                                    <Label>Currency</Label>
-                                    <Select
-                                        value={form.currency_code}
-                                        onValueChange={(value) =>
-                                            handleChange("currency_code", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Currency" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {currencies.map((currency: any) => (
-                                                <SelectItem
-                                                    key={currency.code}
-                                                    value={currency.code}
-                                                >
-                                                    {currency.code} -{" "}
-                                                    {currency.symbol}{" "}
-                                                    {currency.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <Label>Status</Label>
+                                    <Label>
+                                        Status
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.status}
                                         onValueChange={(value) =>
@@ -148,10 +179,14 @@ export default function Create() {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {renderError("status")}
                                 </div>
 
                                 <div>
-                                    <Label>Method</Label>
+                                    <Label>
+                                        Method
+                                        <span className="text-red-500">*</span>
+                                    </Label>
                                     <Select
                                         value={form.method}
                                         onValueChange={(value) =>
@@ -165,64 +200,38 @@ export default function Create() {
                                             <SelectItem value="cash">
                                                 Cash
                                             </SelectItem>
+                                            <SelectItem value="card">
+                                                Card
+                                            </SelectItem>
                                             <SelectItem value="stripe">
                                                 Stripe
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {renderError("method")}
                                 </div>
 
                                 <div>
-                                    <Label>
-                                        Month
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={form.payment_month}
-                                        onValueChange={(value) =>
-                                            handleChange("payment_month", value)
+                                    <Label>Transaction ID</Label>
+                                    <Input
+                                        type="text"
+                                        value={form.transaction_id}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "transaction_id",
+                                                e.target.value
+                                            )
                                         }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Month" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {[
-                                                "01",
-                                                "02",
-                                                "03",
-                                                "04",
-                                                "05",
-                                                "06",
-                                                "07",
-                                                "08",
-                                                "09",
-                                                "10",
-                                                "11",
-                                                "12",
-                                            ].map((m) => (
-                                                <SelectItem key={m} value={m}>
-                                                    {new Date(
-                                                        0,
-                                                        parseInt(m) - 1
-                                                    ).toLocaleString(
-                                                        "default",
-                                                        { month: "long" }
-                                                    )}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        placeholder="Optional transaction ID"
+                                    />
+                                    {renderError("transaction_id")}
                                 </div>
 
                                 <div>
-                                    <Label>
-                                        Pay At
-                                        <span className="text-red-500">*</span>
-                                    </Label>
+                                    <Label>Pay At</Label>
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button
+                                            <ShadButton
                                                 variant={"outline"}
                                                 className={
                                                     "w-full justify-start text-left font-normal " +
@@ -237,7 +246,7 @@ export default function Create() {
                                                           "PPP"
                                                       )
                                                     : "Pick a date"}
-                                            </Button>
+                                            </ShadButton>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0">
                                             <Calendar
@@ -262,20 +271,137 @@ export default function Create() {
                                             />
                                         </PopoverContent>
                                     </Popover>
+                                    {renderError("pay_at")}
+                                </div>
+                                <div>
+                                    <Label>Due Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <ShadButton
+                                                variant={"outline"}
+                                                className={
+                                                    "w-full justify-start text-left font-normal " +
+                                                    (!form.due_date &&
+                                                        "text-muted-foreground")
+                                                }
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {form.due_date
+                                                    ? format(
+                                                          new Date(
+                                                              form.due_date
+                                                          ),
+                                                          "PPP"
+                                                      )
+                                                    : "Pick a date"}
+                                            </ShadButton>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={
+                                                    form.due_date
+                                                        ? new Date(
+                                                              form.due_date
+                                                          )
+                                                        : undefined
+                                                }
+                                                onSelect={(date) =>
+                                                    handleChange(
+                                                        "due_date",
+                                                        date
+                                                            ? format(
+                                                                  date,
+                                                                  "yyyy-MM-dd"
+                                                              )
+                                                            : ""
+                                                    )
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    {renderError("due_date")}
                                 </div>
 
-                                <div className="col-span-3">
-                                    <Label>Notes</Label>
-                                    <Input
-                                        value={form.notes}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "notes",
-                                                e.target.value
-                                            )
-                                        }
-                                    />
+                                {/* Fee Plan Details (full width, after Due Date) */}
+                                <div className="col-span-2">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">
+                                                Fee Plan Details
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label>Plan</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.plan?.name ||
+                                                        "Custom"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Currency</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.currency_code ||
+                                                        selectedPlan?.plan
+                                                            ?.currency_code ||
+                                                        "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Base Amount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {typeof selectedPlan?.base_amount !==
+                                                    "undefined"
+                                                        ? selectedPlan?.base_amount
+                                                        : "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Effective Amount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {typeof selectedPlan?.effective_amount !==
+                                                    "undefined"
+                                                        ? selectedPlan?.effective_amount
+                                                        : "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Interval</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.interval}
+                                                    {selectedPlan?.interval ===
+                                                        "custom" &&
+                                                    selectedPlan?.interval_count
+                                                        ? ` (${selectedPlan?.interval_count})`
+                                                        : ""}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Discount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.discount_type
+                                                        ? `${selectedPlan?.discount_type} ${selectedPlan?.discount_value}`
+                                                        : "None"}
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
+
+                                {/* Notes moved below to allow full-width Fee Plan Details */}
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <Label>Notes</Label>
+                                <Input
+                                    value={form.notes}
+                                    onChange={(e) =>
+                                        handleChange("notes", e.target.value)
+                                    }
+                                />
                             </div>
 
                             {/* Bank Information Selection */}
@@ -331,6 +457,7 @@ export default function Create() {
                                         </p>
                                     </div>
                                 )}
+                                {renderError("bank_information")}
                             </div>
 
                             <div className="pt-4">

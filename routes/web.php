@@ -121,21 +121,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
-    // Fee Types Routes
-    Route::get('/fee-types', [App\Http\Controllers\Admin\FeeTypeController::class, 'index'])->name('fee-types.index');
-    Route::get('/fee-types/create', [App\Http\Controllers\Admin\FeeTypeController::class, 'create'])->name('fee-types.create');
-    Route::post('/fee-types', [App\Http\Controllers\Admin\FeeTypeController::class, 'store'])->name('fee-types.store');
-    Route::get('/fee-types/{feeType}/edit', [App\Http\Controllers\Admin\FeeTypeController::class, 'edit'])->name('fee-types.edit');
-    Route::put('/fee-types/{feeType}', [App\Http\Controllers\Admin\FeeTypeController::class, 'update'])->name('fee-types.update');
-    Route::delete('/fee-types/{feeType}', [App\Http\Controllers\Admin\FeeTypeController::class, 'destroy'])->name('fee-types.destroy');
+    // Plans
+    Route::get('/plans', [App\Http\Controllers\Admin\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [App\Http\Controllers\Admin\PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [App\Http\Controllers\Admin\PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Admin\PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [App\Http\Controllers\Admin\PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [App\Http\Controllers\Admin\PlanController::class, 'destroy'])->name('plans.destroy');
 
-    // Student Fees Routes
-    Route::get('/student-fees', [App\Http\Controllers\Admin\StudentFeeController::class, 'index'])->name('student-fees.index');
-    Route::get('/student-fees/create', [App\Http\Controllers\Admin\StudentFeeController::class, 'create'])->name('student-fees.create');
-    Route::post('/student-fees', [App\Http\Controllers\Admin\StudentFeeController::class, 'store'])->name('student-fees.store');
-    Route::get('/student-fees/{studentFee}/edit', [App\Http\Controllers\Admin\StudentFeeController::class, 'edit'])->name('student-fees.edit');
-    Route::put('/student-fees/{studentFee}', [App\Http\Controllers\Admin\StudentFeeController::class, 'update'])->name('student-fees.update');
-    Route::delete('/student-fees/{studentFee}', [App\Http\Controllers\Admin\StudentFeeController::class, 'destroy'])->name('student-fees.destroy');
+    // Student Fee Plans
+    Route::get('/student-fee-plans', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
+    Route::get('/student-fee-plans/create', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    Route::post('/student-fee-plans', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
+    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
+    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
 
     // Payments Routes
     Route::get('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
@@ -226,6 +226,22 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Organization\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
     Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Organization\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
 
+    // Plans Routes
+    Route::get('/plans', [App\Http\Controllers\Organization\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [App\Http\Controllers\Organization\PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [App\Http\Controllers\Organization\PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Organization\PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'destroy'])->name('plans.destroy');
+
+    // Student Fee Plans Routes
+    Route::get('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
+    Route::get('/student-fee-plans/create', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    Route::post('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
+    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
+    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
+
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Organization\AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'store'])->name('attendances.store');
@@ -281,6 +297,8 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::get('/payments', [App\Http\Controllers\Club\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Club\PaymentController::class, 'create'])->name('payments.create');
     Route::post('/payments', [App\Http\Controllers\Club\PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/bulk-generate', [App\Http\Controllers\Club\PaymentController::class, 'showBulkGenerate'])->name('payments.bulk-generate');
+    Route::post('/payments/bulk-generate', [App\Http\Controllers\Club\PaymentController::class, 'bulkGenerate'])->name('payments.bulk-generate.store');
     Route::get('/payments/{payment}/edit', [App\Http\Controllers\Club\PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [App\Http\Controllers\Club\PaymentController::class, 'destroy'])->name('payments.destroy');
@@ -290,6 +308,22 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Club\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
     Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Club\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
     Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Club\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+
+    // Plans Routes
+    Route::get('/plans', [App\Http\Controllers\Club\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [App\Http\Controllers\Club\PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [App\Http\Controllers\Club\PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Club\PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [App\Http\Controllers\Club\PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [App\Http\Controllers\Club\PlanController::class, 'destroy'])->name('plans.destroy');
+
+    // Student Fee Plans Routes
+    Route::get('/student-fee-plans', [App\Http\Controllers\Club\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
+    Route::get('/student-fee-plans/create', [App\Http\Controllers\Club\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    Route::post('/student-fee-plans', [App\Http\Controllers\Club\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Club\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
+    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Club\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
+    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Club\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
 
     Route::get('/attendances', [App\Http\Controllers\Club\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Club\AttendanceController::class, 'create'])->name('attendances.create');

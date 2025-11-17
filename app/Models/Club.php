@@ -113,4 +113,12 @@ class Club extends Model
         return $this->morphMany(\App\Models\BankInformation::class, 'userable');
     }
 
+    /**
+     * Get all plans associated with this club
+     */
+    public function plans(): MorphMany
+    {
+        return $this->morphMany(Plan::class, 'planable');
+    }
+
 }

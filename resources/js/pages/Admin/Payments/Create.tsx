@@ -25,26 +25,57 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Create() {
     const {
-        studentFees = [],
+        students = [],
+        studentFeePlans = [],
         currencies = [],
         bank_information = [],
         errors = {},
     } = usePage().props as any;
 
     const [form, setForm] = useState({
-        student_fee_id: "",
-        amount: "",
-        currency_code: "MYR",
-        status: "successful",
+        student_id: "",
+        month: "",
+        amount: "", // will be auto-set from fee plan
+        currency_code: "MYR", // will be auto-set from fee plan
+        status: "paid",
         method: "cash",
         pay_at: "",
+        due_date: "",
         notes: "",
         transaction_id: "",
         bank_information: [] as number[],
     });
 
+    const selectedPlan = React.useMemo(() => {
+        if (!form.student_id) return null;
+        return (studentFeePlans as any[]).find(
+            (p) => String(p.student_id) === String(form.student_id)
+        );
+    }, [form.student_id, studentFeePlans]);
+
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+        if (field === "student_id") {
+            const plan = (studentFeePlans as any[]).find(
+                (p) => String(p.student_id) === String(value)
+            );
+            if (plan) {
+                if (typeof plan.effective_amount !== "undefined") {
+                    setForm((prev) => ({
+                        ...prev,
+                        amount: String(plan.effective_amount),
+                    }));
+                }
+                const planCurrency =
+                    plan.currency_code || plan.plan?.currency_code;
+                if (planCurrency) {
+                    setForm((prev) => ({
+                        ...prev,
+                        currency_code: planCurrency,
+                    }));
+                }
+            }
+        }
     };
 
     const handleBankSelection = (bankId: number, checked: boolean) => {
@@ -78,91 +109,52 @@ export default function Create() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label>
-                                        Student Fee
+                                        Student
                                         <span className="text-red-500">*</span>
                                     </Label>
                                     <Select
-                                        value={form.student_fee_id}
+                                        value={form.student_id}
                                         onValueChange={(value) =>
-                                            handleChange(
-                                                "student_fee_id",
-                                                value
-                                            )
+                                            handleChange("student_id", value)
                                         }
                                     >
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Student Fee" />
+                                            <SelectValue placeholder="Select Student" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {studentFees &&
-                                            Array.isArray(studentFees) &&
-                                            studentFees.length > 0 ? (
-                                                studentFees.map((sf: any) => (
+                                            {Array.isArray(students) &&
+                                            students.length > 0 ? (
+                                                students.map((s: any) => (
                                                     <SelectItem
-                                                        key={sf.id}
-                                                        value={String(sf.id)}
+                                                        key={s.id}
+                                                        value={String(s.id)}
                                                     >
-                                                        {sf.student?.name}{" "}
-                                                        {sf.student?.surname} -{" "}
-                                                        {sf.fee_type?.name} (
-                                                        {sf.month}) -{" "}
-                                                        {sf.status}
+                                                        {s.name}{" "}
+                                                        {s.surname || ""}
                                                     </SelectItem>
                                                 ))
                                             ) : (
                                                 <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                                    No pending fees available
+                                                    No students available
                                                 </div>
                                             )}
                                         </SelectContent>
                                     </Select>
-                                    {renderError("student_fee_id")}
+                                    {renderError("student_id")}
                                 </div>
                                 <div>
-                                    <Label>
-                                        Amount
-                                        <span className="text-red-500">*</span>
-                                    </Label>
+                                    <Label>Month (YYYY-MM)</Label>
                                     <Input
-                                        type="number"
-                                        value={form.amount}
+                                        type="month"
+                                        value={form.month}
                                         onChange={(e) =>
                                             handleChange(
-                                                "amount",
+                                                "month",
                                                 e.target.value
                                             )
                                         }
                                     />
-                                    {renderError("amount")}
-                                </div>
-                                <div>
-                                    <Label>
-                                        Currency
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={form.currency_code}
-                                        onValueChange={(value) =>
-                                            handleChange("currency_code", value)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Currency" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {currencies.map((currency: any) => (
-                                                <SelectItem
-                                                    key={currency.code}
-                                                    value={currency.code}
-                                                >
-                                                    {currency.code} -{" "}
-                                                    {currency.symbol}{" "}
-                                                    {currency.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {renderError("currency_code")}
+                                    {renderError("month")}
                                 </div>
                                 <div>
                                     <Label>
@@ -179,14 +171,11 @@ export default function Create() {
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="pending">
-                                                Pending
+                                            <SelectItem value="unpaid">
+                                                Unpaid
                                             </SelectItem>
-                                            <SelectItem value="successful">
-                                                Successful
-                                            </SelectItem>
-                                            <SelectItem value="failed">
-                                                Failed
+                                            <SelectItem value="paid">
+                                                Paid
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -284,19 +273,199 @@ export default function Create() {
                                     </Popover>
                                     {renderError("pay_at")}
                                 </div>
+                                <div>
+                                    <Label>Due Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <ShadButton
+                                                variant={"outline"}
+                                                className={
+                                                    "w-full justify-start text-left font-normal " +
+                                                    (!form.due_date &&
+                                                        "text-muted-foreground")
+                                                }
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {form.due_date
+                                                    ? format(
+                                                          new Date(
+                                                              form.due_date
+                                                          ),
+                                                          "PPP"
+                                                      )
+                                                    : "Pick a date"}
+                                            </ShadButton>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={
+                                                    form.due_date
+                                                        ? new Date(
+                                                              form.due_date
+                                                          )
+                                                        : undefined
+                                                }
+                                                onSelect={(date) =>
+                                                    handleChange(
+                                                        "due_date",
+                                                        date
+                                                            ? format(
+                                                                  date,
+                                                                  "yyyy-MM-dd"
+                                                              )
+                                                            : ""
+                                                    )
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    {renderError("due_date")}
+                                </div>
 
-                                <div className="col-span-3">
+                                {/* Fee Plan Details (full width, after Due Date) */}
+                                <div className="col-span-2">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">
+                                                Fee Plan Details
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label>Plan</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.plan?.name ||
+                                                        "Custom"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Currency</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.currency_code ||
+                                                        selectedPlan?.plan
+                                                            ?.currency_code ||
+                                                        "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Base Amount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {typeof selectedPlan?.base_amount !==
+                                                    "undefined"
+                                                        ? selectedPlan?.base_amount
+                                                        : "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Effective Amount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {typeof selectedPlan?.effective_amount !==
+                                                    "undefined"
+                                                        ? selectedPlan?.effective_amount
+                                                        : "-"}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Interval</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.interval}
+                                                    {selectedPlan?.interval ===
+                                                        "custom" &&
+                                                    selectedPlan?.interval_count
+                                                        ? ` (${selectedPlan?.interval_count})`
+                                                        : ""}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>Discount</Label>
+                                                <div className="mt-1 text-sm">
+                                                    {selectedPlan?.discount_type
+                                                        ? `${selectedPlan?.discount_type} ${selectedPlan?.discount_value}`
+                                                        : "None"}
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {/* Notes moved below to allow full-width Fee Plan Details */}
+                            </div>
+
+                            {/* Fee Plan Details (full width, after Due Date) */}
+                            <Card className="w-full">
+                                <CardHeader>
+                                    <CardTitle className="text-base">
+                                        Fee Plan Details
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Plan</Label>
+                                        <div className="mt-1 text-sm">
+                                            {selectedPlan?.plan?.name ||
+                                                "Custom"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Currency</Label>
+                                        <div className="mt-1 text-sm">
+                                            {selectedPlan?.currency_code ||
+                                                selectedPlan?.plan
+                                                    ?.currency_code ||
+                                                "-"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Base Amount</Label>
+                                        <div className="mt-1 text-sm">
+                                            {typeof selectedPlan?.base_amount !==
+                                            "undefined"
+                                                ? selectedPlan?.base_amount
+                                                : "-"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Effective Amount</Label>
+                                        <div className="mt-1 text-sm">
+                                            {typeof selectedPlan?.effective_amount !==
+                                            "undefined"
+                                                ? selectedPlan?.effective_amount
+                                                : "-"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Interval</Label>
+                                        <div className="mt-1 text-sm">
+                                            {selectedPlan?.interval}
+                                            {selectedPlan?.interval ===
+                                                "custom" &&
+                                            selectedPlan?.interval_count
+                                                ? ` (${selectedPlan?.interval_count})`
+                                                : ""}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Discount</Label>
+                                        <div className="mt-1 text-sm">
+                                            {selectedPlan?.discount_type
+                                                ? `${selectedPlan?.discount_type} ${selectedPlan?.discount_value}`
+                                                : "None"}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Notes */}
+                            <div>
                                     <Label>Notes</Label>
                                     <Input
                                         value={form.notes}
                                         onChange={(e) =>
-                                            handleChange(
-                                                "notes",
-                                                e.target.value
-                                            )
+                                        handleChange("notes", e.target.value)
                                         }
                                     />
-                                </div>
                             </div>
 
                             {/* Bank Information Selection */}
