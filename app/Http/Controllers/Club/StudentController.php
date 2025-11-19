@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Club;
 use App\Http\Controllers\Controller;
 
 use App\Models\Student;
+use App\Models\Plan;
+use App\Models\StudentFeePlan;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Club;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 class StudentController extends Controller
 {
     public function index(Request $request)
@@ -66,20 +70,29 @@ class StudentController extends Controller
 
     public function create()
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
 
         $clubs = Club::select('id', 'name')->get();
-        // $organizations = Organization::select('id', 'name')->get();
 
+        // Get plans for this club only
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->where('planable_id', $clubId)
+            ->where('is_active', true)
+            ->get();
 
         return Inertia::render('Club/Students/Create', [
             'clubs' => $clubs,
-            // 'organizations' => $organizations,
-
+            'plans' => $plans,
+            'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
+
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
@@ -98,7 +111,36 @@ class StudentController extends Controller
             'street' => 'nullable|string',
             'country' => 'nullable|string',
             'status' => 'required|boolean',
+            // Plan assignment fields
+            'plan_id' => [
+                'required',
+                'exists:plans,id',
+                function ($attribute, $value, $fail) use ($clubId) {
+                    $plan = Plan::find($value);
+                    if (!$plan || $plan->planable_type !== 'App\Models\Club' || $plan->planable_id !== $clubId) {
+                        $fail('The selected plan does not belong to your club.');
+                    }
+                },
+            ],
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(function () use ($request) {
+                    $type = $request->input('discount_type');
+                    return in_array($type, ['percent', 'fixed']);
+                }),
+            ],
+            'currency_code' => 'nullable|exists:currencies,code',
         ]);
+
+        // Enforce interval_count if custom
+        if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
+            return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
+        }
 
         // Generate UID
         $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
@@ -115,10 +157,10 @@ class StudentController extends Controller
             }
         }
 
-        // Inject organization_id if the logged-in user is an organization
-        if (Auth::user()->role === 'club') {
-            $validated['club_id'] = Auth::user()->userable_id;
-            $validated['organization_id'] = Auth::user()->userable->organization_id;
+        // Inject organization_id if the logged-in user is a club
+        if ($user->role === 'club') {
+            $validated['club_id'] = $clubId;
+            $validated['organization_id'] = $user->userable->organization_id;
         }
 
         // Create student profile
@@ -134,18 +176,61 @@ class StudentController extends Controller
             ]);
         }
 
+        // Create student fee plan
+        $discountType = $validated['discount_type'] ?: null;
+        $discountValue = $discountType ? (float) $validated['discount_value'] : 0;
+
+        StudentFeePlan::create([
+            'student_id' => $student->id,
+            'plan_id' => $validated['plan_id'],
+            'interval' => $validated['interval'],
+            'interval_count' => $validated['interval_count'] ?? null,
+            'discount_type' => $discountType,
+            'discount_value' => $discountValue,
+            'currency_code' => $validated['currency_code'] ?? null,
+            'is_active' => true,
+        ]);
+
         return redirect()->route('club.students.index')->with('success', 'Student created successfully');
     }
 
     public function edit(Student $student)
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
+
+        // Verify student belongs to club
+        if ($student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to access this student.');
+        }
+
+        // Get plans for this club only
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->where('planable_id', $clubId)
+            ->where('is_active', true)
+            ->get();
+
+        // Load existing fee plan
+        $student->load('feePlan');
+
         return Inertia::render('Club/Students/Edit', [
             'student' => $student,
+            'plans' => $plans,
+            'currencies' => Currency::where('is_active', true)->get(),
+            'feePlan' => $student->feePlan,
         ]);
     }
 
     public function update(Request $request, Student $student)
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
+
+        // Verify student belongs to club
+        if ($student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to update this student.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
@@ -163,7 +248,36 @@ class StudentController extends Controller
             'street' => 'nullable|string',
             'country' => 'nullable|string',
             'status' => 'required|boolean',
+            // Plan assignment fields
+            'plan_id' => [
+                'required',
+                'exists:plans,id',
+                function ($attribute, $value, $fail) use ($clubId) {
+                    $plan = Plan::find($value);
+                    if (!$plan || $plan->planable_type !== 'App\Models\Club' || $plan->planable_id !== $clubId) {
+                        $fail('The selected plan does not belong to your club.');
+                    }
+                },
+            ],
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(function () use ($request) {
+                    $type = $request->input('discount_type');
+                    return in_array($type, ['percent', 'fixed']);
+                }),
+            ],
+            'currency_code' => 'nullable|exists:currencies,code',
         ]);
+
+        // Enforce interval_count if custom
+        if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
+            return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
+        }
 
         // Handle image uploads
         foreach (['profile_image', 'identification_document'] as $field) {
@@ -184,8 +298,8 @@ class StudentController extends Controller
             $userData = [
                 'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
                 'role' => 'student',
-                'organization_id' => $validated['organization_id'] ?? null,
-                'club_id' => $validated['club_id'] ?? null,
+                'organization_id' => $student->organization_id,
+                'club_id' => $student->club_id,
                 'student_id' => $student->id,
             ];
 
@@ -199,6 +313,23 @@ class StudentController extends Controller
                 $userData
             );
         }
+
+        // Create or update student fee plan
+        $discountType = $validated['discount_type'] ?: null;
+        $discountValue = $discountType ? (float) $validated['discount_value'] : 0;
+
+        StudentFeePlan::updateOrCreate(
+            ['student_id' => $student->id],
+            [
+                'plan_id' => $validated['plan_id'],
+                'interval' => $validated['interval'],
+                'interval_count' => $validated['interval_count'] ?? null,
+                'discount_type' => $discountType,
+                'discount_value' => $discountValue,
+                'currency_code' => $validated['currency_code'] ?? null,
+                'is_active' => true,
+            ]
+        );
 
         return redirect()
             ->route('club.students.index')

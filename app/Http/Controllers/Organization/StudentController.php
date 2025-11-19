@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 
 use App\Models\Student;
+use App\Models\Plan;
+use App\Models\StudentFeePlan;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Club;
@@ -14,6 +17,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
@@ -95,17 +100,37 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->whereIn('planable_id', $clubs->pluck('id'))
+            ->where('is_active', true)
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
+
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
+            'plans' => $plans,
+            'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
 
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $organizationId = $user->userable_id;
+
         // Validate required fields
         $validated = $request->validate([
-            'club_id' => 'required|integer',
+            'club_id' => [
+                'required',
+                'integer',
+                'exists:clubs,id',
+                function ($attribute, $value, $fail) use ($organizationId) {
+                    $club = Club::find($value);
+                    if (!$club || $club->organization_id !== $organizationId) {
+                        $fail('The selected club does not belong to your organization.');
+                    }
+                },
+            ],
             'name' => 'required|string',
             'email' => 'required|email',
             'password' => 'required|string|min:6',
@@ -123,40 +148,96 @@ class StudentController extends Controller
             'street' => 'nullable|string',
             'country' => 'nullable|string',
             'status' => 'required|boolean',
+            'plan_id' => [
+                'required',
+                'exists:plans,id',
+                function ($attribute, $value, $fail) use ($request, $organizationId) {
+                    $plan = Plan::find($value);
+                    $clubId = $request->input('club_id');
+                    if (
+                        !$plan ||
+                        $plan->planable_type !== 'App\Models\Club' ||
+                        (int) $plan->planable_id !== (int) $clubId
+                    ) {
+                        $fail('The selected plan does not belong to the selected club.');
+                        return;
+                    }
+
+                    $club = Club::find($clubId);
+                    if (!$club || $club->organization_id !== $organizationId) {
+                        $fail('The selected club does not belong to your organization.');
+                    }
+                },
+            ],
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(function () use ($request) {
+                    $type = $request->input('discount_type');
+                    return in_array($type, ['percent', 'fixed']);
+                }),
+            ],
+            'currency_code' => 'nullable|exists:currencies,code',
         ]);
 
+        if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
+            return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
+        }
+
+        $planFields = ['plan_id', 'interval', 'interval_count', 'discount_type', 'discount_value', 'currency_code'];
+        $planData = Arr::only($validated, $planFields);
+        $studentData = Arr::except($validated, $planFields);
+
         // Generate UID
-        $validated['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
-        $validated['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        $studentData['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        $studentData['code'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
         // Handle image uploads
         foreach (['profile_image', 'identification_document'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = $relativePath; // Store relative path only
+                $studentData[$field] = $relativePath; // Store relative path only
             } else {
                 // Remove from validated to prevent overwriting existing file with null
-                unset($validated[$field]);
+                unset($studentData[$field]);
             }
         }
 
         // Inject organization_id if the logged-in user is an organization
-        if (Auth::user()->role === 'organization') {
-            $validated['organization_id'] = Auth::user()->userable_id;
+        if ($user->role === 'organization') {
+            $studentData['organization_id'] = $organizationId;
         }
 
         // Create student
-        $student = Student::create($validated);
+        $student = Student::create($studentData);
 
         // Create linked user (if email provided)
-        if (!empty($validated['email'])) {
+        if (!empty($studentData['email'])) {
             $student->user()->create([
-                'name' => trim($validated['name'] . ' ' . ($validated['surname'] ?? '')),
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'name' => trim($studentData['name'] . ' ' . ($studentData['surname'] ?? '')),
+                'email' => $studentData['email'],
+                'password' => Hash::make($request->password),
                 'role' => 'student',
             ]);
         }
+
+        $planData['discount_type'] = $planData['discount_type'] ?: null;
+        $planData['discount_value'] = $planData['discount_type'] ? (float) $planData['discount_value'] : 0;
+
+        StudentFeePlan::create([
+            'student_id' => $student->id,
+            'plan_id' => $planData['plan_id'],
+            'interval' => $planData['interval'],
+            'interval_count' => $planData['interval_count'] ?? null,
+            'discount_type' => $planData['discount_type'],
+            'discount_value' => $planData['discount_value'],
+            'currency_code' => $planData['currency_code'] ?? null,
+            'is_active' => true,
+        ]);
 
         return redirect()->route('organization.students.index')->with('success', 'Student created successfully');
 
@@ -167,24 +248,55 @@ class StudentController extends Controller
     {
 
         $user = Auth::user();
+        $organizationId = $user->userable_id;
 
-        $clubs = Club::where('organization_id', $user->userable_id)
+        if ($student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to access this student.');
+        }
+
+        $clubs = Club::where('organization_id', $organizationId)
             ->select('id', 'name')
             ->get();
+
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->whereIn('planable_id', $clubs->pluck('id'))
+            ->where('is_active', true)
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
+
+        $student->load('feePlan');
 
 
         return Inertia::render('Organization/Students/Edit', [
             'student' => $student,
             'clubs' => $clubs,
-            // 'organizations' => $organizations,
+            'plans' => $plans,
+            'currencies' => Currency::where('is_active', true)->get(),
+            'feePlan' => $student->feePlan,
 
         ]);
     }
 
     public function update(Request $request, Student $student)
     {
+        $user = Auth::user();
+        $organizationId = $user->userable_id;
+
+        if ($student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to update this student.');
+        }
+
         $validated = $request->validate([
-            'club_id' => 'required|integer',
+            'club_id' => [
+                'required',
+                'integer',
+                'exists:clubs,id',
+                function ($attribute, $value, $fail) use ($organizationId) {
+                    $club = Club::find($value);
+                    if (!$club || $club->organization_id !== $organizationId) {
+                        $fail('The selected club does not belong to your organization.');
+                    }
+                },
+            ],
             'name' => 'required|string',
             'email' => 'required|email',
             'password' => 'nullable|string|min:6',
@@ -203,29 +315,71 @@ class StudentController extends Controller
             'street' => 'nullable|string',
             'country' => 'nullable|string',
             'status' => 'required|boolean',
+            'plan_id' => [
+                'required',
+                'exists:plans,id',
+                function ($attribute, $value, $fail) use ($request, $organizationId) {
+                    $plan = Plan::find($value);
+                    $clubId = $request->input('club_id');
+                    if (
+                        !$plan ||
+                        $plan->planable_type !== 'App\Models\Club' ||
+                        (int) $plan->planable_id !== (int) $clubId
+                    ) {
+                        $fail('The selected plan does not belong to the selected club.');
+                        return;
+                    }
+
+                    $club = Club::find($clubId);
+                    if (!$club || $club->organization_id !== $organizationId) {
+                        $fail('The selected club does not belong to your organization.');
+                    }
+                },
+            ],
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(function () use ($request) {
+                    $type = $request->input('discount_type');
+                    return in_array($type, ['percent', 'fixed']);
+                }),
+            ],
+            'currency_code' => 'nullable|exists:currencies,code',
         ]);
+
+        if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
+            return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
+        }
+
+        $planFields = ['plan_id', 'interval', 'interval_count', 'discount_type', 'discount_value', 'currency_code'];
+        $planData = Arr::only($validated, $planFields);
+        $studentData = Arr::except($validated, $planFields);
 
         // Handle image uploads
         foreach (['profile_image', 'identification_document'] as $field) {
             if ($request->hasFile($field)) {
                 $relativePath = $request->file($field)->store("students", "public");
-                $validated[$field] = $relativePath; // Store relative path only
+                $studentData[$field] = $relativePath; // Store relative path only
             } else {
                 // Remove from validated to prevent overwriting existing file with null
-                unset($validated[$field]);
+                unset($studentData[$field]);
             }
         }
 
         // Update the student record
-        $student->update($validated);
+        $student->update($studentData);
 
         // Create or update user account
-        if (!empty($validated['email'])) {
+        if (!empty($studentData['email'])) {
             $userData = [
-                'name' => $validated['name'] . ' ' . ($validated['surname'] ?? ''),
+                'name' => $studentData['name'] . ' ' . ($studentData['surname'] ?? ''),
                 'role' => 'student',
-                'organization_id' => $validated['organization_id'] ?? null,
-                'club_id' => $validated['club_id'] ?? null,
+                'organization_id' => $student->organization_id,
+                'club_id' => $studentData['club_id'] ?? null,
                 'student_id' => $student->id,
             ];
 
@@ -235,10 +389,26 @@ class StudentController extends Controller
             }
 
             User::updateOrCreate(
-                ['email' => $validated['email']],
+                ['email' => $studentData['email']],
                 $userData
             );
         }
+
+        $planData['discount_type'] = $planData['discount_type'] ?: null;
+        $planData['discount_value'] = $planData['discount_type'] ? (float) $planData['discount_value'] : 0;
+
+        StudentFeePlan::updateOrCreate(
+            ['student_id' => $student->id],
+            [
+                'plan_id' => $planData['plan_id'],
+                'interval' => $planData['interval'],
+                'interval_count' => $planData['interval_count'] ?? null,
+                'discount_type' => $planData['discount_type'],
+                'discount_value' => $planData['discount_value'],
+                'currency_code' => $planData['currency_code'] ?? null,
+                'is_active' => true,
+            ]
+        );
 
         return redirect()
             ->route('organization.students.index')
