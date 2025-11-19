@@ -241,7 +241,7 @@ class StudentInsightsController extends Controller
                     'currency' => $payment->currency_code,
                     'status' => $payment->status,
                     'method' => $payment->method,
-                    'payment_month' => $payment->payment_month,
+                    'payment_month' => $payment->month,
                     'pay_at' => $payment->pay_at,
                     'notes' => $payment->notes,
                 ];

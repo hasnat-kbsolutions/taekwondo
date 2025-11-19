@@ -81,7 +81,7 @@ class ReportController extends Controller
 
         // Monthly trends with currency breakdown
         $monthlyTrends = $payments->groupBy(function ($payment) {
-            return \Carbon\Carbon::parse($payment->payment_month)->format('Y-m');
+            return \Carbon\Carbon::parse($payment->month)->format('Y-m');
         })->map(function ($monthPayments, $month) {
             // Calculate amounts by currency for this month
             try {
@@ -279,7 +279,7 @@ class ReportController extends Controller
 
         // Monthly trends
         $monthlyTrends = $payments->groupBy(function ($payment) {
-            return Carbon::parse($payment->payment_month)->format('Y-m');
+            return Carbon::parse($payment->month)->format('Y-m');
         })->map(function ($monthPayments, $month) {
             return [
                 'month' => $month,
@@ -609,7 +609,7 @@ class ReportController extends Controller
                 $payment->amount,
                 $payment->status,
                 $payment->method,
-                $payment->payment_month,
+                $payment->month,
             ];
         }
 
