@@ -426,7 +426,6 @@ export default function Create({ clubs, plans, currencies }: Props) {
                         <Select
                             value={String(data.plan_id) || ""}
                             onValueChange={(value) => setData("plan_id", value)}
-                            disabled={availablePlans.length === 0}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Plan" />
