@@ -426,19 +426,15 @@ export default function Create({ clubs, plans, currencies }: Props) {
                         <Select
                             value={String(data.plan_id) || ""}
                             onValueChange={(value) => setData("plan_id", value)}
-                            disabled={availablePlans.length === 0 || !data.club_id}
+                            disabled={availablePlans.length === 0}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Plan" />
                             </SelectTrigger>
                             <SelectContent>
-                                {!data.club_id ? (
-                                    <SelectItem value="no-club" disabled>
-                                        Select a club first
-                                    </SelectItem>
-                                ) : availablePlans.length === 0 ? (
+                                {availablePlans.length === 0 ? (
                                     <SelectItem value="no-plans" disabled>
-                                        No active plans for this club
+                                        No active plans available
                                     </SelectItem>
                                 ) : (
                                     availablePlans.map((plan) => (
