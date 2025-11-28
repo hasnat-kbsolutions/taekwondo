@@ -184,7 +184,22 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
     Route::patch('/clubs/{club}/password', [App\Http\Controllers\Organization\ClubController::class, 'updatePassword'])->name('clubs.updatePassword');
 
-    // REMOVED: Payment routes - Organizations cannot see or manage student payments/earnings
+    // Organization Payment Routes
+    Route::get('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/create', [App\Http\Controllers\Organization\PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/{payment}/edit', [App\Http\Controllers\Organization\PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
+
+    // Organization Plans Routes
+    Route::get('/plans', [App\Http\Controllers\Organization\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [App\Http\Controllers\Organization\PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [App\Http\Controllers\Organization\PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Organization\PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'destroy'])->name('plans.destroy');
 
     // Organization Student Fee Plans Routes - Organizations can manage their students' fee plans
     Route::get('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
