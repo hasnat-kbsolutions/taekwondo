@@ -46,17 +46,9 @@ export default function Edit({
 
     const availablePlans = useMemo(
         () =>
-            plans.filter((plan) => {
-                // Show organization-level plans (planable_type is 'App\Models\Organization')
-                if (plan.planable_type === 'App\\Models\\Organization') {
-                    return true;
-                }
-                // Show club-level plans that match the selected club
-                if (String(plan.planable_id) === String(data.club_id)) {
-                    return true;
-                }
-                return false;
-            }),
+            plans.filter(
+                (plan) => String(plan.planable_id) === String(data.club_id)
+            ),
         [plans, data.club_id]
     );
 

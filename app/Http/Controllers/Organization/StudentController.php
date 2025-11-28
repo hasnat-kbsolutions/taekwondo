@@ -95,25 +95,15 @@ class StudentController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $organizationId = $user->userable_id;
 
-        $clubs = Club::where('organization_id', $organizationId)
+        $clubs = Club::where('organization_id', $user->userable_id)
             ->select('id', 'name')
             ->get();
 
-        // Fetch both organization-level and club-level plans
-        $plans = Plan::where('is_active', true)
-            ->where(function ($query) use ($organizationId, $clubs) {
-                // Organization-level plans
-                $query->where('planable_type', 'App\Models\Organization')
-                    ->where('planable_id', $organizationId)
-                    // OR club-level plans for this organization's clubs
-                    ->orWhere(function ($subQuery) use ($clubs) {
-                        $subQuery->where('planable_type', 'App\Models\Club')
-                            ->whereIn('planable_id', $clubs->pluck('id'));
-                    });
-            })
-            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->whereIn('planable_id', $clubs->pluck('id'))
+            ->where('is_active', true)
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
 
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
@@ -271,19 +261,10 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
-        // Fetch both organization-level and club-level plans
-        $plans = Plan::where('is_active', true)
-            ->where(function ($query) use ($organizationId, $clubs) {
-                // Organization-level plans
-                $query->where('planable_type', 'App\Models\Organization')
-                    ->where('planable_id', $organizationId)
-                    // OR club-level plans for this organization's clubs
-                    ->orWhere(function ($subQuery) use ($clubs) {
-                        $subQuery->where('planable_type', 'App\Models\Club')
-                            ->whereIn('planable_id', $clubs->pluck('id'));
-                    });
-            })
-            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
+        $plans = Plan::where('planable_type', 'App\Models\Club')
+            ->whereIn('planable_id', $clubs->pluck('id'))
+            ->where('is_active', true)
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
 
         $student->load('feePlan');
 
