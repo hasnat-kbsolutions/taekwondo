@@ -60,6 +60,20 @@ interface Event {
     venue?: string;
 }
 
+interface FeePlan {
+    id: number;
+    plan_name: string;
+    base_amount: number;
+    effective_amount: number;
+    currency_code: string;
+    interval: string;
+    discount_type?: string;
+    discount_value?: number;
+    is_active: boolean;
+    effective_from?: string;
+    next_due_date?: string;
+}
+
 interface Props {
     year: number;
     attendanceStats: AttendanceStats;
@@ -69,6 +83,9 @@ interface Props {
     paidAmountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
     upcomingEvents?: Event[];
+    feePlan?: FeePlan | null;
+    unpaidFeesCount?: number;
+    unpaidAmount?: number;
 }
 
 // Utility function to safely format amounts
@@ -90,6 +107,9 @@ export default function Dashboard({
     paidAmountsByCurrency,
     defaultCurrencyCode,
     upcomingEvents = [],
+    feePlan,
+    unpaidFeesCount = 0,
+    unpaidAmount = 0,
 }: Props) {
     const [selectedYear, setSelectedYear] = useState(year || currentYear);
 
@@ -143,6 +163,62 @@ export default function Dashboard({
                         </div>
                     </div>
                 </div>
+
+                {/* Fee Plan and Unpaid Fees Alert */}
+                {feePlan && unpaidFeesCount > 0 && (
+                    <Card className="mb-6 border-l-4 border-red-500">
+                        <CardContent className="pt-4 pb-4 px-6">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-red-700">Outstanding Fees</p>
+                                        <p className="text-xs text-gray-600">{unpaidFeesCount} payment{unpaidFeesCount === 1 ? "" : "s"} due</p>
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-lg font-bold text-red-700">
+                                        {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
+                                        {formatAmount(unpaidAmount, defaultCurrencyCode)}
+                                    </p>
+                                    <p className="text-xs text-gray-600">{feePlan.plan_name}</p>
+                                </div>
+                                <Link
+                                    href={route("student.payments.index")}
+                                    className="text-xs text-red-600 hover:text-red-800 font-semibold hover:underline px-3 py-2 rounded hover:bg-red-50 whitespace-nowrap flex-shrink-0"
+                                >
+                                    View
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Fee Plan Information Card */}
+                {feePlan && unpaidFeesCount === 0 && (
+                    <Card className="mb-6 border-l-4 border-green-500">
+                        <CardContent className="pt-4 pb-4 px-6">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <BadgeCheck className="h-5 w-5 text-green-600 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-green-700">All Payments Paid</p>
+                                        <p className="text-xs text-gray-600">{feePlan.plan_name} • {feePlan.interval}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-lg font-bold text-green-700">
+                                        {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
+                                        {formatAmount(feePlan.effective_amount, feePlan.currency_code)}
+                                    </p>
+                                    <Badge variant={feePlan.is_active ? "default" : "secondary"} className="text-xs mt-1">
+                                        {feePlan.is_active ? "Active" : "Inactive"}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Upcoming Events Alert */}
                 {upcomingEvents && upcomingEvents.length > 0 && (
@@ -350,7 +426,7 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
+                    <Card className="col-span-1 sm:col-span-2 lg:col-span-2">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
                                 Total Amount
@@ -375,6 +451,56 @@ export default function Dashboard({
                                         1 && (
                                         <div className="text-xs text-muted-foreground space-y-1">
                                             {Object.entries(amountsByCurrency)
+                                                .filter(
+                                                    ([code]) =>
+                                                        code !==
+                                                        defaultCurrencyCode
+                                                )
+                                                .map(([code, amount]) => (
+                                                    <div
+                                                        key={code}
+                                                        className="flex justify-between"
+                                                    >
+                                                        <span>{code}:</span>
+                                                        <span>
+                                                            {formatAmount(
+                                                                amount,
+                                                                code
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="col-span-1 sm:col-span-2 lg:col-span-2">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Paid Amount
+                            </CardTitle>
+                            <BadgeCheck className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-1 w-full">
+                                <div className="text-lg font-bold text-green-600">
+                                    {defaultCurrencyCode === "MYR"
+                                        ? "RM"
+                                        : defaultCurrencyCode}{" "}
+                                    {formatAmount(
+                                        paidAmountsByCurrency?.[
+                                            defaultCurrencyCode || "MYR"
+                                        ] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </div>
+                                {paidAmountsByCurrency &&
+                                    Object.keys(paidAmountsByCurrency).length >
+                                        1 && (
+                                        <div className="text-xs text-muted-foreground space-y-1">
+                                            {Object.entries(paidAmountsByCurrency)
                                                 .filter(
                                                     ([code]) =>
                                                         code !==
