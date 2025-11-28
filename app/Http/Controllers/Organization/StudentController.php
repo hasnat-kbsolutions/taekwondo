@@ -95,15 +95,8 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
-        $plans = Plan::where('planable_type', 'App\Models\Club')
-            ->whereIn('planable_id', $clubs->pluck('id'))
-            ->where('is_active', true)
-            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
-
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
-            'plans' => $plans,
-            'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
 
@@ -143,49 +136,9 @@ class StudentController extends Controller
             'street' => 'nullable|string',
             'country' => 'nullable|string',
             'status' => 'required|boolean',
-            'plan_id' => [
-                'required',
-                'exists:plans,id',
-                function ($attribute, $value, $fail) use ($request, $organizationId) {
-                    $plan = Plan::find($value);
-                    $clubId = $request->input('club_id');
-                    if (
-                        !$plan ||
-                        $plan->planable_type !== 'App\Models\Club' ||
-                        (int) $plan->planable_id !== (int) $clubId
-                    ) {
-                        $fail('The selected plan does not belong to the selected club.');
-                        return;
-                    }
-
-                    $club = Club::find($clubId);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
-                    }
-                },
-            ],
-            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
-            'interval_count' => 'nullable|integer|min:1',
-            'discount_type' => 'nullable|in:percent,fixed',
-            'discount_value' => [
-                'nullable',
-                'numeric',
-                'min:0',
-                Rule::requiredIf(function () use ($request) {
-                    $type = $request->input('discount_type');
-                    return in_array($type, ['percent', 'fixed']);
-                }),
-            ],
-            'currency_code' => 'nullable|exists:currencies,code',
         ]);
 
-        if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
-            return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
-        }
-
-        $planFields = ['plan_id', 'interval', 'interval_count', 'discount_type', 'discount_value', 'currency_code'];
-        $planData = Arr::only($validated, $planFields);
-        $studentData = Arr::except($validated, $planFields);
+        $studentData = $validated;
 
         // Generate UID
         $studentData['uid'] = 'STD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
@@ -219,20 +172,6 @@ class StudentController extends Controller
                 'role' => 'student',
             ]);
         }
-
-        $planData['discount_type'] = $planData['discount_type'] ?: null;
-        $planData['discount_value'] = $planData['discount_type'] ? (float) $planData['discount_value'] : 0;
-
-        StudentFeePlan::create([
-            'student_id' => $student->id,
-            'plan_id' => $planData['plan_id'],
-            'interval' => $planData['interval'],
-            'interval_count' => $planData['interval_count'] ?? null,
-            'discount_type' => $planData['discount_type'],
-            'discount_value' => $planData['discount_value'],
-            'currency_code' => $planData['currency_code'] ?? null,
-            'is_active' => true,
-        ]);
 
         return redirect()->route('organization.students.index')->with('success', 'Student created successfully');
 
