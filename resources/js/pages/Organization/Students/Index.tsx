@@ -68,108 +68,116 @@ interface Props {
 }
 
 // Define the columns inline here - Organization view
-export const columns = (onDelete?: (student: Student) => void): ColumnDef<Student>[] => [
-    {
-        header: "#",
-        cell: ({ row }) => row.index + 1,
-    },
-    {
-        id: "profile_image",
-        header: "Photo",
-        cell: ({ row }) => {
-            const imageUrl = row.original.profile_image;
-            if (imageUrl) {
-                // Handle both relative paths and full URLs
-                const fullUrl = imageUrl.startsWith("http")
-                    ? imageUrl
-                    : `/storage/${imageUrl}`;
-                return (
-                    <div className="relative">
-                        <img
-                            src={fullUrl}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full object-cover"
-                            onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                e.currentTarget.nextElementSibling?.classList.remove(
-                                    "hidden"
-                                );
-                            }}
-                        />
-                        <span className="text-gray-400 italic text-xs hidden absolute inset-0 flex items-center justify-center">
-                            No image
-                        </span>
-                    </div>
-                );
-            }
-            return <span className="text-gray-400 italic">No image</span>;
+export const columns = (onDelete?: (student: Student) => void, isClubView: boolean = false): ColumnDef<Student>[] => {
+    const baseColumns: ColumnDef<Student>[] = [
+        {
+            header: "#",
+            cell: ({ row }) => row.index + 1,
         },
-    },
-    { accessorKey: "code", header: "Code" },
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "surname", header: "Surname" },
-    { accessorKey: "dob", header: "DOB" },
-    {
-        id: "rating",
-        header: "Rating",
-        cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-                <RatingStars
-                    rating={
-                        typeof row.original.average_rating === "number"
-                            ? Math.round(row.original.average_rating)
-                            : 0
-                    }
-                    readonly
-                    size="sm"
-                />
-                <span className="text-sm text-muted-foreground">
-                    ({row.original.total_ratings})
-                </span>
-            </div>
-        ),
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge variant={row.original.status ? "default" : "destructive"}>
-                {row.original.status ? "Active" : "Inactive"}
-            </Badge>
-        ),
-    },
-    {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link href={route("organization.students.edit", row.original.id)}>
-                            Edit
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => {
-                            if (onDelete && confirm("Are you sure you want to delete this student?")) {
-                                onDelete(row.original);
-                            }
-                        }}
-                        className="text-red-600"
-                    >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+        {
+            id: "profile_image",
+            header: "Photo",
+            cell: ({ row }) => {
+                const imageUrl = row.original.profile_image;
+                if (imageUrl) {
+                    // Handle both relative paths and full URLs
+                    const fullUrl = imageUrl.startsWith("http")
+                        ? imageUrl
+                        : `/storage/${imageUrl}`;
+                    return (
+                        <div className="relative">
+                            <img
+                                src={fullUrl}
+                                alt="Profile"
+                                className="w-10 h-10 rounded-full object-cover"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    e.currentTarget.nextElementSibling?.classList.remove(
+                                        "hidden"
+                                    );
+                                }}
+                            />
+                            <span className="text-gray-400 italic text-xs hidden absolute inset-0 flex items-center justify-center">
+                                No image
+                            </span>
+                        </div>
+                    );
+                }
+                return <span className="text-gray-400 italic">No image</span>;
+            },
+        },
+        { accessorKey: "code", header: "Code" },
+        { accessorKey: "name", header: "Name" },
+        { accessorKey: "surname", header: "Surname" },
+        { accessorKey: "dob", header: "DOB" },
+        {
+            id: "rating",
+            header: "Rating",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <RatingStars
+                        rating={
+                            typeof row.original.average_rating === "number"
+                                ? Math.round(row.original.average_rating)
+                                : 0
+                        }
+                        readonly
+                        size="sm"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                        ({row.original.total_ratings})
+                    </span>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge variant={row.original.status ? "default" : "destructive"}>
+                    {row.original.status ? "Active" : "Inactive"}
+                </Badge>
+            ),
+        },
+    ];
+
+    // Only add Actions column for organization's own students (not club view)
+    if (!isClubView) {
+        baseColumns.push({
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link href={route("organization.students.edit", row.original.id)}>
+                                Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (onDelete && confirm("Are you sure you want to delete this student?")) {
+                                    onDelete(row.original);
+                                }
+                            }}
+                            className="text-red-600"
+                        >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        });
+    }
+
+    return baseColumns;
+};
 
 export default function Index({
     students,
@@ -364,7 +372,7 @@ export default function Index({
 
                         {/* DataTable */}
                         <DataTable
-                            columns={columns(handleDelete)}
+                            columns={columns(handleDelete, !!clubId)}
                             data={students}
                         />
                     </CardContent>

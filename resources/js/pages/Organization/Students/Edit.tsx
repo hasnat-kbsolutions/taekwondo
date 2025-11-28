@@ -346,7 +346,188 @@ export default function Edit({
                         {renderError("status")}
                     </div>
 
+                    {/* Plan Assignment Section */}
+                    <div className="w-full px-2 mt-6">
+                        <h3 className="text-lg font-semibold mb-4">
+                            Plan Assignment
+                        </h3>
+                    </div>
 
+                    {/* Plan Select */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Plan</Label>
+                        <Select
+                            value={String(data.plan_id) || ""}
+                            onValueChange={(value) => setData("plan_id", value)}
+                            disabled={availablePlans.length === 0}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Plan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availablePlans.length === 0 ? (
+                                    <SelectItem value="no-plans" disabled>
+                                        No active plans available
+                                    </SelectItem>
+                                ) : (
+                                    availablePlans.map((plan) => (
+                                        <SelectItem
+                                            key={plan.id}
+                                            value={String(plan.id)}
+                                        >
+                                            {plan.name} - {plan.currency_code}{" "}
+                                            {plan.base_amount}
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                        {renderError("plan_id")}
+                    </div>
+
+                    {/* Interval */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Interval</Label>
+                        <Select
+                            value={data.interval}
+                            onValueChange={(value) =>
+                                setData("interval", value)
+                            }
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Interval" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">
+                                    Quarterly
+                                </SelectItem>
+                                <SelectItem value="semester">
+                                    Semester
+                                </SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {renderError("interval")}
+                    </div>
+
+                    {/* Interval Count */}
+                    {data.interval === "custom" && (
+                        <div className="w-[33.33%] px-2 mt-3">
+                            <Label>
+                                Interval Count (Months){" "}
+                                <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                min="1"
+                                placeholder="Enter number of months"
+                                value={data.interval_count ?? ""}
+                                onChange={(e) =>
+                                    setData(
+                                        "interval_count",
+                                        e.target.value
+                                            ? parseInt(e.target.value)
+                                            : null
+                                    )
+                                }
+                            />
+                            {renderError("interval_count")}
+                        </div>
+                    )}
+
+                    {/* Discount Type */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Discount Type</Label>
+                        <Select
+                            value={data.discount_type || "none"}
+                            onValueChange={(value) =>
+                                setData(
+                                    "discount_type",
+                                    value === "none"
+                                        ? ""
+                                        : (value as "percent" | "fixed")
+                                )
+                            }
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Discount Type (Optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="percent">
+                                    Percentage
+                                </SelectItem>
+                                <SelectItem value="fixed">
+                                    Fixed Amount
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {renderError("discount_type")}
+                    </div>
+
+                    {/* Discount Value */}
+                    {data.discount_type && (
+                        <div className="w-[33.33%] px-2 mt-3">
+                            <Label>
+                                Discount Value{" "}
+                                <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder={
+                                    data.discount_type === "percent"
+                                        ? "Enter percentage"
+                                        : "Enter amount"
+                                }
+                                value={data.discount_value ?? ""}
+                                onChange={(e) =>
+                                    setData(
+                                        "discount_value",
+                                        e.target.value
+                                            ? parseFloat(e.target.value)
+                                            : null
+                                    )
+                                }
+                            />
+                            {renderError("discount_value")}
+                        </div>
+                    )}
+
+                    {/* Currency Override */}
+                    <div className="w-[33.33%] px-2 mt-3">
+                        <Label>Currency</Label>
+                        <Select
+                            value={data.currency_code || "default"}
+                            onValueChange={(value) =>
+                                setData(
+                                    "currency_code",
+                                    value === "default" ? "" : value
+                                )
+                            }
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Currency (Optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="default">
+                                    Use Plan Currency
+                                </SelectItem>
+                                {currencies.map((currency) => (
+                                    <SelectItem
+                                        key={currency.code}
+                                        value={currency.code}
+                                    >
+                                        {currency.code} - {currency.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {renderError("currency_code")}
+                    </div>
 
                     <div className="w-full px-2 mt-5">
                         <Button type="submit" disabled={processing}>
