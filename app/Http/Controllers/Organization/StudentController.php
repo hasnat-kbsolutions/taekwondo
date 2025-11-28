@@ -101,22 +101,19 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
-        // Get ALL active plans first to debug
-        $allActivePlans = Plan::where('is_active', true)
+        // Fetch both organization-level and club-level plans
+        $plans = Plan::where('is_active', true)
+            ->where(function ($query) use ($organizationId, $clubs) {
+                // Organization-level plans
+                $query->where('planable_type', 'App\Models\Organization')
+                    ->where('planable_id', $organizationId)
+                    // OR club-level plans for this organization's clubs
+                    ->orWhere(function ($subQuery) use ($clubs) {
+                        $subQuery->where('planable_type', 'App\Models\Club')
+                            ->whereIn('planable_id', $clubs->pluck('id'));
+                    });
+            })
             ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
-
-        // Filter plans: get organization-level plans OR club-level plans
-        $plans = $allActivePlans->filter(function ($plan) use ($organizationId, $clubs) {
-            // Include organization-level plans for this organization
-            if ($plan->planable_type === 'App\\Models\\Organization' && $plan->planable_id == $organizationId) {
-                return true;
-            }
-            // Include club-level plans for this organization's clubs
-            if ($plan->planable_type === 'App\\Models\\Club' && $clubs->pluck('id')->contains($plan->planable_id)) {
-                return true;
-            }
-            return false;
-        })->values();
 
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
@@ -274,22 +271,19 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
-        // Get ALL active plans first
-        $allActivePlans = Plan::where('is_active', true)
+        // Fetch both organization-level and club-level plans
+        $plans = Plan::where('is_active', true)
+            ->where(function ($query) use ($organizationId, $clubs) {
+                // Organization-level plans
+                $query->where('planable_type', 'App\Models\Organization')
+                    ->where('planable_id', $organizationId)
+                    // OR club-level plans for this organization's clubs
+                    ->orWhere(function ($subQuery) use ($clubs) {
+                        $subQuery->where('planable_type', 'App\Models\Club')
+                            ->whereIn('planable_id', $clubs->pluck('id'));
+                    });
+            })
             ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
-
-        // Filter plans: get organization-level plans OR club-level plans
-        $plans = $allActivePlans->filter(function ($plan) use ($organizationId, $clubs) {
-            // Include organization-level plans for this organization
-            if ($plan->planable_type === 'App\\Models\\Organization' && $plan->planable_id == $organizationId) {
-                return true;
-            }
-            // Include club-level plans for this organization's clubs
-            if ($plan->planable_type === 'App\\Models\\Club' && $clubs->pluck('id')->contains($plan->planable_id)) {
-                return true;
-            }
-            return false;
-        })->values();
 
         $student->load('feePlan');
 
