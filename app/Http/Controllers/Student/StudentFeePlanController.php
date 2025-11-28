@@ -16,11 +16,11 @@ class StudentFeePlanController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $studentId = $user->userable_id;
+        $student = $user->userable;
 
         // Get the student's fee plan
         $feePlan = StudentFeePlan::with(['plan', 'student.club'])
-            ->where('student_id', $studentId)
+            ->where('student_id', $student->id)
             ->first();
 
         return Inertia::render('Student/FeePlan/Show', [
