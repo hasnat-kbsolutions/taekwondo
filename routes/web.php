@@ -186,6 +186,14 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
 
     // REMOVED: Payment routes - Organizations cannot see or manage student payments/earnings
 
+    // Organization Student Fee Plans Routes - Organizations can manage their students' fee plans
+    Route::get('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
+    Route::get('/student-fee-plans/create', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    Route::post('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
+    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
+    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
+
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Organization\AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'store'])->name('attendances.store');
@@ -324,6 +332,7 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/payments', [App\Http\Controllers\Student\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/fee-plan', [App\Http\Controllers\Student\StudentFeePlanController::class, 'show'])->name('fee-plan.show');
 
     // Student Payment Attachment Routes
     Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Student\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');

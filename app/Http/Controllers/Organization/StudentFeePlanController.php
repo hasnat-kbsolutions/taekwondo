@@ -116,6 +116,15 @@ class StudentFeePlanController extends Controller
             abort(403, 'Unauthorized to assign fee plan to this student.');
         }
 
+        // Verify plan belongs to organization's clubs (if plan_id is provided)
+        if (!empty($validated['plan_id'])) {
+            $plan = Plan::findOrFail($validated['plan_id']);
+            $organizationClubIds = Club::where('organization_id', $organizationId)->pluck('id')->toArray();
+            if ($plan->planable_type !== 'App\Models\Club' || !in_array($plan->planable_id, $organizationClubIds)) {
+                abort(403, 'Unauthorized to assign this plan to a student.');
+            }
+        }
+
         // Enforce interval_count if custom
         if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
             return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
@@ -190,6 +199,15 @@ class StudentFeePlanController extends Controller
         $student = Student::findOrFail($validated['student_id']);
         if ($student->organization_id !== $organizationId) {
             abort(403, 'Unauthorized to assign fee plan to this student.');
+        }
+
+        // Verify plan belongs to organization's clubs (if plan_id is provided)
+        if (!empty($validated['plan_id'])) {
+            $plan = Plan::findOrFail($validated['plan_id']);
+            $organizationClubIds = Club::where('organization_id', $organizationId)->pluck('id')->toArray();
+            if ($plan->planable_type !== 'App\Models\Club' || !in_array($plan->planable_id, $organizationClubIds)) {
+                abort(403, 'Unauthorized to assign this plan to a student.');
+            }
         }
 
         if ($validated['interval'] === 'custom' && empty($validated['interval_count'])) {
