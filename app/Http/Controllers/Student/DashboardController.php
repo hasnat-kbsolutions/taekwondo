@@ -10,6 +10,7 @@ use App\Models\Attendance;
 use App\Models\Payment;
 use App\Models\Currency;
 use App\Models\Event;
+use App\Models\StudentFeePlan;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -80,6 +81,32 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
+        // Get student's fee plan
+        $feePlan = $student->feePlan()->with('plan')->first();
+        $feePlanData = null;
+        if ($feePlan) {
+            $feePlanData = [
+                'id' => $feePlan->id,
+                'plan_name' => $feePlan->plan?->name ?? 'Custom Plan',
+                'base_amount' => $feePlan->base_amount,
+                'effective_amount' => $feePlan->effective_amount,
+                'currency_code' => $feePlan->currency_code ?? 'MYR',
+                'interval' => $feePlan->interval,
+                'discount_type' => $feePlan->discount_type,
+                'discount_value' => $feePlan->discount_value,
+                'is_active' => $feePlan->is_active,
+                'effective_from' => $feePlan->effective_from,
+                'next_due_date' => $feePlan->next_due_date,
+            ];
+        }
+
+        // Get unpaid fees count and amount
+        $unpaidFees = $student->payments()
+            ->where('status', 'unpaid')
+            ->get();
+        $unpaidFeesCount = $unpaidFees->count();
+        $unpaidAmount = $unpaidFees->sum('amount');
+
         return Inertia::render('Student/Dashboard', [
             'year' => $year,
             'attendanceStats' => [
@@ -103,6 +130,9 @@ class DashboardController extends Controller
             'paidAmountsByCurrency' => $paidAmountsByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
             'upcomingEvents' => $upcomingEvents,
+            'feePlan' => $feePlanData,
+            'unpaidFeesCount' => $unpaidFeesCount,
+            'unpaidAmount' => $unpaidAmount,
         ]);
     }
 }

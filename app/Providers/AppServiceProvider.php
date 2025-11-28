@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\StudentFeePlan;
+use App\Observers\StudentFeePlanObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -20,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        StudentFeePlan::observe(StudentFeePlanObserver::class);
+
         Inertia::share([
             'auth' => fn() => [
                 'user' => Auth::user()?->only(['id', 'name', 'email', 'role']),
