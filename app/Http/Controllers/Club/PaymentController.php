@@ -375,6 +375,19 @@ class PaymentController extends Controller
      */
     public function downloadAttachment(PaymentAttachment $attachment)
     {
+        $user = Auth::user();
+        if ($user->role !== 'club') {
+            abort(403, 'Unauthorized');
+        }
+
+        $clubId = $user->userable_id;
+
+        // Verify attachment belongs to a payment for this club's student
+        $attachment->load('payment');
+        if ($attachment->payment->student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to access this attachment.');
+        }
+
         $filePath = storage_path('app/public/' . $attachment->file_path);
 
         if (!file_exists($filePath)) {
@@ -389,6 +402,19 @@ class PaymentController extends Controller
      */
     public function deleteAttachment(PaymentAttachment $attachment)
     {
+        $user = Auth::user();
+        if ($user->role !== 'club') {
+            abort(403, 'Unauthorized');
+        }
+
+        $clubId = $user->userable_id;
+
+        // Verify attachment belongs to a payment for this club's student
+        $attachment->load('payment');
+        if ($attachment->payment->student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to delete this attachment.');
+        }
+
         $filePath = storage_path('app/public/' . $attachment->file_path);
         if (file_exists($filePath)) {
             unlink($filePath);

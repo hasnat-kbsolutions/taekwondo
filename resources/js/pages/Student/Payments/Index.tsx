@@ -616,20 +616,6 @@ export default function Payment({
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Unpaid
-                            </CardTitle>
-                            <XCircle className="h-6 w-6 text-red-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600">
-                                {unpaidPayments || 0}
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">

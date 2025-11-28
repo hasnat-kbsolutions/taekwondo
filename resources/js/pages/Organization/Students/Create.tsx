@@ -428,7 +428,7 @@ export default function Create({ clubs, plans, currencies }: Props) {
                                     Plan <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
-                                    value={data.plan_id}
+                                    value={String(data.plan_id) || ""}
                                     onValueChange={(value) => setData("plan_id", value)}
                                     disabled={availablePlans.length === 0}
                                 >

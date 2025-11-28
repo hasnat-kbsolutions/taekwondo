@@ -274,7 +274,7 @@ export default function Index({
                                                     <TableCell>
                                                         <Link
                                                             href={route(
-                                                                "organization.student-insights.show",
+                                                                "organization.students.edit",
                                                                 student.id
                                                             )}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline font-medium"

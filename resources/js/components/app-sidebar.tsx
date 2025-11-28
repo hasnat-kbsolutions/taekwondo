@@ -9,6 +9,17 @@ import {
     SquareTerminal,
     Star,
     Calendar,
+    Users,
+    Building,
+    Clock,
+    Wallet,
+    Award,
+    BarChart3,
+    Landmark,
+    Settings,
+    GraduationCap,
+    User,
+    TrendingUp,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -50,7 +61,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Management",
             url: "#",
-            icon: SquareTerminal,
+            icon: Users,
             isActive: false,
             items: [
                 { title: "Students", url: "/admin/students" },
@@ -61,7 +72,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Clubs",
             url: "/admin/clubs",
-            icon: SquareTerminal,
+            icon: Building,
             isActive: false,
             items: [
                 { title: "List", url: "/admin/clubs" },
@@ -71,7 +82,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Ahli Gabungan",
             url: "/admin/organizations",
-            icon: SquareTerminal,
+            icon: Building,
             isActive: false,
             items: [
                 { title: "List", url: "/admin/organizations" },
@@ -81,7 +92,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Attendance",
             url: "/admin/attendances",
-            icon: SquareTerminal,
+            icon: Clock,
             isActive: false,
             items: [
                 { title: "List", url: "/admin/attendances" },
@@ -91,7 +102,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Payment",
             url: "/admin/payments",
-            icon: SquareTerminal,
+            icon: Wallet,
             isActive: false,
             items: [
                 { title: "Payments", url: "/admin/payments" },
@@ -102,14 +113,14 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Certifications",
             url: "/admin/certifications",
-            icon: SquareTerminal,
+            icon: Award,
             isActive: false,
             items: [{ title: "Certifications", url: "/admin/certifications" }],
         },
         {
             title: "Online Exams",
             url: "#",
-            icon: SquareTerminal,
+            icon: BarChart3,
             isActive: false,
             items: [
                 { title: "Exam Result", url: "#" },
@@ -129,17 +140,17 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Reports",
             url: "/admin/reports",
-            icon: SquareTerminal,
+            icon: TrendingUp,
         },
         {
             title: "Bank Information",
             url: "/admin/bank-information",
-            icon: SquareTerminal,
+            icon: Landmark,
         },
         {
             title: "Settings",
             url: "#",
-            icon: SquareTerminal,
+            icon: Settings,
             isActive: false,
             items: [{ title: "Currencies", url: "/admin/currencies" }],
         },
@@ -150,17 +161,17 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Clubs",
             url: "/organization/clubs",
-            icon: SquareTerminal,
+            icon: Building,
         },
         {
             title: "Students",
             url: "/organization/students",
-            icon: SquareTerminal,
+            icon: Users,
         },
         {
             title: "Payment",
             url: "/organization/payments",
-            icon: SquareTerminal,
+            icon: Wallet,
             isActive: false,
             items: [
                 { title: "Payments", url: "/organization/payments" },
@@ -174,17 +185,17 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Attendance",
             url: "/organization/attendances",
-            icon: SquareTerminal,
+            icon: Clock,
         },
         {
             title: "Instructor",
             url: "/organization/instructors",
-            icon: SquareTerminal,
+            icon: GraduationCap,
         },
         {
             title: "Certifications",
             url: "/organization/certifications",
-            icon: SquareTerminal,
+            icon: Award,
         },
         {
             title: "Ratings",
@@ -194,7 +205,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Bank Information",
             url: "/organization/bank-information",
-            icon: SquareTerminal,
+            icon: Landmark,
         },
     ],
 
@@ -204,12 +215,12 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Students",
             url: "/club/students",
-            icon: SquareTerminal,
+            icon: Users,
         },
         {
             title: "Payment",
             url: "/club/payments",
-            icon: SquareTerminal,
+            icon: Wallet,
             isActive: false,
             items: [
                 { title: "Payments", url: "/club/payments" },
@@ -223,17 +234,17 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Attendance",
             url: "/club/attendances",
-            icon: SquareTerminal,
+            icon: Clock,
         },
         {
             title: "Instructor",
             url: "/club/instructors",
-            icon: SquareTerminal,
+            icon: GraduationCap,
         },
         {
             title: "Certifications",
             url: "/club/certifications",
-            icon: SquareTerminal,
+            icon: Award,
         },
         {
             title: "Ratings",
@@ -248,18 +259,18 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Bank Information",
             url: "/club/bank-information",
-            icon: SquareTerminal,
+            icon: Landmark,
         },
     ],
 
     student: [
         { title: "Dashboard", url: "/student/dashboard", icon: Home },
-        { title: "Payment", url: "/student/payments", icon: Home },
-        { title: "Attendence", url: "/student/attendances", icon: Home },
+        { title: "Payment", url: "/student/payments", icon: Wallet },
+        { title: "Attendence", url: "/student/attendances", icon: Clock },
         {
             title: "Certifications",
             url: "/student/certifications",
-            icon: SquareTerminal,
+            icon: Award,
         },
         {
             title: "Events",
@@ -269,12 +280,12 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Profile",
             url: "/student/profile",
-            icon: SquareTerminal,
+            icon: User,
         },
         {
             title: "Ratings",
             url: "/student/ratings",
-            icon: SquareTerminal,
+            icon: Star,
         },
     ],
 
@@ -283,12 +294,12 @@ const NAV_MENUS: Record<string, NavItem[]> = {
         {
             title: "Students",
             url: "/instructor/students",
-            icon: SquareTerminal,
+            icon: Users,
         },
         {
             title: "Attendances",
             url: "/instructor/attendances",
-            icon: SquareTerminal,
+            icon: Clock,
         },
     ],
 };

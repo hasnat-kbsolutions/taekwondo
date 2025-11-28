@@ -20,7 +20,19 @@ class DashboardController extends Controller
     // StudentDashboardController.php
     public function index(Request $request)
     {
-        $student = Auth::user()->userable;
+        $user = Auth::user();
+        $student = $user->userable;
+
+        // If student is null, try to find it by email (for legacy user records)
+        if (!$student) {
+            $student = Student::where('email', $user->email)->first();
+        }
+
+        // If still no student, abort
+        if (!$student) {
+            abort(404, 'Student record not found.');
+        }
+
         $year = $request->input('year', now()->year);
 
         // Get attendance statistics for the year

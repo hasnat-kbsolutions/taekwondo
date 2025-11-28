@@ -29,6 +29,8 @@ class Payment extends Model
         'bank_information' => 'array',
     ];
 
+    protected $appends = ['payment_month'];
+
     /**
      * Student for this payment
      */
@@ -43,6 +45,14 @@ class Payment extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency_code', 'code');
+    }
+
+    /**
+     * Get the payment month (alias for 'month' field for API responses)
+     */
+    public function getPaymentMonthAttribute(): string
+    {
+        return $this->month;
     }
 
     /**

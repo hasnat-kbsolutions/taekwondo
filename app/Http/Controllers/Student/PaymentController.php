@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Currency;
 use App\Models\Payment;
 use App\Models\PaymentAttachment;
+use App\Notifications\PaymentProofUploaded;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\View;
 use Dompdf\Dompdf;
@@ -178,7 +179,6 @@ class PaymentController extends Controller
 
         $request->validate([
             'attachment' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120', // 5MB max
-            'description' => 'nullable|string|max:500',
             'replace_attachment_id' => 'nullable|exists:payment_attachments,id', // For replacing existing attachment
         ]);
 
@@ -213,8 +213,12 @@ class PaymentController extends Controller
             'original_filename' => $file->getClientOriginalName(),
             'file_type' => $file->getClientOriginalExtension(),
             'file_size' => $file->getSize(),
-            'description' => $request->description,
         ]);
+
+        // Notify club about the uploaded payment proof
+        if ($student->club && $student->club->user) {
+            $student->club->user->notify(new PaymentProofUploaded($payment, $student));
+        }
 
         $message = $request->replace_attachment_id
             ? 'Payment attachment replaced successfully.'

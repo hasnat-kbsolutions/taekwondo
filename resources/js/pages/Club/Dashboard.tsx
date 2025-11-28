@@ -410,11 +410,7 @@ export default function DashboardCards({
                             <Link
                                 key={item.label}
                                 href={item.url}
-                                className={`block group ${
-                                    item.label === "Total Amount"
-                                        ? "col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4"
-                                        : ""
-                                }`}
+                                className="block group"
                             >
                                 <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 border-2 hover:border-primary/20">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

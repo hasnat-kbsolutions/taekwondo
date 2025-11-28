@@ -22,6 +22,7 @@ interface Props {
     student: any;
     plans?: any[];
     currencies?: any[];
+    feePlan?: any;
 }
 
 export default function Edit({
@@ -29,18 +30,19 @@ export default function Edit({
     student,
     plans = [],
     currencies = [],
+    feePlan,
 }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         ...student,
         _method: "put",
         profile_image: null as File | null,
         identification_document: null as File | null,
-        plan_id: student.feePlan?.plan_id ?? "",
-        interval: student.feePlan?.interval ?? "monthly",
-        interval_count: student.feePlan?.interval_count ?? null,
-        discount_type: student.feePlan?.discount_type ?? "",
-        discount_value: student.feePlan?.discount_value ?? null,
-        currency_code: student.feePlan?.currency_code ?? "",
+        plan_id: feePlan?.plan_id ? String(feePlan.plan_id) : "",
+        interval: feePlan?.interval ?? "monthly",
+        interval_count: feePlan?.interval_count ?? null,
+        discount_type: feePlan?.discount_type ?? "",
+        discount_value: feePlan?.discount_value ?? null,
+        currency_code: feePlan?.currency_code ?? "",
     });
 
     const availablePlans = useMemo(
@@ -59,13 +61,17 @@ export default function Edit({
             return;
         }
 
-        const exists = availablePlans.some(
-            (plan) => String(plan.id) === data.plan_id
-        );
-        if (!exists && data.plan_id !== "") {
-            setData("plan_id", "");
+        // Only clear plan_id if it doesn't exist AND it's not the current feePlan
+        if (data.plan_id !== "") {
+            const exists = availablePlans.some(
+                (plan) => String(plan.id) === String(data.plan_id)
+            );
+            // If plan doesn't exist and it's not the student's current fee plan, clear it
+            if (!exists && feePlan?.plan_id && String(feePlan.plan_id) !== String(data.plan_id)) {
+                setData("plan_id", "");
+            }
         }
-    }, [data.club_id, availablePlans, data.plan_id, setData]);
+    }, [data.club_id, availablePlans, data.plan_id, setData, feePlan]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -398,7 +404,7 @@ export default function Edit({
                                     Plan <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
-                                    value={data.plan_id}
+                                    value={String(data.plan_id) || ""}
                                     onValueChange={(value) => setData("plan_id", value)}
                                     disabled={availablePlans.length === 0}
                                 >

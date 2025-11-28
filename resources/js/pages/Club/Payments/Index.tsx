@@ -228,7 +228,20 @@ export default function PaymentIndex({
         },
         {
             header: "Student",
-            cell: ({ row }) => row.original.student?.name || "-",
+            cell: ({ row }) => {
+                const student = row.original.student;
+                const hasProof = row.original.attachment;
+                return (
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium">{student?.name || "-"}</span>
+                        {hasProof && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-300">
+                                📤 Proof
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             header: "Amount",
@@ -268,6 +281,31 @@ export default function PaymentIndex({
                     {row.original.status}
                 </Badge>
             ),
+        },
+        {
+            header: "Proof",
+            cell: ({ row }) => {
+                const attachment = row.original.attachment;
+                return (
+                    <div className="flex items-center gap-2">
+                        {attachment ? (
+                            <div className="flex items-center gap-2">
+                                <FileCheck className="h-5 w-5 text-green-600" />
+                                <span className="text-xs text-green-600 font-semibold">
+                                    ✓ Uploaded
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <XCircle className="h-5 w-5 text-gray-400" />
+                                <span className="text-xs text-gray-500">
+                                    No proof
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
         { header: "Method", accessorKey: "method" },
         { header: "Month", accessorKey: "month" },
@@ -335,6 +373,27 @@ export default function PaymentIndex({
                                 <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </Link>
                         </DropdownMenuItem>
+                        {row.original.attachment && (
+                            <>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (row.original.attachment) {
+                                            const url = route(
+                                                "club.payments.download-attachment",
+                                                {
+                                                    attachment: row.original.attachment.id,
+                                                }
+                                            );
+                                            window.open(url, "_blank");
+                                        }
+                                    }}
+                                >
+                                    <Download className="w-4 h-4 mr-2" /> View
+                                    Proof
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuItem asChild>
                             <Link
                                 href={route("invoice.show", {

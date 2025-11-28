@@ -135,7 +135,6 @@ export default function ReportsIndex({
             icon: (
                 <Wallet className="h-5 w-5 text-green-600 dark:text-green-400" />
             ),
-            url: route("admin.payments.index"),
         },
         {
             label: "Total Organizations",
@@ -254,16 +253,8 @@ export default function ReportsIndex({
                     System Overview
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {quickStats.map((item) => (
-                        <Link
-                            key={item.label}
-                            href={item.url}
-                            className={`block group ${
-                                item.label === "Total Revenue"
-                                    ? "col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4"
-                                    : ""
-                            }`}
-                        >
+                    {quickStats.map((item) => {
+                        const cardContent = (
                             <Card className="text-center border-border bg-card hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-accent/50 dark:hover:bg-accent/20">
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-center mb-2">
@@ -277,8 +268,28 @@ export default function ReportsIndex({
                                     </div>
                                 </CardContent>
                             </Card>
-                        </Link>
-                    ))}
+                        );
+
+                        const wrapperClass = `block group ${
+                            item.label === "Total Revenue"
+                                ? "col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4"
+                                : ""
+                        }`;
+
+                        return item.url ? (
+                            <Link
+                                key={item.label}
+                                href={item.url}
+                                className={wrapperClass}
+                            >
+                                {cardContent}
+                            </Link>
+                        ) : (
+                            <div key={item.label} className={wrapperClass}>
+                                {cardContent}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 

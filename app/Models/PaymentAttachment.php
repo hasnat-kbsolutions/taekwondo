@@ -13,7 +13,6 @@ class PaymentAttachment extends Model
         'original_filename',
         'file_type',
         'file_size',
-        'description',
     ];
 
     /**

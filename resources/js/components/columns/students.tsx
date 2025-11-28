@@ -73,14 +73,6 @@ export const columns = (
     {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => (
-            <Link
-                href={route("admin.student-insights.show", row.original.id)}
-                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-            >
-                {row.original.name}
-            </Link>
-        ),
         meta: {
             sticky: true,
             left: "180px",

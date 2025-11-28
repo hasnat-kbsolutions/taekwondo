@@ -11,9 +11,13 @@ use App\Models\Organization;
 use App\Models\Plan;
 
 use App\Models\User;
+use App\Models\Currency;
+use App\Models\StudentFeePlan;
+use App\Notifications\StudentFeePlanAssigned;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
@@ -269,6 +273,7 @@ class StudentController extends Controller
             'clubs' => $clubs,
             'plans' => $plans,
             'currencies' => Currency::where('is_active', true)->get(),
+            'feePlan' => $student->feePlan,
         ]);
     }
 
@@ -373,9 +378,8 @@ class StudentController extends Controller
             $userData = [
                 'name' => $studentData['name'] . ' ' . ($studentData['surname'] ?? ''),
                 'role' => 'student',
-                'organization_id' => $student->organization_id,
-                'club_id' => $studentData['club_id'] ?? null,
-                'student_id' => $student->id,
+                'userable_type' => 'App\Models\Student',
+                'userable_id' => $student->id,
             ];
 
             // Only include password if it's provided
@@ -394,7 +398,7 @@ class StudentController extends Controller
             $planData['discount_type'] = $planData['discount_type'] ?: null;
             $planData['discount_value'] = $planData['discount_type'] ? (float) $planData['discount_value'] : 0;
 
-            StudentFeePlan::updateOrCreate(
+            $feePlan = StudentFeePlan::updateOrCreate(
                 ['student_id' => $student->id],
                 [
                     'plan_id' => $planData['plan_id'],
@@ -406,6 +410,11 @@ class StudentController extends Controller
                     'is_active' => true,
                 ]
             );
+
+            // Send notification to student if they have a user account
+            if ($student->user) {
+                $student->notify(new StudentFeePlanAssigned($feePlan));
+            }
         }
 
         return redirect()

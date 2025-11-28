@@ -67,10 +67,24 @@ class PaymentController extends Controller
 
         $defaultCurrencyCode = $user->userable->default_currency ?? 'MYR';
 
+        // Get only students who have payments in this organization
+        $studentsWithPayments = Student::where('organization_id', $user->userable_id)
+            ->whereIn('id', Payment::whereHas('student', function ($q) use ($user) {
+                $q->where('organization_id', $user->userable_id);
+            })->distinct()->pluck('student_id'))
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Organization/Payments/Index', [
             'payments' => $payments,
-            'students' => Student::where('organization_id', $user->userable_id)->get(),
-            'filters' => $request->only(['status', 'month', 'currency_code', 'student_id']),
+            'students' => $studentsWithPayments,
+            'filters' => [
+                'status' => $request->status,
+                'payment_month' => $request->month,
+                'currency_code' => $request->currency_code,
+                'student_id' => $request->student_id,
+            ],
             'currencies' => Currency::getActive(),
             'totalPayments' => $totalPayments,
             'paidPayments' => $paidPayments,
@@ -362,6 +376,19 @@ class PaymentController extends Controller
      */
     public function downloadAttachment(PaymentAttachment $attachment)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
+        // Verify attachment belongs to a payment for this organization's student
+        $attachment->load('payment');
+        if ($attachment->payment->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to access this attachment.');
+        }
+
         $filePath = storage_path('app/public/' . $attachment->file_path);
 
         if (!file_exists($filePath)) {

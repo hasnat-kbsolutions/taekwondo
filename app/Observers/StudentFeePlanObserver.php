@@ -66,6 +66,7 @@ class StudentFeePlanObserver
                 'amount' => $amount,
                 'month' => $paymentMonth,
                 'status' => 'unpaid',
+                'method' => 'bank_transfer',
                 'currency_code' => $feePlan->currency_code ?? 'MYR',
                 'due_date' => $dueDate,
             ]);

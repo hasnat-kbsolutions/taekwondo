@@ -146,7 +146,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Admin Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
 
-    // REMOVED: Admin Reports - Financial reporting restricted
+    // Admin Reports
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
 
     // Bank Information Routes
     Route::get('/bank-information', [App\Http\Controllers\Admin\BankInformationController::class, 'index'])->name('bank-information.index');
@@ -193,6 +194,9 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 
+    // Organization Payment Attachment Routes
+    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Organization\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
+
     // Organization Plans Routes
     Route::get('/plans', [App\Http\Controllers\Organization\PlanController::class, 'index'])->name('plans.index');
     Route::get('/plans/create', [App\Http\Controllers\Organization\PlanController::class, 'create'])->name('plans.create');
@@ -216,6 +220,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::put('/attendances/{attendance}', [App\Http\Controllers\Organization\AttendanceController::class, 'update'])->name('attendances.update');
     Route::delete('/attendances/{attendance}', [App\Http\Controllers\Organization\AttendanceController::class, 'destroy'])->name('attendances.destroy');
     Route::post('/attendances/toggle', [App\Http\Controllers\Organization\AttendanceController::class, 'toggle'])->name('attendances.toggle');
+    Route::get('/students/filter', [App\Http\Controllers\Organization\AttendanceController::class, 'filter'])->name('students.filter');
 
     Route::get('/certifications', [\App\Http\Controllers\Organization\CertificationController::class, 'index'])->name('certifications.index');
     Route::get('/certifications/create', [\App\Http\Controllers\Organization\CertificationController::class, 'create'])->name('certifications.create');

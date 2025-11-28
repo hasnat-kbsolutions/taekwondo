@@ -79,10 +79,12 @@ interface Payment {
 
 interface Props {
     payments: Payment[];
+    students: Student[];
     filters: {
         status?: string;
         payment_month?: string;
         currency_code?: string;
+        student_id?: string;
     };
     amountsByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
@@ -127,6 +129,7 @@ const months = [
 
 export default function PaymentIndex({
     payments,
+    students,
     filters,
     amountsByCurrency = {},
     defaultCurrencyCode = "MYR",
@@ -135,6 +138,9 @@ export default function PaymentIndex({
     const [status, setStatus] = useState(filters.status || "");
     const [selectedCurrency, setSelectedCurrency] = useState(
         filters.currency_code || ""
+    );
+    const [selectedStudent, setSelectedStudent] = useState(
+        filters.student_id || ""
     );
 
     const [selectedYear, setSelectedYear] = useState(
@@ -153,11 +159,13 @@ export default function PaymentIndex({
         month,
         status,
         currency,
+        student_id,
     }: {
         year: string;
         month: string;
         status: string;
         currency: string;
+        student_id: string;
     }) => {
         // If year is "All", clear payment_month
         // If month is empty/not selected, send year only (for year-wide filtering)
@@ -169,8 +177,9 @@ export default function PaymentIndex({
             route("organization.payments.index"),
             {
                 status: status || null,
-                payment_month: paymentMonth || null,
+                month: paymentMonth || null,
                 currency_code: currency || null,
+                student_id: student_id || null,
             },
             {
                 preserveScroll: true,
@@ -202,14 +211,16 @@ export default function PaymentIndex({
             month: selectedMonth,
             status: status,
             currency: selectedCurrency,
+            student_id: selectedStudent,
         });
-    }, [selectedYear, selectedMonth, status, selectedCurrency]);
+    }, [selectedYear, selectedMonth, status, selectedCurrency, selectedStudent]);
 
     const resetFilters = () => {
         setStatus("");
         setSelectedYear("All");
         setSelectedMonth("");
         setSelectedCurrency("");
+        setSelectedStudent("");
         router.get(
             route("organization.payments.index"),
             {},
@@ -228,7 +239,20 @@ export default function PaymentIndex({
         },
         {
             header: "Student",
-            cell: ({ row }) => row.original.student?.name || "-",
+            cell: ({ row }) => {
+                const student = row.original.student;
+                const hasProof = row.original.attachment;
+                return (
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium">{student?.name || "-"}</span>
+                        {hasProof && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-300">
+                                📤 Proof
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             header: "Amount",
@@ -268,6 +292,31 @@ export default function PaymentIndex({
                     {row.original.status}
                 </Badge>
             ),
+        },
+        {
+            header: "Proof",
+            cell: ({ row }) => {
+                const attachment = row.original.attachment;
+                return (
+                    <div className="flex items-center gap-2">
+                        {attachment ? (
+                            <div className="flex items-center gap-2">
+                                <FileCheck className="h-5 w-5 text-green-600" />
+                                <span className="text-xs text-green-600 font-semibold">
+                                    ✓ Uploaded
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <XCircle className="h-5 w-5 text-gray-400" />
+                                <span className="text-xs text-gray-500">
+                                    No proof
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
         { header: "Method", accessorKey: "method" },
         { header: "Payment Month", accessorKey: "payment_month" },
@@ -322,6 +371,27 @@ export default function PaymentIndex({
                                 <XCircle className="w-4 h-4 mr-2" /> Mark as
                                 Unpaid
                             </DropdownMenuItem>
+                        )}
+                        {row.original.attachment && (
+                            <>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (row.original.attachment) {
+                                            const url = route(
+                                                "organization.payments.download-attachment",
+                                                {
+                                                    attachment: row.original.attachment.id,
+                                                }
+                                            );
+                                            window.open(url, "_blank");
+                                        }
+                                    }}
+                                >
+                                    <Download className="w-4 h-4 mr-2" /> View
+                                    Proof
+                                </DropdownMenuItem>
+                            </>
                         )}
                         <DropdownMenuItem asChild>
                             <Link
@@ -611,6 +681,38 @@ export default function PaymentIndex({
                                                 >
                                                     {currency.code} -{" "}
                                                     {currency.symbol}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Student Filter */}
+                                <div className="flex flex-col w-[160px]">
+                                    <Label className="text-sm mb-1">
+                                        Student
+                                    </Label>
+                                    <Select
+                                        value={selectedStudent}
+                                        onValueChange={(val) =>
+                                            setSelectedStudent(
+                                                val === "all" ? "" : val
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Students" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                All
+                                            </SelectItem>
+                                            {students.map((student) => (
+                                                <SelectItem
+                                                    key={student.id}
+                                                    value={student.id.toString()}
+                                                >
+                                                    {student.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

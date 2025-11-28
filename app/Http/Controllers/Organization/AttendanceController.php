@@ -58,21 +58,39 @@ class AttendanceController extends Controller
 
     public function create()
     {
-        return Inertia::render('Organization/Attendances/Create', [
-            'clubs' => Club::all(),
-            // 'organizations' => Organization::all(),
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
 
+        $organizationId = $user->userable_id;
+
+        return Inertia::render('Organization/Attendances/Create', [
+            'clubs' => Club::where('organization_id', $organizationId)->get(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
         $request->validate([
             'date' => 'required|date',
             'attendances' => 'required|array',
         ]);
 
         foreach ($request->attendances as $studentId => $attendance) {
+            // Verify student belongs to organization
+            $student = Student::find($studentId);
+            if (!$student || $student->organization_id !== $organizationId) {
+                continue;
+            }
+
             Attendance::create([
                 'student_id' => $studentId,
                 'date' => $request->date,
@@ -100,6 +118,21 @@ class AttendanceController extends Controller
 
     public function update(Request $request, Attendance $attendance)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
+        // Load student relationship if not loaded
+        $attendance->load('student');
+
+        // Verify attendance belongs to organization's student
+        if ($attendance->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to update this attendance.');
+        }
+
         $request->validate([
             'status' => 'required|in:present,absent,late,excused',
             'remarks' => 'nullable|string',
@@ -112,15 +145,22 @@ class AttendanceController extends Controller
 
     public function filter(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $organizationId = $user->userable_id;
+
         $request->validate([
             'club_id' => 'nullable|integer',
-
         ]);
 
         $students = Student::query()
-            ->where('organization_id', Auth::user()->userable_id)
+            ->where('organization_id', $organizationId)
             ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
-
+            ->select('id', 'name')
+            ->orderBy('name')
             ->get();
 
         return response()->json($students);
@@ -129,36 +169,52 @@ class AttendanceController extends Controller
 
     public function destroy(Attendance $attendance)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organizationId = $user->userable_id;
+
+        // Load student relationship if not loaded
+        $attendance->load('student');
+
+        // Verify attendance belongs to organization's student
+        if ($attendance->student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to delete this attendance.');
+        }
+
         $attendance->delete();
         return redirect()->route('organization.attendances.index')->with('success', 'Attendance deleted successfully.');
     }
 
     public function toggle(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'organization') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $organizationId = $user->userable_id;
         $studentId = $request->input('student_id');
         $date = $request->input('date');
         $status = $request->input('status');
 
         try {
+            // Verify student belongs to organization
+            $student = Student::find($studentId);
+            if (!$student || $student->organization_id !== $organizationId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
             Attendance::updateOrCreate(
                 ['student_id' => $studentId, 'date' => $date],
                 ['status' => $status]
             );
 
-            // Return a proper Inertia response
-            return back()->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Attendance updated successfully',
-                ]
-            ]);
+            return response()->json(['success' => true, 'message' => 'Attendance updated successfully']);
         } catch (\Exception $e) {
-            return back()->with([
-                'toast' => [
-                    'type' => 'error',
-                    'message' => 'Failed to update attendance',
-                ]
-            ]);
+            return response()->json(['error' => 'Failed to update attendance'], 500);
         }
     }
 
