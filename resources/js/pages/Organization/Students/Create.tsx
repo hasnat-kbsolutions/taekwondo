@@ -19,11 +19,11 @@ import { toast } from "sonner";
 
 interface Props {
     clubs: any[];
-    plans: any[];
-    currencies: any[];
+    plans?: any[];
+    currencies?: any[];
 }
 
-export default function Create({ clubs, plans, currencies }: Props) {
+export default function Create({ clubs, plans = [], currencies = [] }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         club_id: "",
         name: "",
