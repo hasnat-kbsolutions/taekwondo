@@ -5,13 +5,6 @@ import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2, Key } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
 import {
@@ -63,11 +56,8 @@ interface Props {
     students: Student[];
 }
 
-// Define the columns inline here
-export const columns = (
-    onView: (student: Student) => void,
-    onChangePassword?: (student: Student) => void
-): ColumnDef<Student>[] => [
+// Define the columns inline here - read-only view for club
+export const columns = (): ColumnDef<Student>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -167,55 +157,6 @@ export const columns = (
             </Badge>
         ),
     },
-    {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => {
-            const student = row.original;
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(student)}>
-                            <Eye className="w-4 h-4 mr-2" /> View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route("club.students.edit", student.id)}
-                            >
-                                <Edit className="w-4 h-4 mr-2" /> Edit
-                            </Link>
-                        </DropdownMenuItem>
-
-                        {onChangePassword && (
-                            <DropdownMenuItem
-                                onClick={() => onChangePassword(student)}
-                            >
-                                <Key className="w-4 h-4 mr-2" /> Change Password
-                            </DropdownMenuItem>
-                        )}
-
-                        <DropdownMenuItem asChild>
-                            <Link
-                                href={route(
-                                    "club.students.destroy",
-                                    student.id
-                                )}
-                                method="delete"
-                                as="button"
-                            >
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete
-                            </Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            );
-        },
-    },
 ];
 
 export default function Index({ students }: Props) {
@@ -250,9 +191,7 @@ export default function Index({ students }: Props) {
                     </CardHeader>
                     <CardContent>
                         <DataTable
-                            columns={columns(handleView, (student) =>
-                                setPasswordChangeStudent(student)
-                            )}
+                            columns={columns()}
                             data={students}
                         />
                     </CardContent>
