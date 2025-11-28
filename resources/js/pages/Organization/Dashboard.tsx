@@ -7,6 +7,10 @@ import {
     Calendar,
     Award,
     ArrowRight,
+    DollarSign,
+    CheckCircle,
+    AlertCircle,
+    CreditCard,
 } from "lucide-react";
 
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
@@ -25,6 +29,11 @@ export default function DashboardCards({
     absentDays,
     attendanceRate,
     certificationsCount,
+    totalPayments,
+    paidPayments,
+    unpaidPayments,
+    totalRevenue,
+    defaultCurrency,
 }: {
     studentsCount: number;
     clubsCount: number;
@@ -37,8 +46,14 @@ export default function DashboardCards({
     absentDays: number;
     attendanceRate: number;
     certificationsCount: number;
+    totalPayments: number;
+    paidPayments: number;
+    unpaidPayments: number;
+    totalRevenue: number;
+    defaultCurrency: string;
 }) {
     const stats = [
+        // Basic Organization Stats
         {
             label: "Students",
             count: studentsCount,
@@ -57,6 +72,35 @@ export default function DashboardCards({
             icon: <Users className="h-6 w-6 text-green-600" />,
             url: route("organization.instructors.index"),
         },
+        // Payment Stats
+        {
+            label: "Total Payments",
+            count: totalPayments,
+            icon: <CreditCard className="h-6 w-6 text-blue-600" />,
+            url: route("organization.payments.index"),
+        },
+        {
+            label: "Paid",
+            count: paidPayments,
+            icon: <CheckCircle className="h-6 w-6 text-green-600" />,
+            url: route("organization.payments.index"),
+        },
+        {
+            label: "Unpaid",
+            count: unpaidPayments,
+            icon: <AlertCircle className="h-6 w-6 text-red-600" />,
+            url: route("organization.payments.index"),
+        },
+        {
+            label: "Total Revenue",
+            count: `${defaultCurrency === "MYR" ? "RM" : defaultCurrency} ${totalRevenue.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            })}`,
+            icon: <CreditCard className="h-6 w-6 text-emerald-600" />,
+            url: route("organization.payments.index"),
+        },
+        // Attendance Stats
         {
             label: "Attendance Rate",
             count: `${attendanceRate}%`,
@@ -75,6 +119,7 @@ export default function DashboardCards({
             icon: <Calendar className="h-6 w-6 text-red-600" />,
             url: route("organization.attendances.index"),
         },
+        // Other Stats
         {
             label: "Certifications",
             count: certificationsCount,

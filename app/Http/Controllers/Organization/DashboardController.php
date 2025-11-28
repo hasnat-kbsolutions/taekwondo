@@ -14,7 +14,7 @@ use App\Models\Instructor;
 use App\Models\Rating;
 use App\Models\Attendance;
 use App\Models\Certification;
-
+use App\Models\Payment;
 use App\Models\Supporter;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,6 +54,20 @@ class DashboardController extends Controller
         // Get certification statistics
         $certificationsCount = \App\Models\Certification::whereIn('student_id', $studentIds)->count();
 
+        // Get payment statistics
+        $payments = Payment::whereIn('student_id', $studentIds)->get();
+        $totalPayments = $payments->count();
+        $paidPayments = $payments->where('status', 'paid')->count();
+        $unpaidPayments = $payments->where('status', 'unpaid')->count();
+
+        // Get default currency for total display
+        $defaultCurrency = $organization->default_currency ?? 'MYR';
+
+        // Calculate total revenue for default currency
+        $totalRevenue = (float) $payments->where('status', 'paid')
+            ->where('currency_code', $defaultCurrency)
+            ->sum('amount');
+
         return Inertia::render('Organization/Dashboard', [
             'studentsCount' => $organization->students()->count(),
             'clubsCount' => $organization->clubs()->count(),
@@ -66,6 +80,11 @@ class DashboardController extends Controller
             'absentDays' => $absentDays,
             'attendanceRate' => $attendanceRate,
             'certificationsCount' => $certificationsCount,
+            'totalPayments' => $totalPayments,
+            'paidPayments' => $paidPayments,
+            'unpaidPayments' => $unpaidPayments,
+            'totalRevenue' => $totalRevenue,
+            'defaultCurrency' => $defaultCurrency,
         ]);
     }
 }
