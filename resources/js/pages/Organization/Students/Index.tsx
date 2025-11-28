@@ -16,6 +16,13 @@ import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 
 interface Club {
     id: number;
@@ -60,8 +67,8 @@ interface Props {
     };
 }
 
-// Define the columns inline here - Organization view (limited visibility)
-export const columns = (): ColumnDef<Student>[] => [
+// Define the columns inline here - Organization view
+export const columns = (onDelete?: (student: Student) => void): ColumnDef<Student>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -131,6 +138,37 @@ export const columns = (): ColumnDef<Student>[] => [
             </Badge>
         ),
     },
+    {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href={route("organization.students.edit", row.original.id)}>
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => {
+                            if (onDelete && confirm("Are you sure you want to delete this student?")) {
+                                onDelete(row.original);
+                            }
+                        }}
+                        className="text-red-600"
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    },
 ];
 
 export default function Index({
@@ -183,6 +221,14 @@ export default function Index({
         );
     };
 
+    const handleDelete = (student: Student) => {
+        router.delete(route("organization.students.destroy", student.id), {
+            onSuccess: () => {
+                router.visit(route("organization.students.index"));
+            },
+        });
+    };
+
     return (
         <AuthenticatedLayout header="Students">
             <Head title="Students" />
@@ -191,9 +237,11 @@ export default function Index({
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Students</CardTitle>
-                        <Link href={route("organization.students.create")}>
-                            <Button>Add Student</Button>
-                        </Link>
+                        {!clubId && (
+                            <Link href={route("organization.students.create")}>
+                                <Button>Add Student</Button>
+                            </Link>
+                        )}
                     </CardHeader>
                     <CardContent>
                         {/* Filters Section */}
@@ -316,7 +364,7 @@ export default function Index({
 
                         {/* DataTable */}
                         <DataTable
-                            columns={columns()}
+                            columns={columns(handleDelete)}
                             data={students}
                         />
                     </CardContent>
