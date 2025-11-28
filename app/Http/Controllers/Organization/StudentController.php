@@ -95,15 +95,22 @@ class StudentController extends Controller
     public function create()
     {
         $user = Auth::user();
+        $organizationId = $user->userable_id;
 
-        $clubs = Club::where('organization_id', $user->userable_id)
+        $clubs = Club::where('organization_id', $organizationId)
             ->select('id', 'name')
             ->get();
 
-        $plans = Plan::where('planable_type', 'App\Models\Club')
-            ->whereIn('planable_id', $clubs->pluck('id'))
-            ->where('is_active', true)
-            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
+        $plans = Plan::where('is_active', true)
+            ->where(function ($query) use ($organizationId, $clubs) {
+                $query->where('planable_type', 'App\Models\Organization')
+                    ->where('planable_id', $organizationId)
+                    ->orWhere(function ($subQuery) use ($clubs) {
+                        $subQuery->where('planable_type', 'App\Models\Club')
+                            ->whereIn('planable_id', $clubs->pluck('id'));
+                    });
+            })
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
 
         return Inertia::render('Organization/Students/Create', [
             'clubs' => $clubs,
@@ -261,10 +268,16 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->get();
 
-        $plans = Plan::where('planable_type', 'App\Models\Club')
-            ->whereIn('planable_id', $clubs->pluck('id'))
-            ->where('is_active', true)
-            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id']);
+        $plans = Plan::where('is_active', true)
+            ->where(function ($query) use ($organizationId, $clubs) {
+                $query->where('planable_type', 'App\Models\Organization')
+                    ->where('planable_id', $organizationId)
+                    ->orWhere(function ($subQuery) use ($clubs) {
+                        $subQuery->where('planable_type', 'App\Models\Club')
+                            ->whereIn('planable_id', $clubs->pluck('id'));
+                    });
+            })
+            ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
 
         $student->load('feePlan');
 
