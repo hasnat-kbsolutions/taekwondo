@@ -3,10 +3,6 @@ import {
     GraduationCap,
     Landmark,
     Users,
-    Group,
-    Wallet,
-    BadgeCheck,
-    Hourglass,
     Star,
     Calendar,
     Award,
@@ -21,12 +17,6 @@ export default function DashboardCards({
     studentsCount,
     clubsCount,
     instructorsCount,
-    paymentsCount,
-    paidCount,
-    pendingCount,
-    totalAmount,
-    amountsByCurrency,
-    defaultCurrencyCode,
     avgStudentRating,
     avgInstructorRating,
     totalRatings,
@@ -39,12 +29,6 @@ export default function DashboardCards({
     studentsCount: number;
     clubsCount: number;
     instructorsCount: number;
-    paymentsCount: number;
-    paidCount: number;
-    pendingCount: number;
-    totalAmount: number;
-    amountsByCurrency?: Record<string, number>;
-    defaultCurrencyCode?: string;
     avgStudentRating: number;
     avgInstructorRating: number;
     totalRatings: number;
@@ -54,56 +38,7 @@ export default function DashboardCards({
     attendanceRate: number;
     certificationsCount: number;
 }) {
-    // Utility function to safely format amounts
-    const formatAmount = (amount: any, currencyCode: string = "MYR") => {
-        const numAmount = Number(amount) || 0;
-
-        if (currencyCode === "JPY") {
-            return numAmount.toLocaleString();
-        } else {
-            return numAmount.toFixed(2);
-        }
-    };
     const stats = [
-        {
-            label: "Total Amount",
-            count: (
-                <div className="space-y-1 w-full">
-                    <div className="text-lg font-bold">
-                        {defaultCurrencyCode === "MYR"
-                            ? "RM"
-                            : defaultCurrencyCode}{" "}
-                        {formatAmount(
-                            amountsByCurrency?.[defaultCurrencyCode || "MYR"] ||
-                                0,
-                            defaultCurrencyCode || "MYR"
-                        )}
-                    </div>
-                    {amountsByCurrency &&
-                        Object.keys(amountsByCurrency).length > 1 && (
-                            <div className="text-xs text-muted-foreground space-y-1">
-                                {Object.entries(amountsByCurrency)
-                                    .filter(
-                                        ([code]) => code !== defaultCurrencyCode
-                                    )
-                                    .map(([code, amount]) => (
-                                        <div
-                                            key={code}
-                                            className="flex justify-between"
-                                        >
-                                            <span>{code}:</span>
-                                            <span>
-                                                {formatAmount(amount, code)}
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
-                        )}
-                </div>
-            ),
-            icon: <Wallet className="h-6 w-6 text-primary" />,
-            url: route("organization.payments.index"),
-        },
         {
             label: "Students",
             count: studentsCount,
@@ -122,25 +57,6 @@ export default function DashboardCards({
             icon: <Users className="h-6 w-6 text-green-600" />,
             url: route("organization.instructors.index"),
         },
-        {
-            label: "Total Payments",
-            count: paymentsCount,
-            icon: <Wallet className="h-6 w-6 text-primary" />,
-            url: route("organization.payments.index"),
-        },
-        {
-            label: "Paid",
-            count: paidCount,
-            icon: <BadgeCheck className="h-6 w-6 text-green-600" />,
-            url: route("organization.payments.index"),
-        },
-        {
-            label: "Unpaid",
-            count: pendingCount,
-            icon: <Hourglass className="h-6 w-6 text-yellow-500" />,
-            url: route("organization.payments.index"),
-        },
-
         {
             label: "Attendance Rate",
             count: `${attendanceRate}%`,

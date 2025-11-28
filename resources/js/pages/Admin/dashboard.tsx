@@ -5,9 +5,6 @@ import {
     Users,
     Group,
     Star,
-    Coins,
-    BadgeCheck,
-    Hourglass,
     Calendar,
     Award,
     ArrowRight,
@@ -22,12 +19,6 @@ export default function DashboardCards({
     clubsCount,
     SupportersCount,
     instructorsCount,
-    paymentsCount,
-    paidCount,
-    pendingCount,
-    totalAmount,
-    amountsByCurrency,
-    defaultCurrencyCode,
     totalAttendanceDays,
     presentDays,
     absentDays,
@@ -42,12 +33,6 @@ export default function DashboardCards({
     clubsCount: number;
     SupportersCount: number;
     instructorsCount: number;
-    paymentsCount: number;
-    paidCount: number;
-    pendingCount: number;
-    totalAmount: number;
-    amountsByCurrency: Record<string, number>;
-    defaultCurrencyCode: string;
     totalAttendanceDays: number;
     presentDays: number;
     absentDays: number;
@@ -57,62 +42,7 @@ export default function DashboardCards({
     avgInstructorRating: number;
     totalRatings: number;
 }) {
-    // Utility function to safely format amounts
-    const formatAmount = (amount: any) => {
-        return (Number(amount) || 0).toFixed(2);
-    };
     const stats = [
-        {
-            label: "Total Amount",
-            count: (
-                <div className="space-y-1 w-full">
-                    <div className="text-lg font-bold">
-                        {defaultCurrencyCode === "MYR"
-                            ? "RM"
-                            : defaultCurrencyCode}{" "}
-                        {formatAmount(amountsByCurrency[defaultCurrencyCode])}
-                    </div>
-                    {Object.keys(amountsByCurrency).length > 1 && (
-                        <div className="text-xs text-muted-foreground space-y-1">
-                            {Object.entries(amountsByCurrency)
-                                .filter(
-                                    ([code]) => code !== defaultCurrencyCode
-                                )
-                                .map(([code, amount]) => (
-                                    <div
-                                        key={code}
-                                        className="flex justify-between"
-                                    >
-                                        <span>{code}:</span>
-                                        <span>{formatAmount(amount)}</span>
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-            ),
-            // icon: <DollarSign className="h-6 w-6 text-primary" />,
-            url: route("admin.payments.index"),
-        },
-        {
-            label: "Total Payments",
-            count: paymentsCount,
-            // icon: <DollarSign className="h-6 w-6 text-primary w-100" />,
-            url: route("admin.payments.index"),
-        },
-
-        {
-            label: "Paid",
-            count: paidCount,
-            icon: <BadgeCheck className="h-6 w-6 text-green-600" />,
-            url: route("admin.payments.index"),
-        },
-        {
-            label: "Unpaid",
-            count: pendingCount,
-            icon: <Hourglass className="h-6 w-6 text-yellow-500" />,
-            url: route("admin.payments.index"),
-        },
         {
             label: "Students",
             count: studentsCount,

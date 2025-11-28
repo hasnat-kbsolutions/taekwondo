@@ -13,10 +13,8 @@ use App\Models\Club;
 use App\Models\Supporter;
 use App\Models\Instructor;
 use App\Models\Rating;
-use App\Models\Payment;
 use App\Models\Attendance;
 use App\Models\Certification;
-use App\Models\Currency;
 
 class DashboardController extends Controller
 {
@@ -29,24 +27,6 @@ class DashboardController extends Controller
         $avgStudentRating = $studentRatings->count() > 0 ? $studentRatings->avg('rating') : 0;
         $avgInstructorRating = $instructorRatings->count() > 0 ? $instructorRatings->avg('rating') : 0;
         $totalRatings = $studentRatings->count() + $instructorRatings->count();
-
-        // Get payment statistics with currency breakdown
-        $payments = \App\Models\Payment::with('currency')->get();
-        $paymentsCount = $payments->count();
-        $paidCount = $payments->where('status', 'paid')->count();
-        $pendingCount = $payments->where('status', 'unpaid')->count();
-
-        // Calculate total amount by currency
-        $amountsByCurrency = $payments->groupBy('currency_code')
-            ->map(function ($currencyPayments) {
-                return (float) $currencyPayments->sum('amount'); // Ensure float type
-            });
-
-        $totalAmount = $payments->sum('amount');
-
-        // Get default currency for display
-        $defaultCurrency = Currency::where('is_default', true)->first();
-        $defaultCurrencyCode = $defaultCurrency ? $defaultCurrency->code : 'MYR';
 
         // Get attendance statistics for current month
         $currentMonth = now()->startOfMonth();
@@ -68,12 +48,6 @@ class DashboardController extends Controller
             'clubsCount' => Club::count(),
             'SupportersCount' => Supporter::count(),
             'instructorsCount' => Instructor::count(),
-            'paymentsCount' => $paymentsCount,
-            'paidCount' => $paidCount,
-            'pendingCount' => $pendingCount,
-            'totalAmount' => $totalAmount,
-            'amountsByCurrency' => $amountsByCurrency,
-            'defaultCurrencyCode' => $defaultCurrencyCode,
             'totalAttendanceDays' => $totalAttendanceDays,
             'presentDays' => $presentDays,
             'absentDays' => $absentDays,

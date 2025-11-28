@@ -72,8 +72,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'destroy'])->name('students.destroy');
 
-    // Student Insights
-    Route::get('/student-insights/{student}', [App\Http\Controllers\Admin\StudentInsightsController::class, 'show'])->name('student-insights.show');
+    // REMOVED: Student Insights - Financial analytics restricted
 
     // Club Routes
     Route::get('/clubs', [App\Http\Controllers\Admin\ClubController::class, 'index'])->name('clubs.index');
@@ -121,35 +120,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('instructors.update');
     Route::delete('/instructors/{instructor}', [App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('instructors.destroy');
 
-    // Plans
-    Route::get('/plans', [App\Http\Controllers\Admin\PlanController::class, 'index'])->name('plans.index');
-    Route::get('/plans/create', [App\Http\Controllers\Admin\PlanController::class, 'create'])->name('plans.create');
-    Route::post('/plans', [App\Http\Controllers\Admin\PlanController::class, 'store'])->name('plans.store');
-    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Admin\PlanController::class, 'edit'])->name('plans.edit');
-    Route::put('/plans/{plan}', [App\Http\Controllers\Admin\PlanController::class, 'update'])->name('plans.update');
-    Route::delete('/plans/{plan}', [App\Http\Controllers\Admin\PlanController::class, 'destroy'])->name('plans.destroy');
+    // REMOVED: Admin Plans and Fee Plans - Pricing restricted to Clubs only
 
-    // Student Fee Plans
-    Route::get('/student-fee-plans', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
-    Route::get('/student-fee-plans/create', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
-    Route::post('/student-fee-plans', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
-    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
-    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
-    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Admin\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
-
-    // Payments Routes
-    Route::get('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
-    Route::get('/payments/create', [App\Http\Controllers\Admin\PaymentController::class, 'create'])->name('payments.create');
-    Route::post('/payments', [App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('payments.store');
-    Route::get('/payments/{payment}/edit', [App\Http\Controllers\Admin\PaymentController::class, 'edit'])->name('payments.edit');
-    Route::put('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'update'])->name('payments.update');
-    Route::delete('/payments/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
-
-    // Admin Payment Attachment Routes
-    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Admin\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
-    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Admin\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
-    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Admin\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
+    // REMOVED: Admin Payment routes - Financial management restricted to Clubs
 
     // Student Password Update
     Route::patch('/students/{student}/password', [App\Http\Controllers\Admin\StudentController::class, 'updatePassword'])->name('students.updatePassword');
@@ -173,9 +146,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Admin Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'adminIndex'])->name('ratings.index');
 
-    // Admin Reports
-    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/{type}', [App\Http\Controllers\Admin\ReportController::class, 'exportReport'])->name('reports.export');
+    // REMOVED: Admin Reports - Financial reporting restricted
 
     // Bank Information Routes
     Route::get('/bank-information', [App\Http\Controllers\Admin\BankInformationController::class, 'index'])->name('bank-information.index');
@@ -213,34 +184,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
     Route::patch('/clubs/{club}/password', [App\Http\Controllers\Organization\ClubController::class, 'updatePassword'])->name('clubs.updatePassword');
 
-    Route::get('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'index'])->name('payments.index');
-    Route::get('/payments/create', [App\Http\Controllers\Organization\PaymentController::class, 'create'])->name('payments.create');
-    Route::post('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'store'])->name('payments.store');
-    Route::get('/payments/{payment}/edit', [App\Http\Controllers\Organization\PaymentController::class, 'edit'])->name('payments.edit');
-    Route::put('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'update'])->name('payments.update');
-    Route::delete('/payments/{payment}', [App\Http\Controllers\Organization\PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Organization\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
-
-    // Organization Payment Attachment Routes
-    Route::post('/payments/{payment}/upload-attachment', [App\Http\Controllers\Organization\PaymentController::class, 'uploadAttachment'])->name('payments.upload-attachment');
-    Route::get('/payment-attachments/{attachment}/download', [App\Http\Controllers\Organization\PaymentController::class, 'downloadAttachment'])->name('payments.download-attachment');
-    Route::delete('/payment-attachments/{attachment}', [App\Http\Controllers\Organization\PaymentController::class, 'deleteAttachment'])->name('payments.delete-attachment');
-
-    // Plans Routes
-    Route::get('/plans', [App\Http\Controllers\Organization\PlanController::class, 'index'])->name('plans.index');
-    Route::get('/plans/create', [App\Http\Controllers\Organization\PlanController::class, 'create'])->name('plans.create');
-    Route::post('/plans', [App\Http\Controllers\Organization\PlanController::class, 'store'])->name('plans.store');
-    Route::get('/plans/{plan}/edit', [App\Http\Controllers\Organization\PlanController::class, 'edit'])->name('plans.edit');
-    Route::put('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'update'])->name('plans.update');
-    Route::delete('/plans/{plan}', [App\Http\Controllers\Organization\PlanController::class, 'destroy'])->name('plans.destroy');
-
-    // Student Fee Plans Routes
-    Route::get('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
-    Route::get('/student-fee-plans/create', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
-    Route::post('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
-    Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
-    Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
-    Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
+    // REMOVED: Payment routes - Organizations cannot see or manage student payments/earnings
 
     Route::get('/attendances', [App\Http\Controllers\Organization\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/attendances/create', [App\Http\Controllers\Organization\AttendanceController::class, 'create'])->name('attendances.create');
@@ -267,11 +211,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     // Organization Ratings
     Route::get('/ratings', [App\Http\Controllers\RatingController::class, 'organizationIndex'])->name('ratings.index');
 
-    // Organization Insights
-    Route::get('/insights', [App\Http\Controllers\Organization\OrganizationInsightsController::class, 'show'])->name('insights.show');
-
-    // Organization Student Insights
-    Route::get('/student-insights/{student}', [App\Http\Controllers\Organization\StudentInsightsController::class, 'show'])->name('student-insights.show');
+    // REMOVED: Organization Insights and Student Insights - Organizations cannot see financial analytics
 
     // Bank Information Routes
     Route::get('/bank-information', [App\Http\Controllers\Organization\BankInformationController::class, 'index'])->name('bank-information.index');

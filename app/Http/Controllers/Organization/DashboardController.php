@@ -17,7 +17,6 @@ use App\Models\Certification;
 
 use App\Models\Supporter;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Payment;
 
 class DashboardController extends Controller
 {
@@ -28,22 +27,6 @@ class DashboardController extends Controller
         // Get all student IDs under this organization
         $studentIds = $organization->students()->pluck('id');
         $instructorIds = $organization->instructors()->pluck('id');
-
-        // Get payment statistics with currency breakdown
-        $payments = Payment::whereIn('student_id', $studentIds)->with('currency');
-
-        $paymentsCount = $payments->count();
-        $paidCount = Payment::whereIn('student_id', $studentIds)->where('status', 'paid')->count();
-        $pendingCount = Payment::whereIn('student_id', $studentIds)->where('status', 'unpaid')->count();
-
-        // Calculate amounts by currency
-        $amountsByCurrency = $payments->get()->groupBy('currency_code')
-            ->map(function ($currencyPayments) {
-                return (float) $currencyPayments->sum('amount');
-            });
-
-        $defaultCurrencyCode = $organization->default_currency ?? 'MYR';
-        $totalAmount = $amountsByCurrency[$defaultCurrencyCode] ?? 0;
 
         // Get rating statistics
         $studentRatings = Rating::whereIn('rated_id', $studentIds)
@@ -75,12 +58,6 @@ class DashboardController extends Controller
             'studentsCount' => $organization->students()->count(),
             'clubsCount' => $organization->clubs()->count(),
             'instructorsCount' => $organization->instructors()->count(),
-            'paymentsCount' => $paymentsCount,
-            'paidCount' => $paidCount,
-            'pendingCount' => $pendingCount,
-            'totalAmount' => $totalAmount,
-            'amountsByCurrency' => $amountsByCurrency,
-            'defaultCurrencyCode' => $defaultCurrencyCode,
             'avgStudentRating' => round($avgStudentRating, 1),
             'avgInstructorRating' => round($avgInstructorRating, 1),
             'totalRatings' => $totalRatings,
