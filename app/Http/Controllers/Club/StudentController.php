@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Notifications\StudentFeePlanAssigned;
+
 class StudentController extends Controller
 {
     public function index(Request $request)
@@ -180,7 +182,7 @@ class StudentController extends Controller
         $discountType = $validated['discount_type'] ?: null;
         $discountValue = $discountType ? (float) $validated['discount_value'] : 0;
 
-        StudentFeePlan::create([
+        $feePlan = StudentFeePlan::create([
             'student_id' => $student->id,
             'plan_id' => $validated['plan_id'],
             'interval' => $validated['interval'],
@@ -190,6 +192,11 @@ class StudentController extends Controller
             'currency_code' => $validated['currency_code'] ?? null,
             'is_active' => true,
         ]);
+
+        // Send notification to student if user account was created
+        if ($student->user) {
+            $student->notify(new StudentFeePlanAssigned($feePlan));
+        }
 
         return redirect()->route('club.students.index')->with('success', 'Student created successfully');
     }
@@ -318,7 +325,7 @@ class StudentController extends Controller
         $discountType = $validated['discount_type'] ?: null;
         $discountValue = $discountType ? (float) $validated['discount_value'] : 0;
 
-        StudentFeePlan::updateOrCreate(
+        $feePlan = StudentFeePlan::updateOrCreate(
             ['student_id' => $student->id],
             [
                 'plan_id' => $validated['plan_id'],
@@ -330,6 +337,11 @@ class StudentController extends Controller
                 'is_active' => true,
             ]
         );
+
+        // Send notification to student if fee plan was updated and user account exists
+        if ($student->user) {
+            $student->notify(new StudentFeePlanAssigned($feePlan));
+        }
 
         return redirect()
             ->route('club.students.index')

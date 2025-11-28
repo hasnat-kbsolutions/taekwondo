@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 class Student extends Model
 {
+    use Notifiable;
 
     protected $fillable = [
         'club_id',

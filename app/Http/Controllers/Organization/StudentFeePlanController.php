@@ -11,6 +11,7 @@ use App\Models\Club;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\StudentFeePlanAssigned;
 
 class StudentFeePlanController extends Controller
 {
@@ -130,7 +131,12 @@ class StudentFeePlanController extends Controller
             return back()->withErrors(['interval_count' => 'Interval count is required when using custom interval.'])->withInput();
         }
 
-        StudentFeePlan::create($validated);
+        $feePlan = StudentFeePlan::create($validated);
+
+        // Send notification to student
+        if ($student->user) {
+            $student->notify(new StudentFeePlanAssigned($feePlan));
+        }
 
         return redirect()->route('organization.student-fee-plans.index')->with('success', 'Student fee plan created.');
     }
@@ -215,6 +221,11 @@ class StudentFeePlanController extends Controller
         }
 
         $studentFeePlan->update($validated);
+
+        // Send notification to student
+        if ($student->user) {
+            $student->notify(new StudentFeePlanAssigned($studentFeePlan));
+        }
 
         return redirect()->route('organization.student-fee-plans.index')->with('success', 'Student fee plan updated.');
     }
