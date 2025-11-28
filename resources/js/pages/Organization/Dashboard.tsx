@@ -10,7 +10,7 @@ import {
     DollarSign,
     CheckCircle,
     AlertCircle,
-    CreditCard,
+    Wallet,
 } from "lucide-react";
 
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
@@ -76,7 +76,7 @@ export default function DashboardCards({
         {
             label: "Total Payments",
             count: totalPayments,
-            icon: <CreditCard className="h-6 w-6 text-blue-600" />,
+            icon: <Wallet className="h-6 w-6 text-blue-600" />,
             url: route("organization.payments.index"),
         },
         {
@@ -97,7 +97,7 @@ export default function DashboardCards({
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
             })}`,
-            icon: <CreditCard className="h-6 w-6 text-emerald-600" />,
+            icon: <Wallet className="h-6 w-6 text-emerald-600" />,
             url: route("organization.payments.index"),
         },
         // Attendance Stats
