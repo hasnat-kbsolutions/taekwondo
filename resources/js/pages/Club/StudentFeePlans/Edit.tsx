@@ -51,12 +51,13 @@ export default function Edit() {
         ? students.find((s: any) => s.id === Number(form.student_id))
         : null;
 
-    // Filter plans by selected student's club
+    // Filter plans: show organization plans + club plans
     const filteredPlans = selectedStudent?.club_id
         ? plans.filter(
               (p: any) =>
-                  p.planable_type === "App\\Models\\Club" &&
-                  p.planable_id === selectedStudent.club_id
+                  (p.planable_type === "App\\Models\\Organization") ||
+                  (p.planable_type === "App\\Models\\Club" &&
+                      p.planable_id === selectedStudent.club_id)
           )
         : [];
 

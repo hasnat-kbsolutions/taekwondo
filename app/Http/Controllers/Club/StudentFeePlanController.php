@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Plan;
 use App\Models\StudentFeePlan;
 use App\Models\Currency;
+use App\Models\Club;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -42,12 +43,25 @@ class StudentFeePlanController extends Controller
 
         $students = Student::where('club_id', $clubId)->get();
 
-        // Get plans for this club only
-        $plans = Plan::where('planable_type', 'App\Models\Club')
+        // Get organization ID from club
+        $club = Club::findOrFail($clubId);
+        $organizationId = $club->organization_id;
+
+        // Get organization-level plans
+        $organizationPlans = Plan::where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
+            ->where('is_active', true)
+            ->with('planable')
+            ->get();
+
+        // Get club-level plans
+        $clubPlans = Plan::where('planable_type', 'App\Models\Club')
             ->where('planable_id', $clubId)
             ->where('is_active', true)
             ->with('planable')
             ->get();
+
+        $plans = $organizationPlans->merge($clubPlans);
 
         return Inertia::render('Club/StudentFeePlans/Index', [
             'feePlans' => $feePlans,
@@ -67,12 +81,25 @@ class StudentFeePlanController extends Controller
 
         $clubId = $user->userable_id;
 
-        // Get plans for this club only
-        $plans = Plan::where('planable_type', 'App\Models\Club')
+        // Get organization ID from club
+        $club = Club::findOrFail($clubId);
+        $organizationId = $club->organization_id;
+
+        // Get organization-level plans
+        $organizationPlans = Plan::where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
+            ->where('is_active', true)
+            ->with('planable')
+            ->get();
+
+        // Get club-level plans
+        $clubPlans = Plan::where('planable_type', 'App\Models\Club')
             ->where('planable_id', $clubId)
             ->where('is_active', true)
             ->with('planable')
             ->get();
+
+        $plans = $organizationPlans->merge($clubPlans);
 
         return Inertia::render('Club/StudentFeePlans/Create', [
             'students' => Student::where('club_id', $clubId)->with('club')->get(),
@@ -110,10 +137,13 @@ class StudentFeePlanController extends Controller
             abort(403, 'Unauthorized to assign fee plan to this student.');
         }
 
-        // Verify plan belongs to this club (if plan_id is provided)
+        // Verify plan belongs to this club or organization (if plan_id is provided)
         if (!empty($validated['plan_id'])) {
             $plan = Plan::findOrFail($validated['plan_id']);
-            if ($plan->planable_type !== 'App\Models\Club' || $plan->planable_id !== $clubId) {
+            $club = Club::findOrFail($clubId);
+            $isOrganizationPlan = $plan->planable_type === 'App\Models\Organization' && $plan->planable_id === $club->organization_id;
+            $isClubPlan = $plan->planable_type === 'App\Models\Club' && $plan->planable_id === $clubId;
+            if (!$isOrganizationPlan && !$isClubPlan) {
                 abort(403, 'Unauthorized to assign this plan to a student.');
             }
         }
@@ -147,12 +177,25 @@ class StudentFeePlanController extends Controller
             abort(403, 'Unauthorized to access this student fee plan.');
         }
 
-        // Get plans for this club only
-        $plans = Plan::where('planable_type', 'App\Models\Club')
+        // Get organization ID from club
+        $club = Club::findOrFail($clubId);
+        $organizationId = $club->organization_id;
+
+        // Get organization-level plans
+        $organizationPlans = Plan::where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
+            ->where('is_active', true)
+            ->with('planable')
+            ->get();
+
+        // Get club-level plans
+        $clubPlans = Plan::where('planable_type', 'App\Models\Club')
             ->where('planable_id', $clubId)
             ->where('is_active', true)
             ->with('planable')
             ->get();
+
+        $plans = $organizationPlans->merge($clubPlans);
 
         return Inertia::render('Club/StudentFeePlans/Edit', [
             'studentFeePlan' => $studentFeePlan->load(['student.club', 'plan']),
@@ -196,10 +239,13 @@ class StudentFeePlanController extends Controller
             abort(403, 'Unauthorized to assign fee plan to this student.');
         }
 
-        // Verify plan belongs to this club (if plan_id is provided)
+        // Verify plan belongs to this club or organization (if plan_id is provided)
         if (!empty($validated['plan_id'])) {
             $plan = Plan::findOrFail($validated['plan_id']);
-            if ($plan->planable_type !== 'App\Models\Club' || $plan->planable_id !== $clubId) {
+            $club = Club::findOrFail($clubId);
+            $isOrganizationPlan = $plan->planable_type === 'App\Models\Organization' && $plan->planable_id === $club->organization_id;
+            $isClubPlan = $plan->planable_type === 'App\Models\Club' && $plan->planable_id === $clubId;
+            if (!$isOrganizationPlan && !$isClubPlan) {
                 abort(403, 'Unauthorized to assign this plan to a student.');
             }
         }
