@@ -82,6 +82,21 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Get students with unpaid fees
+        $studentsWithUnpaidFees = Student::whereIn('id', $studentIds)
+            ->whereHas('feePlan')
+            ->with(['feePlan.plan'])
+            ->get()
+            ->filter(function ($student) {
+                // Check if student has unpaid payments
+                $unpaidCount = Payment::where('student_id', $student->id)
+                    ->where('status', 'unpaid')
+                    ->count();
+                return $unpaidCount > 0;
+            })
+            ->take(5)
+            ->values();
+
         // Calculate amounts by currency
         $amountsByCurrency = $payments->groupBy('currency_code')
             ->map(function ($currencyPayments) {
@@ -111,6 +126,7 @@ class DashboardController extends Controller
             'defaultCurrencyCode' => $defaultCurrencyCode,
             'upcomingEvents' => $upcomingEvents,
             'paymentProofs' => $paymentProofs,
+            'studentsWithUnpaidFees' => $studentsWithUnpaidFees,
         ]);
     }
 }

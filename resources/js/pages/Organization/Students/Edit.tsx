@@ -17,7 +17,6 @@ import {
 import { toast } from "sonner";
 
 interface Props {
-    clubs: any[];
     student: any;
     plans?: any[];
     currencies?: any[];
@@ -25,7 +24,6 @@ interface Props {
 }
 
 export default function Edit({
-    clubs,
     student,
     plans = [],
     currencies = [],
@@ -47,38 +45,11 @@ export default function Edit({
     const availablePlans = useMemo(
         () =>
             plans.filter((plan) => {
-                // Always show organization-level plans
-                if (plan.planable_type === 'App\\Models\\Organization') {
-                    return true;
-                }
-                // Show club-level plans only if a club is selected and matches
-                if (data.club_id && String(plan.planable_id) === String(data.club_id)) {
-                    return true;
-                }
-                return false;
+                // Show only organization-level plans
+                return plan.planable_type === 'App\\Models\\Organization';
             }),
-        [plans, data.club_id]
+        [plans]
     );
-
-    useEffect(() => {
-        if (!data.club_id) {
-            if (data.plan_id !== "") {
-                setData("plan_id", "");
-            }
-            return;
-        }
-
-        // Only clear plan_id if it doesn't exist AND it's not the current feePlan
-        if (data.plan_id !== "") {
-            const exists = availablePlans.some(
-                (plan) => String(plan.id) === String(data.plan_id)
-            );
-            // If plan doesn't exist and it's not the student's current fee plan, clear it
-            if (!exists && feePlan?.plan_id && String(feePlan.plan_id) !== String(data.plan_id)) {
-                setData("plan_id", "");
-            }
-        }
-    }, [data.club_id, availablePlans, data.plan_id, setData, feePlan]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,32 +66,6 @@ export default function Edit({
             <Head title="Edit Student" />
             <div className="container mx-auto py-10">
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
-                    {/* Required: Club */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>
-                            Select Club <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            value={String(data.club_id) || ""}
-                            onValueChange={(value) => setData("club_id", value)}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Club" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {clubs.map((club) => (
-                                    <SelectItem
-                                        key={club.id}
-                                        value={String(club.id)}
-                                    >
-                                        {club.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {renderError("club_id")}
-                    </div>
-
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>
@@ -369,7 +314,22 @@ export default function Edit({
                             onValueChange={(value) => setData("plan_id", value)}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Plan" />
+                                <SelectValue placeholder="Select Plan">
+                                    {data.plan_id
+                                        ? (() => {
+                                            const selectedPlan = availablePlans.find(
+                                                (p) =>
+                                                    String(p.id) ===
+                                                    String(data.plan_id)
+                                            );
+                                            return selectedPlan
+                                                ? `${selectedPlan.name} - ${selectedPlan.currency_code} ${selectedPlan.base_amount}`
+                                                : feePlan?.plan
+                                                ? `${feePlan.plan.name} - ${feePlan.plan.currency_code} ${feePlan.plan.base_amount}`
+                                                : "Select Plan";
+                                        })()
+                                        : "Select Plan"}
+                                </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 {availablePlans.length === 0 ? (

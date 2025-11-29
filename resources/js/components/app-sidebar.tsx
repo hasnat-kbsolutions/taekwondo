@@ -176,10 +176,6 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             items: [
                 { title: "Payments", url: "/organization/payments" },
                 { title: "Plans", url: "/organization/plans" },
-                {
-                    title: "Student Fee Plans",
-                    url: "/organization/student-fee-plans",
-                },
             ],
         },
         {

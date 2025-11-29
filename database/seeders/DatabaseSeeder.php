@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             OrganizationSeeder::class,
             ClubSeeder::class,
             StudentSeeder::class,
+            PlanSeeder::class,
             InstructorSeeder::class,
             UserSeeder::class,
             CertificationSeeder::class,

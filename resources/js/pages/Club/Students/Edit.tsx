@@ -347,7 +347,22 @@ export default function Edit({ student, plans, currencies, feePlan }: Props) {
                             onValueChange={(value) => setData("plan_id", value)}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Plan" />
+                                <SelectValue placeholder="Select Plan">
+                                    {data.plan_id
+                                        ? (() => {
+                                            const selectedPlan = plans.find(
+                                                (p) =>
+                                                    String(p.id) ===
+                                                    String(data.plan_id)
+                                            );
+                                            return selectedPlan
+                                                ? `${selectedPlan.name} - ${selectedPlan.currency_code} ${selectedPlan.base_amount}`
+                                                : feePlan?.plan
+                                                ? `${feePlan.plan.name} - ${feePlan.plan.currency_code} ${feePlan.plan.base_amount}`
+                                                : "Select Plan";
+                                        })()
+                                        : "Select Plan"}
+                                </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 {plans.map((plan) => (

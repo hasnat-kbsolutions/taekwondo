@@ -207,8 +207,9 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
 
     // Organization Student Fee Plans Routes - Organizations can manage their students' fee plans
     Route::get('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
-    Route::get('/student-fee-plans/create', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
-    Route::post('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    // Create route removed - students are now assigned fee plans during student creation
+    // Route::get('/student-fee-plans/create', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    // Route::post('/student-fee-plans', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
     Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
     Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
     Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Organization\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');
@@ -287,8 +288,9 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
 
     // Student Fee Plans Routes
     Route::get('/student-fee-plans', [App\Http\Controllers\Club\StudentFeePlanController::class, 'index'])->name('student-fee-plans.index');
-    Route::get('/student-fee-plans/create', [App\Http\Controllers\Club\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
-    Route::post('/student-fee-plans', [App\Http\Controllers\Club\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
+    // Create route removed - students are now assigned fee plans during student creation
+    // Route::get('/student-fee-plans/create', [App\Http\Controllers\Club\StudentFeePlanController::class, 'create'])->name('student-fee-plans.create');
+    // Route::post('/student-fee-plans', [App\Http\Controllers\Club\StudentFeePlanController::class, 'store'])->name('student-fee-plans.store');
     Route::get('/student-fee-plans/{studentFeePlan}/edit', [App\Http\Controllers\Club\StudentFeePlanController::class, 'edit'])->name('student-fee-plans.edit');
     Route::put('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Club\StudentFeePlanController::class, 'update'])->name('student-fee-plans.update');
     Route::delete('/student-fee-plans/{studentFeePlan}', [App\Http\Controllers\Club\StudentFeePlanController::class, 'destroy'])->name('student-fee-plans.destroy');

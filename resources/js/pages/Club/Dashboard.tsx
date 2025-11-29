@@ -55,6 +55,19 @@ interface PaymentAttachment {
     };
 }
 
+interface StudentWithUnpaidFees {
+    id: number;
+    name: string;
+    surname?: string;
+    feePlan?: {
+        plan?: {
+            name: string;
+            base_amount: number;
+            currency_code: string;
+        };
+    };
+}
+
 interface Props {
     studentsCount: number;
     instructorsCount: number;
@@ -74,6 +87,7 @@ interface Props {
     defaultCurrencyCode?: string;
     upcomingEvents?: Event[];
     paymentProofs?: PaymentAttachment[];
+    studentsWithUnpaidFees?: StudentWithUnpaidFees[];
 }
 
 // Utility function to safely format amounts
@@ -105,6 +119,7 @@ export default function DashboardCards({
     defaultCurrencyCode,
     upcomingEvents = [],
     paymentProofs = [],
+    studentsWithUnpaidFees = [],
 }: Props) {
     const stats = [
         {
@@ -322,6 +337,83 @@ export default function DashboardCards({
                         </CardContent>
                     </Card>
                 )}
+                {/* Students with Unpaid Fees Alert */}
+                {studentsWithUnpaidFees && studentsWithUnpaidFees.length > 0 && (
+                    <Card className="border-red-500 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="h-5 w-5 text-red-600" />
+                                    <CardTitle className="text-lg">
+                                        Students with Unpaid Fees
+                                    </CardTitle>
+                                </div>
+                                <Link
+                                    href={route("club.payments.index", {
+                                        status: "unpaid",
+                                    })}
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    View All
+                                </Link>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid gap-3 md:grid-cols-5">
+                                {studentsWithUnpaidFees.map((student) => (
+                                    <Link
+                                        key={student.id}
+                                        href={route("club.payments.index")}
+                                        className="block"
+                                    >
+                                        <div className="p-3 rounded-lg border bg-white dark:bg-gray-800 hover:bg-accent/50 transition-colors cursor-pointer">
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <h4 className="font-semibold text-sm line-clamp-1">
+                                                    {student.name}
+                                                    {student.surname
+                                                        ? ` ${student.surname}`
+                                                        : ""}
+                                                </h4>
+                                                <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                                            </div>
+                                            <div className="space-y-1 text-xs text-muted-foreground">
+                                                {student.feePlan?.plan && (
+                                                    <>
+                                                        <div className="flex items-center gap-2">
+                                                            <Wallet className="h-3 w-3" />
+                                                            <span className="line-clamp-1">
+                                                                {
+                                                                    student.feePlan
+                                                                        .plan.name
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Coins className="h-3 w-3" />
+                                                            <span className="font-medium text-foreground">
+                                                                {
+                                                                    student.feePlan
+                                                                        .plan
+                                                                        .currency_code
+                                                                }{" "}
+                                                                {Number(
+                                                                    student.feePlan
+                                                                        .plan
+                                                                        .base_amount
+                                                                ).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Upcoming Events Alert */}
                 {upcomingEvents && upcomingEvents.length > 0 && (
                     <Card className="border-orange-500 bg-gradient-to-r from-orange-50 to-blue-50 dark:from-orange-950/20 dark:to-blue-950/20">

@@ -17,6 +17,7 @@ use App\Models\Certification;
 use App\Models\Payment;
 use App\Models\Supporter;
 use Illuminate\Support\Facades\Auth;
+use App\Models\StudentFeePlan;
 
 class DashboardController extends Controller
 {
@@ -68,6 +69,21 @@ class DashboardController extends Controller
             ->where('currency_code', $defaultCurrency)
             ->sum('amount');
 
+        // Get students with unpaid fees (no paid payments)
+        $studentsWithUnpaidFees = Student::whereIn('id', $studentIds)
+            ->whereHas('feePlan')
+            ->with(['feePlan.plan', 'club'])
+            ->get()
+            ->filter(function ($student) {
+                // Check if student has unpaid payments
+                $unpaidCount = Payment::where('student_id', $student->id)
+                    ->where('status', 'unpaid')
+                    ->count();
+                return $unpaidCount > 0;
+            })
+            ->take(5)
+            ->values();
+
         return Inertia::render('Organization/Dashboard', [
             'studentsCount' => $organization->students()->count(),
             'clubsCount' => $organization->clubs()->count(),
@@ -85,6 +101,7 @@ class DashboardController extends Controller
             'unpaidPayments' => $unpaidPayments,
             'totalRevenue' => $totalRevenue,
             'defaultCurrency' => $defaultCurrency,
+            'studentsWithUnpaidFees' => $studentsWithUnpaidFees,
         ]);
     }
 }

@@ -24,16 +24,20 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+        $organizationId = $user->userable_id;
+
         $students = Student::query()
             ->with(['organization', 'club']) // eager load relations
-            ->when(Auth::user()->role === 'organization', function ($query) {
-                $query->where('organization_id', Auth::user()->userable_id);
+            ->when($user->role === 'organization', function ($query) use ($organizationId) {
+                $query->where('organization_id', $organizationId);
             })
-            ->when($request->filled('organization_id') && $request->organization_id !== 'all', function ($query) use ($request) {
-                $query->where('organization_id', $request->organization_id);
-            })
-            ->when($request->filled('club_id') && $request->club_id !== 'all', function ($query) use ($request) {
-                $query->where('club_id', $request->club_id);
+            ->when($request->filled('club_id') && $request->club_id !== 'all', function ($query) use ($request, $organizationId) {
+                // Support club_id filter only if the club belongs to the organization
+                $club = Club::find($request->club_id);
+                if ($club && $club->organization_id === $organizationId) {
+                    $query->where('club_id', $request->club_id);
+                }
             })
             ->when($request->filled('nationality') && $request->nationality !== 'all', function ($query) use ($request) {
                 $query->where('nationality', $request->nationality);
@@ -77,12 +81,9 @@ class StudentController extends Controller
 
         return Inertia::render('Organization/Students/Index', [
             'students' => $students,
-            'organizations' => Organization::select('id', 'name')->get(),
-            'clubs' => Club::select('id', 'name')->get(),
             'nationalities' => Student::select('nationality')->distinct()->pluck('nationality'),
             'countries' => Student::select('country')->distinct()->pluck('country'),
             'filters' => [
-                'organization_id' => $request->organization_id,
                 'club_id' => $request->club_id,
                 'nationality' => $request->nationality,
                 'country' => $request->country,
@@ -97,23 +98,13 @@ class StudentController extends Controller
         $user = Auth::user();
         $organizationId = $user->userable_id;
 
-        $clubs = Club::where('organization_id', $organizationId)
-            ->select('id', 'name')
-            ->get();
-
+        // Get only organization-level plans
         $plans = Plan::where('is_active', true)
-            ->where(function ($query) use ($organizationId, $clubs) {
-                $query->where('planable_type', 'App\Models\Organization')
-                    ->where('planable_id', $organizationId)
-                    ->orWhere(function ($subQuery) use ($clubs) {
-                        $subQuery->where('planable_type', 'App\Models\Club')
-                            ->whereIn('planable_id', $clubs->pluck('id'));
-                    });
-            })
+            ->where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
             ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
 
         return Inertia::render('Organization/Students/Create', [
-            'clubs' => $clubs,
             'plans' => $plans,
             'currencies' => Currency::where('is_active', true)->get(),
         ]);
@@ -127,17 +118,6 @@ class StudentController extends Controller
 
         // Validate required fields
         $validated = $request->validate([
-            'club_id' => [
-                'required',
-                'integer',
-                'exists:clubs,id',
-                function ($attribute, $value, $fail) use ($organizationId) {
-                    $club = Club::find($value);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
-                    }
-                },
-            ],
             'name' => 'required|string',
             'email' => 'required|email',
             'password' => 'required|string|min:6',
@@ -148,6 +128,7 @@ class StudentController extends Controller
             'dod' => 'nullable|date',
             'grade' => 'required|string',
             'gender' => 'required|string',
+            'id_passport' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'identification_document' => 'nullable|mimes:pdf|max:2048',
             'city' => 'nullable|string',
@@ -158,25 +139,18 @@ class StudentController extends Controller
             'plan_id' => [
                 'nullable',
                 'exists:plans,id',
-                function ($attribute, $value, $fail) use ($request, $organizationId) {
+                function ($attribute, $value, $fail) use ($organizationId) {
                     if (!$value) {
-                        return; // Plan is optional if no club is selected
+                        return; // Plan is optional
                     }
 
                     $plan = Plan::find($value);
-                    $clubId = $request->input('club_id');
                     if (
                         !$plan ||
-                        $plan->planable_type !== 'App\Models\Club' ||
-                        (int) $plan->planable_id !== (int) $clubId
+                        $plan->planable_type !== 'App\Models\Organization' ||
+                        (int) $plan->planable_id !== (int) $organizationId
                     ) {
-                        $fail('The selected plan does not belong to the selected club.');
-                        return;
-                    }
-
-                    $club = Club::find($clubId);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
+                        $fail('The selected plan does not belong to your organization.');
                     }
                 },
             ],
@@ -217,6 +191,12 @@ class StudentController extends Controller
         // Inject organization_id if the logged-in user is an organization
         if ($user->role === 'organization') {
             $studentData['organization_id'] = $organizationId;
+
+            // Auto-assign to first available club of the organization
+            $firstClub = Club::where('organization_id', $organizationId)->first();
+            if ($firstClub) {
+                $studentData['club_id'] = $firstClub->id;
+            }
         }
 
         // Create student
@@ -264,26 +244,16 @@ class StudentController extends Controller
             abort(403, 'Unauthorized to access this student.');
         }
 
-        $clubs = Club::where('organization_id', $organizationId)
-            ->select('id', 'name')
-            ->get();
-
+        // Get only organization-level plans
         $plans = Plan::where('is_active', true)
-            ->where(function ($query) use ($organizationId, $clubs) {
-                $query->where('planable_type', 'App\Models\Organization')
-                    ->where('planable_id', $organizationId)
-                    ->orWhere(function ($subQuery) use ($clubs) {
-                        $subQuery->where('planable_type', 'App\Models\Club')
-                            ->whereIn('planable_id', $clubs->pluck('id'));
-                    });
-            })
+            ->where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
             ->get(['id', 'name', 'base_amount', 'currency_code', 'planable_id', 'planable_type']);
 
         $student->load('feePlan');
 
         return Inertia::render('Organization/Students/Edit', [
             'student' => $student,
-            'clubs' => $clubs,
             'plans' => $plans,
             'currencies' => Currency::where('is_active', true)->get(),
             'feePlan' => $student->feePlan,
@@ -300,17 +270,6 @@ class StudentController extends Controller
         }
 
         $validated = $request->validate([
-            'club_id' => [
-                'required',
-                'integer',
-                'exists:clubs,id',
-                function ($attribute, $value, $fail) use ($organizationId) {
-                    $club = Club::find($value);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
-                    }
-                },
-            ],
             'name' => 'required|string',
             'email' => 'required|email',
             'password' => 'nullable|string|min:6',
@@ -321,6 +280,7 @@ class StudentController extends Controller
             'dod' => 'nullable|date',
             'grade' => 'required|string',
             'gender' => 'required|string',
+            'id_passport' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'identification_document' => 'nullable|mimes:pdf|max:2048',
             'city' => 'nullable|string',
@@ -331,25 +291,18 @@ class StudentController extends Controller
             'plan_id' => [
                 'nullable',
                 'exists:plans,id',
-                function ($attribute, $value, $fail) use ($request, $organizationId) {
+                function ($attribute, $value, $fail) use ($organizationId) {
                     if (!$value) {
-                        return; // Plan is optional if no club is selected
+                        return; // Plan is optional
                     }
 
                     $plan = Plan::find($value);
-                    $clubId = $request->input('club_id');
                     if (
                         !$plan ||
-                        $plan->planable_type !== 'App\Models\Club' ||
-                        (int) $plan->planable_id !== (int) $clubId
+                        $plan->planable_type !== 'App\Models\Organization' ||
+                        (int) $plan->planable_id !== (int) $organizationId
                     ) {
-                        $fail('The selected plan does not belong to the selected club.');
-                        return;
-                    }
-
-                    $club = Club::find($clubId);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
+                        $fail('The selected plan does not belong to your organization.');
                     }
                 },
             ],

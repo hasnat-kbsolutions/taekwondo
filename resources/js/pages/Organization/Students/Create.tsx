@@ -18,14 +18,12 @@ import {
 import { toast } from "sonner";
 
 interface Props {
-    clubs: any[];
     plans: any[];
     currencies: any[];
 }
 
-export default function Create({ clubs, plans, currencies }: Props) {
+export default function Create({ plans, currencies }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        club_id: "",
         name: "",
         email: "",
         password: "",
@@ -55,34 +53,11 @@ export default function Create({ clubs, plans, currencies }: Props) {
     const availablePlans = useMemo(
         () =>
             plans.filter((plan) => {
-                // Always show organization-level plans
-                if (plan.planable_type === 'App\\Models\\Organization') {
-                    return true;
-                }
-                // Show club-level plans only if a club is selected and matches
-                if (data.club_id && String(plan.planable_id) === String(data.club_id)) {
-                    return true;
-                }
-                return false;
+                // Show only organization-level plans
+                return plan.planable_type === 'App\\Models\\Organization';
             }),
-        [plans, data.club_id]
+        [plans]
     );
-
-    useEffect(() => {
-        if (!data.club_id) {
-            if (data.plan_id !== "") {
-                setData("plan_id", "");
-            }
-            return;
-        }
-
-        const exists = availablePlans.some(
-            (plan) => String(plan.id) === data.plan_id
-        );
-        if (!exists && data.plan_id !== "") {
-            setData("plan_id", "");
-        }
-    }, [data.club_id, availablePlans, data.plan_id, setData]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,32 +79,6 @@ export default function Create({ clubs, plans, currencies }: Props) {
             <Head title="Add Student" />
             <div className="container mx-auto py-10">
                 <form onSubmit={handleSubmit} className="flex flex-wrap">
-                    {/* Required: Club */}
-                    <div className="w-[33.33%] px-2 mt-3">
-                        <Label>
-                            Select Club <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            value={data.club_id}
-                            onValueChange={(value) => setData("club_id", value)}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Club" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {clubs.map((club) => (
-                                    <SelectItem
-                                        key={club.id}
-                                        value={String(club.id)}
-                                    >
-                                        {club.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {renderError("club_id")}
-                    </div>
-
                     {/* Required: Name */}
                     <div className="w-[33.33%] px-2 mt-3">
                         <Label>

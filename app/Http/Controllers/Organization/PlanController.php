@@ -21,31 +21,16 @@ class PlanController extends Controller
 
         $organizationId = $user->userable_id;
 
-        // Get all clubs for this organization
-        $clubIds = \App\Models\Club::where('organization_id', $organizationId)
-            ->pluck('id')
-            ->toArray();
-
-        // Get plans associated with this organization's clubs
-        $query = Plan::where('planable_type', 'App\Models\Club')
-            ->whereIn('planable_id', $clubIds)
-            ->with('planable');
-
-        // Filter by club if specified
-        if ($request->club_id) {
-            $club = \App\Models\Club::find($request->club_id);
-            if ($club && $club->organization_id === $organizationId) {
-                $query->where('planable_id', $request->club_id);
-            }
-        }
-
-        $plans = $query->orderByDesc('id')->get();
+        // Get plans associated with this organization
+        $plans = Plan::where('planable_type', 'App\Models\Organization')
+            ->where('planable_id', $organizationId)
+            ->with('planable')
+            ->orderByDesc('id')
+            ->get();
 
         return Inertia::render('Organization/Plans/Index', [
             'plans' => $plans,
-            'clubs' => \App\Models\Club::where('organization_id', $organizationId)->get(),
             'currencies' => Currency::where('is_active', true)->get(),
-            'filters' => $request->only(['club_id']),
         ]);
     }
 
@@ -56,10 +41,7 @@ class PlanController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $organizationId = $user->userable_id;
-
         return Inertia::render('Organization/Plans/Create', [
-            'clubs' => Club::where('organization_id', $organizationId)->get(),
             'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
@@ -74,27 +56,17 @@ class PlanController extends Controller
         $organizationId = $user->userable_id;
 
         $validated = $request->validate([
-            'club_id' => [
-                'required',
-                'exists:clubs,id',
-                function ($attribute, $value, $fail) use ($organizationId) {
-                    $club = Club::find($value);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
-                    }
-                },
-            ],
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                function ($attribute, $value, $fail) use ($request) {
+                function ($attribute, $value, $fail) use ($organizationId) {
                     $exists = Plan::where('name', $value)
-                        ->where('planable_type', 'App\Models\Club')
-                        ->where('planable_id', $request->club_id)
+                        ->where('planable_type', 'App\Models\Organization')
+                        ->where('planable_id', $organizationId)
                         ->exists();
                     if ($exists) {
-                        $fail('A plan with this name already exists for the selected club.');
+                        $fail('A plan with this name already exists for your organization.');
                     }
                 },
             ],
@@ -102,6 +74,11 @@ class PlanController extends Controller
             'currency_code' => 'required|exists:currencies,code',
             'is_active' => 'nullable|boolean',
             'description' => 'nullable|string',
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => 'nullable|numeric|min:0',
+            'effective_from' => 'nullable|date',
         ]);
 
         Plan::create([
@@ -110,8 +87,13 @@ class PlanController extends Controller
             'currency_code' => $validated['currency_code'],
             'is_active' => $validated['is_active'] ?? true,
             'description' => $validated['description'] ?? null,
-            'planable_type' => 'App\Models\Club',
-            'planable_id' => $validated['club_id'],
+            'interval' => $validated['interval'],
+            'interval_count' => $validated['interval_count'] ?? null,
+            'discount_type' => $validated['discount_type'] ?? null,
+            'discount_value' => $validated['discount_value'] ?? null,
+            'effective_from' => $validated['effective_from'] ?? null,
+            'planable_type' => 'App\Models\Organization',
+            'planable_id' => $organizationId,
         ]);
 
         return redirect()->route('organization.plans.index')->with('success', 'Plan created successfully.');
@@ -126,17 +108,13 @@ class PlanController extends Controller
 
         $organizationId = $user->userable_id;
 
-        // Verify plan belongs to organization's club
-        $plan->load('planable');
-        $club = $plan->planable;
-        if (!$club || $club->organization_id !== $organizationId) {
+        // Verify plan belongs to this organization
+        if ($plan->planable_type !== 'App\Models\Organization' || $plan->planable_id !== $organizationId) {
             abort(403, 'Unauthorized to access this plan.');
         }
 
         return Inertia::render('Organization/Plans/Edit', [
             'plan' => $plan,
-            'club_id' => $club->id,
-            'clubs' => Club::where('organization_id', $organizationId)->get(),
             'currencies' => Currency::where('is_active', true)->get(),
         ]);
     }
@@ -150,36 +128,24 @@ class PlanController extends Controller
 
         $organizationId = $user->userable_id;
 
-        // Verify plan belongs to organization's club
-        $plan->load('planable');
-        $club = $plan->planable;
-        if (!$club || $club->organization_id !== $organizationId) {
+        // Verify plan belongs to this organization
+        if ($plan->planable_type !== 'App\Models\Organization' || $plan->planable_id !== $organizationId) {
             abort(403, 'Unauthorized to update this plan.');
         }
 
         $validated = $request->validate([
-            'club_id' => [
-                'required',
-                'exists:clubs,id',
-                function ($attribute, $value, $fail) use ($organizationId) {
-                    $club = Club::find($value);
-                    if (!$club || $club->organization_id !== $organizationId) {
-                        $fail('The selected club does not belong to your organization.');
-                    }
-                },
-            ],
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                function ($attribute, $value, $fail) use ($request, $plan) {
+                function ($attribute, $value, $fail) use ($organizationId, $plan) {
                     $exists = Plan::where('name', $value)
-                        ->where('planable_type', 'App\Models\Club')
-                        ->where('planable_id', $request->club_id)
+                        ->where('planable_type', 'App\Models\Organization')
+                        ->where('planable_id', $organizationId)
                         ->where('id', '!=', $plan->id)
                         ->exists();
                     if ($exists) {
-                        $fail('A plan with this name already exists for the selected club.');
+                        $fail('A plan with this name already exists for your organization.');
                     }
                 },
             ],
@@ -187,6 +153,11 @@ class PlanController extends Controller
             'currency_code' => 'required|exists:currencies,code',
             'is_active' => 'nullable|boolean',
             'description' => 'nullable|string',
+            'interval' => 'required|in:monthly,quarterly,semester,yearly,custom',
+            'interval_count' => 'nullable|integer|min:1',
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => 'nullable|numeric|min:0',
+            'effective_from' => 'nullable|date',
         ]);
 
         $plan->update([
@@ -195,8 +166,11 @@ class PlanController extends Controller
             'currency_code' => $validated['currency_code'],
             'is_active' => $validated['is_active'] ?? $plan->is_active,
             'description' => $validated['description'] ?? null,
-            'planable_type' => 'App\Models\Club',
-            'planable_id' => $validated['club_id'],
+            'interval' => $validated['interval'],
+            'interval_count' => $validated['interval_count'] ?? null,
+            'discount_type' => $validated['discount_type'] ?? null,
+            'discount_value' => $validated['discount_value'] ?? null,
+            'effective_from' => $validated['effective_from'] ?? null,
         ]);
 
         return redirect()->route('organization.plans.index')->with('success', 'Plan updated successfully.');
@@ -211,10 +185,8 @@ class PlanController extends Controller
 
         $organizationId = $user->userable_id;
 
-        // Verify plan belongs to organization's club
-        $plan->load('planable');
-        $club = $plan->planable;
-        if (!$club || $club->organization_id !== $organizationId) {
+        // Verify plan belongs to this organization
+        if ($plan->planable_type !== 'App\Models\Organization' || $plan->planable_id !== $organizationId) {
             abort(403, 'Unauthorized to delete this plan.');
         }
 

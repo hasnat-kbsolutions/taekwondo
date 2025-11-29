@@ -16,6 +16,11 @@ class Plan extends Model
         'description',
         'planable_type',
         'planable_id',
+        'interval',
+        'interval_count',
+        'discount_type',
+        'discount_value',
+        'effective_from',
     ];
 
     protected $casts = [
