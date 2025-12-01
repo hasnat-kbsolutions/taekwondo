@@ -128,16 +128,16 @@ class ComprehensiveDummyDataSeeder extends Seeder
             for ($i = 0; $i < 3; $i++) {
                 $clubIndex++;
                 $club = Club::updateOrCreate(
-                    ['name' => $clubNames[$i % count($clubNames)]],
+                    ['tax_number' => 'TN' . str_pad($clubIndex, 4, '0', STR_PAD_LEFT)],
                     [
+                        'name' => $clubNames[$clubIndex - 1],
                         'organization_id' => $org->id,
-                        'tax_number' => 'TN' . str_pad($clubIndex, 4, '0', STR_PAD_LEFT),
                         'invoice_prefix' => 'INV-' . str_pad($clubIndex, 3, '0', STR_PAD_LEFT),
                         'phone' => '+603-' . str_pad($clubIndex, 4, '0', STR_PAD_LEFT) . '-9999',
                         'website' => 'https://club' . $clubIndex . '.taekwondo.my',
                         'postal_code' => '50000',
                         'city' => $org->city,
-                        'street' => ($clubIndex) . ' Jalan ' . $clubNames[$i % count($clubNames)],
+                        'street' => ($clubIndex) . ' Jalan ' . $clubNames[$clubIndex - 1],
                         'country' => 'Malaysia',
                         'status' => true,
                         'default_currency' => 'MYR',
