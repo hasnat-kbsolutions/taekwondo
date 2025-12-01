@@ -1,5 +1,6 @@
 # Taekwondo App - Quick Command Reference Guide
 
+**Created by**: Kamran Bhutto
 **Last Updated**: December 1, 2025
 **For**: Future Development & Deployment Issues
 
@@ -312,6 +313,9 @@ mysql -h localhost -u kbsoluti_taekwondo -p kbsoluti_taekwondo -e "SELECT COUNT(
 
 ---
 
-**Created by**: Kamran Bhutto
+**Created by**: Kamran Bhutto with AI assistance
+**Author & Owner**: Kamran Bhutto
 **Email**: kamranbhutto@gmail.com
 **Repository**: https://github.com/hasnat-kbsolutions/taekwondo
+
+*This guide was requested by Kamran Bhutto and compiled from his direct experience in solving deployment issues on December 1, 2025.*
