@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Models\Currency;
+use App\Models\BankInformation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -61,6 +62,10 @@ class ComprehensiveDummyDataSeeder extends Seeder
         // Step 9: Create Attendances
         $this->command->info('Creating attendances...');
         $this->createAttendances($students);
+
+        // Step 10: Create Bank Information
+        $this->command->info('Creating bank information...');
+        $this->createBankInformation($organizations, $clubs);
 
         $this->command->info('Dummy data seeding completed!');
     }
@@ -438,6 +443,57 @@ class ComprehensiveDummyDataSeeder extends Seeder
                 }
                 $currentDate->addDay();
             }
+        }
+    }
+
+    private function createBankInformation($organizations, $clubs)
+    {
+        $banks = [
+            ['bank_name' => 'Maybank', 'swift_code' => 'MBBEMYKL'],
+            ['bank_name' => 'Public Bank', 'swift_code' => 'PBBEMYKL'],
+            ['bank_name' => 'CIMB Bank', 'swift_code' => 'CIBBMYKL'],
+            ['bank_name' => 'Hong Leong Bank', 'swift_code' => 'HLBKMYKL'],
+            ['bank_name' => 'AmBank', 'swift_code' => 'AFBKMYKL'],
+        ];
+
+        // Create bank information for organizations
+        foreach ($organizations as $index => $org) {
+            $bank = $banks[$index % count($banks)];
+            BankInformation::updateOrCreate(
+                [
+                    'userable_type' => Organization::class,
+                    'userable_id' => $org->id,
+                ],
+                [
+                    'bank_name' => $bank['bank_name'],
+                    'account_name' => $org->name,
+                    'account_number' => '0' . str_pad($org->id, 15, rand(100, 999), STR_PAD_LEFT),
+                    'iban' => 'MY' . str_pad($org->id, 24, '0', STR_PAD_LEFT),
+                    'swift_code' => $bank['swift_code'],
+                    'branch' => $org->city,
+                    'currency' => 'MYR',
+                ]
+            );
+        }
+
+        // Create bank information for clubs
+        foreach ($clubs as $index => $club) {
+            $bank = $banks[$index % count($banks)];
+            BankInformation::updateOrCreate(
+                [
+                    'userable_type' => Club::class,
+                    'userable_id' => $club->id,
+                ],
+                [
+                    'bank_name' => $bank['bank_name'],
+                    'account_name' => $club->name,
+                    'account_number' => '0' . str_pad($club->id, 15, rand(100, 999), STR_PAD_LEFT),
+                    'iban' => 'MY' . str_pad($club->id, 24, '0', STR_PAD_LEFT),
+                    'swift_code' => $bank['swift_code'],
+                    'branch' => $club->city,
+                    'currency' => 'MYR',
+                ]
+            );
         }
     }
 }
