@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Club;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankInformation;
-use App\Models\User;
+use App\Models\Club;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,7 @@ class BankInformationController extends Controller
         }
 
         $query = BankInformation::with(['userable'])
-            ->where('userable_type', User::class)
+            ->where('userable_type', Club::class)
             ->where('userable_id', $club->id);
 
         // Search functionality
@@ -72,7 +72,7 @@ class BankInformationController extends Controller
         }
 
         // Add the club as the owner
-        $validated['userable_type'] = User::class;
+        $validated['userable_type'] = Club::class;
         $validated['userable_id'] = $club->id;
 
         BankInformation::create($validated);
@@ -112,7 +112,7 @@ class BankInformationController extends Controller
         }
 
         // Ensure the bank information belongs to the current club
-        if ($bankInformation->userable_type !== User::class || $bankInformation->userable_id !== $club->id) {
+        if ($bankInformation->userable_type !== Club::class || $bankInformation->userable_id !== $club->id) {
             return back()->withErrors(['error' => 'You can only edit your own bank information.']);
         }
 
@@ -131,7 +131,7 @@ class BankInformationController extends Controller
         }
 
         // Ensure the bank information belongs to the current club
-        if ($bankInformation->userable_type !== User::class || $bankInformation->userable_id !== $club->id) {
+        if ($bankInformation->userable_type !== Club::class || $bankInformation->userable_id !== $club->id) {
             return back()->withErrors(['error' => 'You can only delete your own bank information.']);
         }
 

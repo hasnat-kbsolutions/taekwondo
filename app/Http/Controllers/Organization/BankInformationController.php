@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankInformation;
-use App\Models\User;
+use App\Models\Organization;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,7 @@ class BankInformationController extends Controller
         }
 
         $query = BankInformation::with(['userable'])
-            ->where('userable_type', User::class)
+            ->where('userable_type', Organization::class)
             ->where('userable_id', $organization->id);
 
         // Search functionality
@@ -72,7 +72,7 @@ class BankInformationController extends Controller
         }
 
         // Add the organization as the owner
-        $validated['userable_type'] = User::class;
+        $validated['userable_type'] = Organization::class;
         $validated['userable_id'] = $organization->id;
 
         BankInformation::create($validated);
@@ -112,7 +112,7 @@ class BankInformationController extends Controller
         }
 
         // Ensure the bank information belongs to the current organization
-        if ($bankInformation->userable_type !== User::class || $bankInformation->userable_id !== $organization->id) {
+        if ($bankInformation->userable_type !== Organization::class || $bankInformation->userable_id !== $organization->id) {
             return back()->withErrors(['error' => 'You can only edit your own bank information.']);
         }
 
@@ -131,7 +131,7 @@ class BankInformationController extends Controller
         }
 
         // Ensure the bank information belongs to the current organization
-        if ($bankInformation->userable_type !== User::class || $bankInformation->userable_id !== $organization->id) {
+        if ($bankInformation->userable_type !== Organization::class || $bankInformation->userable_id !== $organization->id) {
             return back()->withErrors(['error' => 'You can only delete your own bank information.']);
         }
 
