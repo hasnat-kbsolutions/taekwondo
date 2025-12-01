@@ -73,6 +73,11 @@ class Student extends Model
         return $this->hasOne(StudentFeePlan::class);
     }
 
+    public function gradeHistories()
+    {
+        return $this->hasMany(StudentGradeHistory::class)->orderBy('achieved_at', 'desc');
+    }
+
     public function instructors()
     {
         return $this->belongsToMany(\App\Models\Instructor::class, 'instructor_student');

@@ -16,7 +16,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Key, Users } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Key, Users, Eye } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -122,9 +122,7 @@ const columns = (
             const clubId = row.original.id;
             return (
                 <Link
-                    href={route("organization.students.index", {
-                        club_id: clubId,
-                    })}
+                    href={route("organization.clubs.students.index", clubId)}
                     className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer"
                 >
                     <Users className="h-4 w-4 text-muted-foreground/50" />
@@ -145,6 +143,17 @@ const columns = (
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route(
+                                "organization.profile.show-club",
+                                row.original.id
+                            )}
+                        >
+                            <Eye className="w-4 h-4 mr-2" /> View Profile
+                        </Link>
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                         <Link
                             href={route(

@@ -13,16 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CurrencySeeder::class, // Must be first as other models depend on currencies
-            OrganizationSeeder::class,
-            ClubSeeder::class,
-            StudentSeeder::class,
-            PlanSeeder::class,
-            InstructorSeeder::class,
-            UserSeeder::class,
-            CertificationSeeder::class,
-            AttendanceSeeder::class,
-            // PaymentSeeder::class,
-            RatingSeeder::class,
+            ComprehensiveDummyDataSeeder::class, // Comprehensive dummy data seeder with 150+ students
         ]);
     }
 }

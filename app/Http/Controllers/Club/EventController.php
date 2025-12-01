@@ -78,18 +78,29 @@ class EventController extends Controller
 
         $club = $user->userable;
 
+        // Validate form data - times are completely optional
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'event_type' => 'required|string|in:training,competition,seminar,meeting,other',
             'event_date' => 'required|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'start_time' => 'nullable|string',
+            'end_time' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
             'status' => 'required|in:upcoming,ongoing,completed',
             'is_public' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
+
+        // Time fields are optional - no format validation required
+        // Simply trim and set to null if empty
+        $validated['start_time'] = !empty(trim($validated['start_time'] ?? ''))
+            ? trim($validated['start_time'])
+            : null;
+        $validated['end_time'] = !empty(trim($validated['end_time'] ?? ''))
+            ? trim($validated['end_time'])
+            : null;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -97,6 +108,14 @@ class EventController extends Controller
             $filename = 'event_' . time() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('events', $filename, 'public');
             $validated['image'] = $path;
+        }
+
+        // Handle document upload
+        if ($request->hasFile('document')) {
+            $document = $request->file('document');
+            $filename = 'event_doc_' . time() . '.' . $document->getClientOriginalExtension();
+            $path = $document->storeAs('events/documents', $filename, 'public');
+            $validated['document'] = $path;
         }
 
         Event::create([
@@ -146,20 +165,51 @@ class EventController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        // Validate form data - times are completely optional
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'event_type' => 'required|string|in:training,competition,seminar,meeting,other',
             'event_date' => 'required|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'start_time' => 'nullable|string',
+            'end_time' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
             'status' => 'required|in:upcoming,ongoing,completed',
             'is_public' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'remove_image' => 'boolean',
+            'remove_document' => 'boolean',
         ]);
 
-        // Handle image upload
+        // Time fields are optional - preserve existing values if not provided/empty
+        // Simply trim empty values and keep the existing event times
+        if (empty(trim($validated['start_time'] ?? ''))) {
+            $validated['start_time'] = $event->start_time;
+        } else {
+            $validated['start_time'] = trim($validated['start_time']);
+        }
+
+        if (empty(trim($validated['end_time'] ?? ''))) {
+            $validated['end_time'] = $event->end_time;
+        } else {
+            $validated['end_time'] = trim($validated['end_time']);
+        }
+
+        // Prepare update data - only include fields that should be updated
+        $updateData = [
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'event_type' => $validated['event_type'],
+            'event_date' => $validated['event_date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'venue' => $validated['venue'],
+            'status' => $validated['status'],
+            'is_public' => $validated['is_public'],
+        ];
+
+        // Handle image upload/removal
         if ($request->hasFile('image')) {
             // Delete old image
             if ($event->image) {
@@ -172,10 +222,46 @@ class EventController extends Controller
             $image = $request->file('image');
             $filename = 'event_' . time() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('events', $filename, 'public');
-            $validated['image'] = $path;
+            $updateData['image'] = $path;
+        } elseif ($request->boolean('remove_image')) {
+            // Delete image if removal is requested
+            if ($event->image) {
+                $oldFile = storage_path('app/public/' . $event->image);
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+            $updateData['image'] = null;
         }
+        // If neither upload nor remove, don't include image in update - it stays unchanged
 
-        $event->update($validated);
+        // Handle document upload/removal
+        if ($request->hasFile('document')) {
+            // Delete old document
+            if ($event->document) {
+                $oldFile = storage_path('app/public/' . $event->document);
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+
+            $document = $request->file('document');
+            $filename = 'event_doc_' . time() . '.' . $document->getClientOriginalExtension();
+            $path = $document->storeAs('events/documents', $filename, 'public');
+            $updateData['document'] = $path;
+        } elseif ($request->boolean('remove_document')) {
+            // Delete document if removal is requested
+            if ($event->document) {
+                $oldFile = storage_path('app/public/' . $event->document);
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+            $updateData['document'] = null;
+        }
+        // If neither upload nor remove, don't include document in update - it stays unchanged
+
+        $event->update($updateData);
 
         return redirect()->route('club.events.index')->with('success', 'Event updated successfully.');
     }
@@ -198,6 +284,14 @@ class EventController extends Controller
         // Delete event image
         if ($event->image) {
             $filePath = storage_path('app/public/' . $event->image);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // Delete event document
+        if ($event->document) {
+            $filePath = storage_path('app/public/' . $event->document);
             if (file_exists($filePath)) {
                 unlink($filePath);
             }

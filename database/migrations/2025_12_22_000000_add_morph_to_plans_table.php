@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->dropUnique(['name']);
 
             // Add morph columns for club association
-            $table->string('planable_type')->nullable()->after('id');
+            $table->string('planable_type', 100)->nullable()->after('id');
             $table->unsignedBigInteger('planable_id')->nullable()->after('planable_type');
 
             // Add index for morph relationship

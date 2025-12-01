@@ -169,6 +169,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: Users,
         },
         {
+            title: "Grade Reports",
+            url: "/organization/grade-reports",
+            icon: TrendingUp,
+        },
+        {
             title: "Payment",
             url: "/organization/payments",
             icon: Wallet,
@@ -214,6 +219,11 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             icon: Users,
         },
         {
+            title: "Grade Reports",
+            url: "/club/grade-reports",
+            icon: TrendingUp,
+        },
+        {
             title: "Payment",
             url: "/club/payments",
             icon: Wallet,
@@ -221,10 +231,6 @@ const NAV_MENUS: Record<string, NavItem[]> = {
             items: [
                 { title: "Payments", url: "/club/payments" },
                 { title: "Plans", url: "/club/plans" },
-                {
-                    title: "Student Fee Plans",
-                    url: "/club/student-fee-plans",
-                },
             ],
         },
         {
@@ -262,6 +268,7 @@ const NAV_MENUS: Record<string, NavItem[]> = {
     student: [
         { title: "Dashboard", url: "/student/dashboard", icon: Home },
         { title: "Payment", url: "/student/payments", icon: Wallet },
+        { title: "Grade Report", url: "/student/grade-report", icon: TrendingUp },
         { title: "Attendence", url: "/student/attendances", icon: Clock },
         {
             title: "Certifications",

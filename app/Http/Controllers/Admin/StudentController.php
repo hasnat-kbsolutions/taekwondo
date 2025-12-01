@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\GradeHistoryController;
 
 use App\Models\Student;
 use App\Models\Plan;
@@ -313,8 +314,17 @@ class StudentController extends Controller
             }
         }
 
+        // Check if grade has changed and record it
+        $oldGrade = $student->grade;
+        $newGrade = $studentData['grade'] ?? $student->grade;
+
         // Update the student record
         $student->update($studentData);
+
+        // Record grade change if it occurred
+        if ($oldGrade !== $newGrade) {
+            GradeHistoryController::recordGradeChange($student, $newGrade, 'Grade updated', $oldGrade);
+        }
 
         // Create or update user account
         if (!empty($studentData['email'])) {

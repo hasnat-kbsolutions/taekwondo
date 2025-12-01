@@ -185,6 +185,9 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::delete('/clubs/{club}', [App\Http\Controllers\Organization\ClubController::class, 'destroy'])->name('clubs.destroy');
     Route::patch('/clubs/{club}/password', [App\Http\Controllers\Organization\ClubController::class, 'updatePassword'])->name('clubs.updatePassword');
 
+    // Nested route: View students of a specific club
+    Route::get('/clubs/{club}/students', [App\Http\Controllers\Organization\ClubStudentController::class, 'index'])->name('clubs.students.index');
+
     // Organization Payment Routes
     Route::get('/payments', [App\Http\Controllers\Organization\PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/create', [App\Http\Controllers\Organization\PaymentController::class, 'create'])->name('payments.create');
@@ -229,6 +232,10 @@ Route::middleware(['auth', 'role:organization'])->prefix('organization')->name('
     Route::get('/certifications/{certification}/edit', [\App\Http\Controllers\Organization\CertificationController::class, 'edit'])->name('certifications.edit');
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Organization\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Organization\CertificationController::class, 'destroy'])->name('certifications.destroy');
+
+    // Organization Grade Report Routes
+    Route::get('/grade-reports', [App\Http\Controllers\Organization\GradeReportController::class, 'index'])->name('grade-reports.index');
+    Route::get('/grade-reports/{student}', [App\Http\Controllers\Organization\GradeReportController::class, 'show'])->name('grade-reports.show');
 
     // Organization Profile Routes
     Route::get('/profile', [App\Http\Controllers\Organization\ProfileController::class, 'show'])->name('profile.show');
@@ -317,6 +324,10 @@ Route::middleware(['auth', 'role:club'])->prefix('club')->name('club.')->group(f
     Route::put('/certifications/{certification}', [\App\Http\Controllers\Club\CertificationController::class, 'update'])->name('certifications.update');
     Route::delete('/certifications/{certification}', [App\Http\Controllers\Club\CertificationController::class, 'destroy'])->name('certifications.destroy');
 
+    // Club Grade Report Routes
+    Route::get('/grade-reports', [App\Http\Controllers\Club\GradeReportController::class, 'index'])->name('grade-reports.index');
+    Route::get('/grade-reports/{student}', [App\Http\Controllers\Club\GradeReportController::class, 'show'])->name('grade-reports.show');
+
     // Club Event Routes
     Route::get('/events', [\App\Http\Controllers\Club\EventController::class, 'index'])->name('events.index');
     Route::get('/events/create', [\App\Http\Controllers\Club\EventController::class, 'create'])->name('events.create');
@@ -363,6 +374,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 
     Route::get('/attendances', [App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('/certifications', [App\Http\Controllers\Student\CertificationController::class, 'index'])->name('certifications.index');
+
+    // Student Grade Report Routes
+    Route::get('/grade-report', [App\Http\Controllers\Student\GradeReportController::class, 'show'])->name('grade-report.show');
 
     // Student Event Routes
     Route::get('/events', [App\Http\Controllers\Student\EventController::class, 'index'])->name('events.index');

@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name', 100)->unique();
             $table->decimal('base_amount', 10, 2);
             $table->string('currency_code', 3)->default('MYR');
             $table->boolean('is_active')->default(true);

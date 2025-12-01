@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Head, Link, router } from "@inertiajs/react";
-import { route } from "ziggy-js";
+import { Head, router } from "@inertiajs/react";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,6 @@ import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
-import { Eye, Edit, Trash2 } from "lucide-react";
 
 export type Student = {
     id: number;
@@ -44,7 +42,13 @@ export type Student = {
     total_ratings: number;
 };
 
+interface Club {
+    id: number;
+    name: string;
+}
+
 interface Props {
+    club: Club;
     students: Student[];
     nationalities?: string[];
     countries?: string[];
@@ -55,8 +59,8 @@ interface Props {
     };
 }
 
-// Define the columns inline here - Organization view
-export const columns = (onDelete?: (student: Student) => void): ColumnDef<Student>[] => {
+// Define the columns for club students view
+export const columns = (): ColumnDef<Student>[] => {
     const baseColumns: ColumnDef<Student>[] = [
         {
             header: "#",
@@ -68,7 +72,6 @@ export const columns = (onDelete?: (student: Student) => void): ColumnDef<Studen
             cell: ({ row }) => {
                 const imageUrl = row.original.profile_image;
                 if (imageUrl) {
-                    // Handle both relative paths and full URLs
                     const fullUrl = imageUrl.startsWith("http")
                         ? imageUrl
                         : `/storage/${imageUrl}`;
@@ -127,50 +130,13 @@ export const columns = (onDelete?: (student: Student) => void): ColumnDef<Studen
                 </Badge>
             ),
         },
-        {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <Link href={route("organization.profile.show-student", row.original.id)}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            title="View Profile"
-                        >
-                            <Eye className="w-4 h-4 text-blue-600" />
-                        </Button>
-                    </Link>
-                    <Link href={route("organization.students.edit", row.original.id)}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Edit"
-                        >
-                            <Edit className="w-4 h-4 text-green-600" />
-                        </Button>
-                    </Link>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Delete"
-                        onClick={() => {
-                            if (onDelete && confirm("Are you sure you want to delete this student?")) {
-                                onDelete(row.original);
-                            }
-                        }}
-                    >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
-                </div>
-            ),
-        },
     ];
 
     return baseColumns;
 };
 
 export default function Index({
+    club,
     students,
     nationalities = [],
     countries = [],
@@ -186,7 +152,7 @@ export default function Index({
         status?: string;
     }) => {
         router.get(
-            route("organization.students.index"),
+            route("organization.clubs.students.index", club.id),
             {
                 nationality: params.nationality ?? (nationality || null),
                 country: params.country ?? (country || null),
@@ -205,7 +171,7 @@ export default function Index({
         setCountry("");
         setStatus("");
         router.get(
-            route("organization.students.index"),
+            route("organization.clubs.students.index", club.id),
             {},
             {
                 preserveScroll: true,
@@ -215,25 +181,13 @@ export default function Index({
         );
     };
 
-    const handleDelete = (student: Student) => {
-        router.delete(route("organization.students.destroy", student.id), {
-            onSuccess: () => {
-                router.visit(route("organization.students.index"));
-            },
-        });
-    };
-
     return (
-        <AuthenticatedLayout header="Students">
-            <Head title="Students" />
+        <AuthenticatedLayout header={`${club.name} Students`}>
+            <Head title={`${club.name} Students`} />
             <div className="container mx-auto py-10">
-                {/* Students Table Card */}
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Students</CardTitle>
-                        <Link href={route("organization.students.create")}>
-                            <Button>Add Student</Button>
-                        </Link>
+                    <CardHeader>
+                        <CardTitle>{club.name} - Students</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {/* Filters Section */}
@@ -323,7 +277,7 @@ export default function Index({
 
                         {/* DataTable */}
                         <DataTable
-                            columns={columns(handleDelete)}
+                            columns={columns()}
                             data={students}
                         />
                     </CardContent>

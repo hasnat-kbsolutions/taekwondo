@@ -16,8 +16,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('club_id');
             $table->unsignedBigInteger('organization_id');
 
-            $table->string('uid')->unique();
-            $table->string('code');
+            $table->string('uid', 50)->unique();
+            $table->string('code', 50);
             $table->string('name');
             $table->string('surname')->nullable();
             $table->string('nationality');

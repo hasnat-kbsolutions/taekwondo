@@ -58,7 +58,7 @@ class ProfileController extends Controller
         
         // Get students, instructors, and clubs for rating functionality
         $students = $organization->students()->select('id', 'name', 'surname', 'grade')->get();
-        $instructors = $organization->instructors()->select('id', 'name', 'grade')->get();
+        $instructors = $organization->instructors()->select('id', 'name')->get();
         $clubs = $organization->clubs()->select('id', 'name', 'city', 'country')->get();
         
         // Calculate statistics
@@ -133,7 +133,7 @@ class ProfileController extends Controller
         
         // Get students, instructors, and clubs for rating functionality
         $students = $organization->students()->select('id', 'name', 'surname', 'grade')->get();
-        $instructors = $organization->instructors()->select('id', 'name', 'grade')->get();
+        $instructors = $organization->instructors()->select('id', 'name')->get();
         $clubs = $organization->clubs()->select('id', 'name', 'city', 'country')->get();
         
         // Calculate statistics
@@ -165,11 +165,43 @@ class ProfileController extends Controller
 
     public function showStudent($id)
     {
-        $student = Student::with(['user', 'club', 'organization'])->findOrFail($id);
-        
+        $student = Student::with(['user', 'club', 'organization', 'gradeHistories'])->findOrFail($id);
+
+        // Format grade history
+        $gradeHistory = $student->gradeHistories->map(function ($history) {
+            return [
+                'id' => $history->id,
+                'grade_name' => $history->grade_name,
+                'achieved_at' => $history->achieved_at->format('Y-m-d'),
+                'achieved_at_formatted' => $history->achieved_at->format('M d, Y'),
+                'duration_days' => $history->duration_days,
+                'duration_formatted' => $this->formatDuration($history->duration_days),
+                'notes' => $history->notes,
+            ];
+        });
+
         return Inertia::render('Organization/Profile/ShowStudent', [
             'student' => $student,
+            'gradeHistory' => $gradeHistory,
         ]);
+    }
+
+    private function formatDuration($days)
+    {
+        if (!$days) {
+            return 'Current';
+        }
+
+        $years = intdiv($days, 365);
+        $months = intdiv(($days % 365), 30);
+        $remainingDays = $days % 30;
+
+        $parts = [];
+        if ($years > 0) $parts[] = "$years year" . ($years > 1 ? 's' : '');
+        if ($months > 0) $parts[] = "$months month" . ($months > 1 ? 's' : '');
+        if ($remainingDays > 0 || empty($parts)) $parts[] = "$remainingDays day" . ($remainingDays > 1 ? 's' : '');
+
+        return implode(', ', array_slice($parts, 0, 2));
     }
 
     public function showInstructor($id)

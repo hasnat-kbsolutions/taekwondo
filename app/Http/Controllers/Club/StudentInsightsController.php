@@ -195,8 +195,8 @@ class StudentInsightsController extends Controller
         $paymentRate = $totalAmount > 0 ? (float) round(($totalPaid / $totalAmount) * 100, 2) : 0.0;
 
         // Get monthly payment breakdown
-        $monthlyPayments = $payments->selectRaw('MONTH(pay_at) as month, SUM(amount) as total, SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = "unpaid" THEN amount ELSE 0 END) as pending')
-            ->groupBy('month')
+        $monthlyPayments = $payments->selectRaw('MONTH(pay_at) as month, SUM(amount) as total, SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as paid, SUM(CASE WHEN status = "unpaid" THEN amount ELSE 0 END) as pending, COUNT(*) as count')
+            ->groupByRaw('MONTH(pay_at)')
             ->get()
             ->sortBy('month')
             ->map(function ($item) {
@@ -206,11 +206,12 @@ class StudentInsightsController extends Controller
                     'total' => (float) $item->total,
                     'paid' => (float) $item->paid,
                     'pending' => (float) $item->pending,
+                    'count' => (int) $item->count,
                 ];
             });
 
         // Get payment methods
-        $paymentMethods = $payments->selectRaw('method, SUM(amount) as total')
+        $paymentMethods = $payments->selectRaw('method, SUM(amount) as total, COUNT(*) as count')
             ->groupBy('method')
             ->get()
             ->sortByDesc('total')
@@ -218,6 +219,7 @@ class StudentInsightsController extends Controller
                 return [
                     'method' => ucfirst(str_replace('_', ' ', $item->method)),
                     'total' => (float) $item->total,
+                    'count' => (int) $item->count,
                 ];
             });
 

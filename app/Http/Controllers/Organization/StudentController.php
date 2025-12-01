@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\GradeHistoryController;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -29,15 +30,10 @@ class StudentController extends Controller
 
         $students = Student::query()
             ->with(['organization', 'club']) // eager load relations
-            ->when($user->role === 'organization', function ($query) use ($organizationId) {
+            ->where('organization_id', $organizationId)
+            ->whereHas('club', function ($query) use ($organizationId) {
+                // Only include students whose clubs belong to THIS organization
                 $query->where('organization_id', $organizationId);
-            })
-            ->when($request->filled('club_id') && $request->club_id !== 'all', function ($query) use ($request, $organizationId) {
-                // Support club_id filter only if the club belongs to the organization
-                $club = Club::find($request->club_id);
-                if ($club && $club->organization_id === $organizationId) {
-                    $query->where('club_id', $request->club_id);
-                }
             })
             ->when($request->filled('nationality') && $request->nationality !== 'all', function ($query) use ($request) {
                 $query->where('nationality', $request->nationality);
@@ -81,10 +77,21 @@ class StudentController extends Controller
 
         return Inertia::render('Organization/Students/Index', [
             'students' => $students,
-            'nationalities' => Student::select('nationality')->distinct()->pluck('nationality'),
-            'countries' => Student::select('country')->distinct()->pluck('country'),
+            'nationalities' => Student::where('organization_id', $organizationId)
+                ->whereHas('club', function ($query) use ($organizationId) {
+                    $query->where('organization_id', $organizationId);
+                })
+                ->select('nationality')
+                ->distinct()
+                ->pluck('nationality'),
+            'countries' => Student::where('organization_id', $organizationId)
+                ->whereHas('club', function ($query) use ($organizationId) {
+                    $query->where('organization_id', $organizationId);
+                })
+                ->select('country')
+                ->distinct()
+                ->pluck('country'),
             'filters' => [
-                'club_id' => $request->club_id,
                 'nationality' => $request->nationality,
                 'country' => $request->country,
                 'status' => $request->status,
@@ -244,6 +251,11 @@ class StudentController extends Controller
             abort(403, 'Unauthorized to access this student.');
         }
 
+        // Verify the student's club belongs to this organization
+        if ($student->club && $student->club->organization_id !== $organizationId) {
+            abort(403, 'This student\'s club does not belong to your organization.');
+        }
+
         // Get only organization-level plans
         $plans = Plan::where('is_active', true)
             ->where('planable_type', 'App\Models\Organization')
@@ -267,6 +279,11 @@ class StudentController extends Controller
 
         if ($student->organization_id !== $organizationId) {
             abort(403, 'Unauthorized to update this student.');
+        }
+
+        // Verify the student's club belongs to this organization
+        if ($student->club && $student->club->organization_id !== $organizationId) {
+            abort(403, 'This student\'s club does not belong to your organization.');
         }
 
         $validated = $request->validate([
@@ -336,8 +353,17 @@ class StudentController extends Controller
             }
         }
 
+        // Check if grade has changed and record it
+        $oldGrade = $student->grade;
+        $newGrade = $studentData['grade'] ?? $student->grade;
+
         // Update the student record
         $student->update($studentData);
+
+        // Record grade change if it occurred
+        if ($oldGrade !== $newGrade) {
+            GradeHistoryController::recordGradeChange($student, $newGrade, 'Grade updated', $oldGrade);
+        }
 
         // Create or update user account
         if (!empty($studentData['email'])) {
@@ -390,6 +416,18 @@ class StudentController extends Controller
 
     public function destroy(Student $student)
     {
+        $user = Auth::user();
+        $organizationId = $user->userable_id;
+
+        if ($student->organization_id !== $organizationId) {
+            abort(403, 'Unauthorized to delete this student.');
+        }
+
+        // Verify the student's club belongs to this organization
+        if ($student->club && $student->club->organization_id !== $organizationId) {
+            abort(403, 'This student\'s club does not belong to your organization.');
+        }
+
         // Delete related user if exists
         if ($student->user) {
             $student->user->delete();

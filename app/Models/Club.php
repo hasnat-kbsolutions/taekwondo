@@ -121,4 +121,12 @@ class Club extends Model
         return $this->morphMany(Plan::class, 'planable');
     }
 
+    /**
+     * Get all events for this club
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
 }

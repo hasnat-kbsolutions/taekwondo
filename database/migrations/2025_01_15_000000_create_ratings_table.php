@@ -13,9 +13,9 @@ return new class extends Migration {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('rater_id'); // Who is giving the rating (student or teacher)
-            $table->string('rater_type'); // 'student' or 'teacher'
+            $table->string('rater_type', 100); // 'student' or 'teacher'
             $table->unsignedBigInteger('rated_id'); // Who is being rated (student or teacher)
-            $table->string('rated_type'); // 'student' or 'teacher'
+            $table->string('rated_type', 100); // 'student' or 'teacher'
             $table->integer('rating'); // 1-5 stars
             $table->text('comment')->nullable(); // Optional comment
             $table->timestamps();
@@ -23,7 +23,6 @@ return new class extends Migration {
             // Indexes for better performance
             $table->index(['rater_id', 'rater_type']);
             $table->index(['rated_id', 'rated_type']);
-            $table->index(['rater_id', 'rater_type', 'rated_id', 'rated_type']);
 
             // Ensure rating is between 1-5 (will be handled in model validation)
         });

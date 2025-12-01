@@ -14,7 +14,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Upload, FileText, X } from "lucide-react";
 import {
     Card,
     CardContent,
@@ -27,6 +27,8 @@ export default function Create() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(
         undefined
     );
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [documentName, setDocumentName] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors } = useForm({
         title: "",
@@ -39,6 +41,7 @@ export default function Create() {
         status: "upcoming",
         is_public: true,
         image: null as File | null,
+        document: null as File | null,
     });
 
     const handleDateChange = (date: Date | undefined) => {
@@ -46,6 +49,37 @@ export default function Create() {
         if (date) {
             setData("event_date", date.toISOString().split("T")[0]);
         }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData("image", file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const clearImage = () => {
+        setData("image", null);
+        setImagePreview(null);
+    };
+
+    const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData("document", file);
+            setDocumentName(file.name);
+        }
+    };
+
+    const clearDocument = () => {
+        setData("document", null);
+        setDocumentName(null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -296,6 +330,112 @@ export default function Create() {
                                 >
                                     Public Event
                                 </Label>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Attachments</CardTitle>
+                            <CardDescription>
+                                Add event image and documents
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {/* Image Upload */}
+                            <div className="space-y-4">
+                                <Label>Event Image</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Upload Area */}
+                                    <div className="space-y-2">
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition">
+                                            <input
+                                                type="file"
+                                                id="image"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="hidden"
+                                            />
+                                            <label
+                                                htmlFor="image"
+                                                className="flex flex-col items-center gap-2 cursor-pointer"
+                                            >
+                                                <Upload className="w-8 h-8 text-muted-foreground" />
+                                                <div className="text-sm">
+                                                    <p className="font-medium">
+                                                        Click to upload
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        JPG, PNG up to 2MB
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Preview */}
+                                    <div className="space-y-2">
+                                        {imagePreview ? (
+                                            <div className="relative">
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="Preview"
+                                                    className="w-full h-40 object-cover rounded-lg border"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={clearImage}
+                                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-40 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                                                No image selected
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Document Upload */}
+                            <div className="space-y-2">
+                                <Label>Event Document (PDF, DOC, DOCX)</Label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition">
+                                    <input
+                                        type="file"
+                                        id="document"
+                                        accept=".pdf,.doc,.docx"
+                                        onChange={handleDocumentChange}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="document"
+                                        className="flex flex-col items-center gap-2 cursor-pointer"
+                                    >
+                                        <FileText className="w-8 h-8 text-muted-foreground" />
+                                        <div className="text-sm">
+                                            <p className="font-medium">
+                                                {documentName
+                                                    ? documentName
+                                                    : "Click to upload document"}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                PDF, DOC, DOCX up to 5MB
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                                {documentName && (
+                                    <button
+                                        type="button"
+                                        onClick={clearDocument}
+                                        className="text-sm text-red-600 hover:text-red-700"
+                                    >
+                                        Clear document
+                                    </button>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

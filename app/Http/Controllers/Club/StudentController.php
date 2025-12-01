@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Club;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\GradeHistoryController;
 
 use App\Models\Student;
 use App\Models\Plan;
@@ -168,6 +169,9 @@ class StudentController extends Controller
         // Create student profile
         $student = Student::create($validated);
 
+        // Record initial grade in history
+        GradeHistoryController::recordGradeChange($student, $validated['grade'], 'Initial grade');
+
         // Create user only if email is provided
         if (!empty($validated['email'])) {
             $student->user()->create([
@@ -297,8 +301,17 @@ class StudentController extends Controller
             }
         }
 
+        // Check if grade has changed and record it
+        $oldGrade = $student->grade;
+        $newGrade = $validated['grade'];
+
         // Update the student record
         $student->update($validated);
+
+        // Record grade change if it occurred
+        if ($oldGrade !== $newGrade) {
+            GradeHistoryController::recordGradeChange($student, $newGrade, 'Grade updated', $oldGrade);
+        }
 
         // Create or update user account
         if (!empty($validated['email'])) {
@@ -350,6 +363,14 @@ class StudentController extends Controller
 
     public function destroy(Student $student)
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
+
+        // Verify student belongs to club
+        if ($student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to delete this student.');
+        }
+
         // Delete related user if exists
         if ($student->user) {
             $student->user->delete();
@@ -370,6 +391,14 @@ class StudentController extends Controller
 
     public function updatePassword(Request $request, Student $student)
     {
+        $user = Auth::user();
+        $clubId = $user->userable_id;
+
+        // Verify student belongs to club
+        if ($student->club_id !== $clubId) {
+            abort(403, 'Unauthorized to update password for this student.');
+        }
+
         $validated = $request->validate([
             'password' => 'required|string|min:6|confirmed',
         ]);

@@ -23,6 +23,9 @@ import {
     Calendar,
     MapPin,
     Clock,
+    FileText,
+    Image,
+    Download,
 } from "lucide-react";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { DataTable } from "@/components/DataTable";
@@ -55,6 +58,7 @@ interface Event {
     status: string;
     is_public: boolean;
     image?: string;
+    document?: string;
     creator?: User;
 }
 
@@ -198,6 +202,44 @@ export default function Index({ events, filters }: Props) {
                 <Badge className={getStatusColor(row.original.status)}>
                     {row.original.status}
                 </Badge>
+            ),
+        },
+        {
+            id: "attachments",
+            header: "Attachments",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    {row.original.image && (
+                        <a
+                            href={`/storage/${row.original.image}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                            title="View Image"
+                        >
+                            <Image className="w-4 h-4" />
+                            <span className="text-xs">Image</span>
+                        </a>
+                    )}
+                    {row.original.document && (
+                        <a
+                            href={`/storage/${row.original.document}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                            title="Download Document"
+                        >
+                            <FileText className="w-4 h-4" />
+                            <Download className="w-3 h-3" />
+                            <span className="text-xs">Doc</span>
+                        </a>
+                    )}
+                    {!row.original.image && !row.original.document && (
+                        <span className="text-xs text-muted-foreground">
+                            None
+                        </span>
+                    )}
+                </div>
             ),
         },
         {

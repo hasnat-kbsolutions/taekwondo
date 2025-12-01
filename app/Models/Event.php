@@ -21,6 +21,7 @@ class Event extends Model
         'status',
         'is_public',
         'image',
+        'document',
     ];
 
     protected $casts = [

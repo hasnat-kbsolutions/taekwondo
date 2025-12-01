@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm, router } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
@@ -7,17 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/RatingStars";
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    DialogDescription,
-    DialogHeader,
-    DialogFooter,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { FileText } from "lucide-react";
+import { FileText, MoreHorizontal, Trash2, Eye } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export type Student = {
     id: number;
@@ -56,8 +53,8 @@ interface Props {
     students: Student[];
 }
 
-// Define the columns inline here - read-only view for club
-export const columns = (): ColumnDef<Student>[] => [
+// Define the columns inline here - club view with edit/delete actions
+export const columns = (onDelete?: (student: Student) => void): ColumnDef<Student>[] => [
     {
         header: "#",
         cell: ({ row }) => row.index + 1,
@@ -95,9 +92,12 @@ export const columns = (): ColumnDef<Student>[] => [
         },
     },
     { accessorKey: "code", header: "Code" },
-    { accessorKey: "name", header: "Name" },
+    {
+        id: "fullName",
+        header: "Name",
+        cell: ({ row }) => `${row.original.name} ${row.original.surname || ''}`.trim(),
+    },
     { accessorKey: "email", header: "Email" },
-    { accessorKey: "surname", header: "Surname" },
     { accessorKey: "dob", header: "DOB" },
     { accessorKey: "id_passport", header: "ID/Passport" },
     {
@@ -157,25 +157,48 @@ export const columns = (): ColumnDef<Student>[] => [
             </Badge>
         ),
     },
+    {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href={route("club.student-insights.show", row.original.id)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Profile
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href={route("club.students.edit", row.original.id)}>
+                            Edit
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => {
+                            if (onDelete && confirm("Are you sure you want to delete this student?")) {
+                                onDelete(row.original);
+                            }
+                        }}
+                        className="text-red-600"
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    },
 ];
 
 export default function Index({ students }: Props) {
-    const [selectedStudent, setSelectedStudent] = useState<Student | null>(
-        null
-    );
-    const [passwordChangeStudent, setPasswordChangeStudent] =
-        useState<Student | null>(null);
-    const passwordForm = useForm({
-        password: "",
-        password_confirmation: "",
-    });
-
-    const handleView = (student: Student) => {
-        setSelectedStudent(student);
-    };
-
-    const handleClose = () => {
-        setSelectedStudent(null);
+    const handleDelete = (student: Student) => {
+        router.delete(route("club.students.destroy", student.id));
     };
 
     return (
@@ -191,415 +214,11 @@ export default function Index({ students }: Props) {
                     </CardHeader>
                     <CardContent>
                         <DataTable
-                            columns={columns()}
+                            columns={columns(handleDelete)}
                             data={students}
                         />
                     </CardContent>
                 </Card>
-
-                <Dialog open={!!selectedStudent} onOpenChange={handleClose}>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Student Details</DialogTitle>
-                            <DialogDescription>
-                                View detailed information about the student.
-                            </DialogDescription>
-                        </DialogHeader>
-                        {selectedStudent && (
-                            <div className="space-y-6">
-                                {/* Profile Image Section */}
-                                <div className="flex justify-center">
-                                    <div className="flex flex-col items-center gap-2">
-                                        {selectedStudent.profile_image ? (
-                                            <div className="relative">
-                                                <img
-                                                    src={
-                                                        selectedStudent.profile_image.startsWith(
-                                                            "http"
-                                                        )
-                                                            ? selectedStudent.profile_image
-                                                            : `/storage/${selectedStudent.profile_image}`
-                                                    }
-                                                    alt="Profile"
-                                                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-lg"
-                                                    onError={(e) => {
-                                                        e.currentTarget.style.display =
-                                                            "none";
-                                                        e.currentTarget.nextElementSibling?.classList.remove(
-                                                            "hidden"
-                                                        );
-                                                    }}
-                                                />
-                                                <div className="w-32 h-32 hidden flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
-                                                    No Image
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="w-32 h-32 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 text-sm italic border-2 border-gray-200">
-                                                No Image
-                                            </div>
-                                        )}
-                                        <div className="text-center">
-                                            <h3 className="font-semibold text-lg">
-                                                {selectedStudent.name}{" "}
-                                                {selectedStudent.surname}
-                                            </h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                {selectedStudent.code}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Details Grid */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        {
-                                            label: "UID",
-                                            value: selectedStudent.uid,
-                                        },
-                                        {
-                                            label: "Email",
-                                            value: selectedStudent.email,
-                                        },
-                                        {
-                                            label: "Phone",
-                                            value: selectedStudent.phone,
-                                        },
-                                        {
-                                            label: "Grade",
-                                            value: selectedStudent.grade,
-                                        },
-                                        {
-                                            label: "Gender",
-                                            value: selectedStudent.gender,
-                                        },
-                                        {
-                                            label: "Nationality",
-                                            value: selectedStudent.nationality,
-                                        },
-                                        {
-                                            label: "Date of Birth",
-                                            value: selectedStudent.dob
-                                                ? new Date(
-                                                      selectedStudent.dob
-                                                  ).toLocaleDateString()
-                                                : "Not specified",
-                                        },
-                                        {
-                                            label: "Date of Death",
-                                            value: selectedStudent.dod
-                                                ? new Date(
-                                                      selectedStudent.dod
-                                                  ).toLocaleDateString()
-                                                : "Not specified",
-                                        },
-                                        {
-                                            label: "ID/Passport",
-                                            value: selectedStudent.id_passport,
-                                        },
-                                        {
-                                            label: "Identification Document",
-                                            value: selectedStudent.identification_document ? (
-                                                <a
-                                                    href={
-                                                        selectedStudent.identification_document.startsWith(
-                                                            "http"
-                                                        )
-                                                            ? selectedStudent.identification_document
-                                                            : `/storage/${selectedStudent.identification_document}`
-                                                    }
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:text-blue-800 underline"
-                                                >
-                                                    View Document
-                                                </a>
-                                            ) : (
-                                                "No document uploaded"
-                                            ),
-                                        },
-                                        {
-                                            label: "City",
-                                            value:
-                                                selectedStudent.city ||
-                                                "Not specified",
-                                        },
-
-                                        {
-                                            label: "Street",
-                                            value:
-                                                selectedStudent.street ||
-                                                "Not specified",
-                                        },
-                                        {
-                                            label: "Postal Code",
-                                            value:
-                                                selectedStudent.postal_code ||
-                                                "Not specified",
-                                        },
-                                        {
-                                            label: "Country",
-                                            value:
-                                                selectedStudent.country ||
-                                                "Not specified",
-                                        },
-                                        {
-                                            label: "Organization",
-                                            value:
-                                                selectedStudent.organization
-                                                    ?.name || "Not specified",
-                                        },
-                                        {
-                                            label: "Club",
-                                            value:
-                                                selectedStudent.club?.name ||
-                                                "Not specified",
-                                        },
-                                        {
-                                            label: "Status",
-                                            value: selectedStudent.status
-                                                ? "Active"
-                                                : "Inactive",
-                                        },
-                                        {
-                                            label: "Rating",
-                                            value: (
-                                                <div className="flex items-center gap-2">
-                                                    <RatingStars
-                                                        rating={
-                                                            typeof selectedStudent.average_rating ===
-                                                            "number"
-                                                                ? Math.round(
-                                                                      selectedStudent.average_rating
-                                                                  )
-                                                                : 0
-                                                        }
-                                                        readonly
-                                                        size="sm"
-                                                    />
-                                                    <span className="text-sm text-muted-foreground">
-                                                        {typeof selectedStudent.average_rating ===
-                                                        "number"
-                                                            ? selectedStudent.average_rating.toFixed(
-                                                                  1
-                                                              )
-                                                            : "0.0"}{" "}
-                                                        (
-                                                        {
-                                                            selectedStudent.total_ratings
-                                                        }{" "}
-                                                        ratings)
-                                                    </span>
-                                                </div>
-                                            ),
-                                        },
-                                    ].map((item, idx) => (
-                                        <div key={idx} className="space-y-1">
-                                            <Label className="text-sm font-medium text-muted-foreground">
-                                                {item.label}
-                                            </Label>
-                                            <div className="text-sm">
-                                                {item.value}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Attachments Section */}
-                                <div className="border-t pt-6">
-                                    <h4 className="font-semibold mb-4">
-                                        Attachments
-                                    </h4>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        {/* Profile Image */}
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-medium text-muted-foreground">
-                                                Profile Image
-                                            </Label>
-                                            <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
-                                                {selectedStudent.profile_image ? (
-                                                    <img
-                                                        src={
-                                                            selectedStudent.profile_image.startsWith(
-                                                                "http"
-                                                            )
-                                                                ? selectedStudent.profile_image
-                                                                : `/storage/${selectedStudent.profile_image}`
-                                                        }
-                                                        alt="Profile"
-                                                        className="max-w-full max-h-48 object-contain rounded"
-                                                    />
-                                                ) : (
-                                                    <span className="text-gray-400 italic">
-                                                        No profile image
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Identification Document */}
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-medium text-muted-foreground">
-                                                Identification Document
-                                            </Label>
-                                            <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200 min-h-[200px] flex items-center justify-center">
-                                                {selectedStudent.identification_document ? (
-                                                    <div className="text-center">
-                                                        <FileText className="w-12 h-12 text-blue-500 mx-auto mb-2" />
-                                                        <p className="text-sm text-gray-600">
-                                                            PDF Document
-                                                            Available
-                                                        </p>
-                                                        <a
-                                                            href={
-                                                                selectedStudent.identification_document.startsWith(
-                                                                    "http"
-                                                                )
-                                                                    ? selectedStudent.identification_document
-                                                                    : `/storage/${selectedStudent.identification_document}`
-                                                            }
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-blue-600 hover:text-blue-800 text-sm underline mt-1 inline-block"
-                                                        >
-                                                            View Document
-                                                        </a>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-gray-400 italic">
-                                                        No identification
-                                                        document
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </DialogContent>
-                </Dialog>
-
-                {/* Change Password Modal */}
-                {passwordChangeStudent && (
-                    <Dialog
-                        open={!!passwordChangeStudent}
-                        onOpenChange={(open) => {
-                            if (!open) {
-                                setPasswordChangeStudent(null);
-                                passwordForm.reset();
-                            }
-                        }}
-                    >
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Change Password</DialogTitle>
-                                <DialogDescription>
-                                    Update password for{" "}
-                                    {passwordChangeStudent.name}{" "}
-                                    {passwordChangeStudent.surname}
-                                </DialogDescription>
-                            </DialogHeader>
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    passwordForm.patch(
-                                        route(
-                                            "club.students.updatePassword",
-                                            passwordChangeStudent.id
-                                        ),
-                                        {
-                                            onSuccess: () => {
-                                                setPasswordChangeStudent(null);
-                                                passwordForm.reset();
-                                            },
-                                        }
-                                    );
-                                }}
-                                className="space-y-4"
-                            >
-                                <div>
-                                    <Label htmlFor="password">
-                                        New Password{" "}
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="Enter new password"
-                                        value={passwordForm.data.password}
-                                        onChange={(e) =>
-                                            passwordForm.setData(
-                                                "password",
-                                                e.target.value
-                                            )
-                                        }
-                                        required
-                                    />
-                                    {passwordForm.errors.password && (
-                                        <p className="text-red-500 text-sm mt-1">
-                                            {passwordForm.errors.password}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="password_confirmation">
-                                        Confirm Password{" "}
-                                        <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        type="password"
-                                        placeholder="Confirm new password"
-                                        value={
-                                            passwordForm.data
-                                                .password_confirmation
-                                        }
-                                        onChange={(e) =>
-                                            passwordForm.setData(
-                                                "password_confirmation",
-                                                e.target.value
-                                            )
-                                        }
-                                        required
-                                    />
-                                    {passwordForm.errors
-                                        .password_confirmation && (
-                                        <p className="text-red-500 text-sm mt-1">
-                                            {
-                                                passwordForm.errors
-                                                    .password_confirmation
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-
-                                <DialogFooter>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => {
-                                            setPasswordChangeStudent(null);
-                                            passwordForm.reset();
-                                        }}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={passwordForm.processing}
-                                    >
-                                        {passwordForm.processing
-                                            ? "Updating..."
-                                            : "Update Password"}
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
-                )}
             </div>
         </AuthenticatedLayout>
     );
