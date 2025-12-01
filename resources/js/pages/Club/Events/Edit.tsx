@@ -160,7 +160,7 @@ export default function Edit({ event }: Props) {
             remove_document: data.remove_document,
         };
 
-        put(route("club.events.update", event.id), submitData, {
+        router.put(route("club.events.update", event.id), submitData, {
             onSuccess: () => {
                 router.visit(route("club.events.index"));
             },
