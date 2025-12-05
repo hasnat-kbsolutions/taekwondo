@@ -8,7 +8,7 @@ import {
     Award,
     TrendingUp,
     Calendar,
-    DollarSign,
+    Wallet,
 } from 'lucide-react';
 
 interface GradeHistory {
@@ -146,7 +146,7 @@ export default function GradeReportShow({
                     <Card className="bg-orange-500/5 border-orange-200 dark:border-orange-800">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400 flex items-center gap-2">
-                                <DollarSign className="w-4 h-4" />
+                                <Wallet className="w-4 h-4" />
                                 Payments
                             </CardTitle>
                         </CardHeader>

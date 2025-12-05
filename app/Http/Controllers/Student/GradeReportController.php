@@ -41,18 +41,19 @@ class GradeReportController extends Controller
 
         // Get payment history
         $payments = Payment::where('student_id', $student->id)
-            ->orderBy('payment_date', 'desc')
+            ->orderBy('pay_at', 'desc')
             ->get()
             ->map(function ($payment) {
+                $payAt = $payment->pay_at ? \Carbon\Carbon::parse($payment->pay_at) : null;
                 return [
                     'id' => $payment->id,
                     'amount' => $payment->amount,
-                    'currency' => $payment->currency_code ?? 'USD',
-                    'payment_date' => $payment->payment_date->format('Y-m-d'),
-                    'payment_date_formatted' => $payment->payment_date->format('M d, Y'),
+                    'currency' => $payment->currency_code ?? 'MYR',
+                    'payment_date' => $payAt?->format('Y-m-d'),
+                    'payment_date_formatted' => $payAt?->format('M d, Y') ?? '-',
                     'status' => $payment->status,
-                    'description' => $payment->description,
-                    'payment_method' => $payment->payment_method,
+                    'description' => $payment->notes,
+                    'payment_method' => $payment->method,
                 ];
             });
 

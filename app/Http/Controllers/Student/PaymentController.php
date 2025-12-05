@@ -24,6 +24,7 @@ class PaymentController extends Controller
         $payments = $student->payments()
             ->where('month', 'LIKE', $year . '-%')
             ->with(['currency', 'attachment'])
+            ->orderBy('month', 'desc')
             ->orderBy('pay_at', 'desc')
             ->get();
 
@@ -37,10 +38,65 @@ class PaymentController extends Controller
                 return (float) $currencyPayments->sum('amount');
             });
 
+        // Calculate paid amounts by currency for the year
+        $paidAmountsByCurrency = $payments->where('status', 'paid')
+            ->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        // Calculate unpaid amounts by currency
+        $unpaidAmountsByCurrency = $payments->where('status', 'unpaid')
+            ->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
+        // Get monthly breakdown for the year
+        $monthlyBreakdown = $payments->groupBy('month')
+            ->map(function ($monthPayments, $month) {
+                $paid = $monthPayments->where('status', 'paid');
+                $unpaid = $monthPayments->where('status', 'unpaid');
+
+                return [
+                    'month' => $month,
+                    'month_name' => \Carbon\Carbon::parse($month . '-01')->format('F Y'),
+                    'total_amount' => (float) $monthPayments->sum('amount'),
+                    'paid_amount' => (float) $paid->sum('amount'),
+                    'unpaid_amount' => (float) $unpaid->sum('amount'),
+                    'paid_count' => $paid->count(),
+                    'unpaid_count' => $unpaid->count(),
+                    'status' => $unpaid->count() > 0 ? 'partial' : ($paid->count() > 0 ? 'paid' : 'none'),
+                ];
+            })
+            ->sortKeysDesc()
+            ->values();
+
+        // Get all-time statistics
+        $allTimePayments = $student->payments()->with('currency')->get();
+        $allTimePaidByCurrency = $allTimePayments->where('status', 'paid')
+            ->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+        $allTimeTotalByCurrency = $allTimePayments
+            ->groupBy('currency_code')
+            ->map(function ($currencyPayments) {
+                return (float) $currencyPayments->sum('amount');
+            });
+
         // Get default currency from student's club or organization
         $defaultCurrencyCode = $student->club->default_currency ??
             $student->organization->default_currency ??
             'MYR';
+
+        // Get available years for the filter (years with payments)
+        $availableYears = $student->payments()
+            ->selectRaw('DISTINCT LEFT(month, 4) as year')
+            ->pluck('year')
+            ->filter()
+            ->sort()
+            ->values();
 
         return Inertia::render('Student/Payments/Index', [
             'payments' => $payments,
@@ -49,7 +105,13 @@ class PaymentController extends Controller
             'paidPayments' => $paidPayments,
             'pendingPayments' => $pendingPayments,
             'amountsByCurrency' => $amountsByCurrency,
+            'paidAmountsByCurrency' => $paidAmountsByCurrency,
+            'unpaidAmountsByCurrency' => $unpaidAmountsByCurrency,
+            'monthlyBreakdown' => $monthlyBreakdown,
+            'allTimePaidByCurrency' => $allTimePaidByCurrency,
+            'allTimeTotalByCurrency' => $allTimeTotalByCurrency,
             'defaultCurrencyCode' => $defaultCurrencyCode,
+            'availableYears' => $availableYears,
         ]);
     }
 

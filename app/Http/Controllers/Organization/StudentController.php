@@ -209,6 +209,11 @@ class StudentController extends Controller
         // Create student
         $student = Student::create($studentData);
 
+        // Record initial grade in grade history
+        if (!empty($studentData['grade'])) {
+            GradeHistoryController::recordGradeChange($student, $studentData['grade'], 'Initial grade assigned');
+        }
+
         // Create linked user (if email provided)
         if (!empty($studentData['email'])) {
             $student->user()->create([

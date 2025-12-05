@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\Club;
 use App\Models\Organization;
+use App\Models\Holiday;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,19 +22,25 @@ class AttendanceController extends Controller
     {
         $organization_id = Auth::user()->userable_id;
 
-        $date = $request->date ? Carbon::parse($request->date . '-01') : null;
+        // Parse date filter
+        $year = $request->date ? substr($request->date, 0, 4) : now()->year;
+        $month = $request->date ? substr($request->date, 5, 2) : now()->format('m');
+        $date = Carbon::parse("{$year}-{$month}-01");
 
+        // Build students query - students from clubs that belong to this organization
+        // Same logic as Organization StudentController
         $students = Student::with([
             'attendances' => function ($q) use ($date) {
-                if ($date) {
-                    $q->whereMonth('date', $date->month)
-                        ->whereYear('date', $date->year);
-                }
+                $q->whereMonth('date', $date->month)
+                    ->whereYear('date', $date->year);
             }
         ])
-            ->where('organization_id', $organization_id)
-            ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
-            ->get();
+        ->where('organization_id', $organization_id)
+        ->whereHas('club', function ($query) use ($organization_id) {
+            $query->where('organization_id', $organization_id);
+        })
+        ->orderBy('name')
+        ->get();
 
         $studentsWithAttendance = $students->map(function ($student) {
             $records = $student->attendances->groupBy(function ($a) {
@@ -43,16 +50,22 @@ class AttendanceController extends Controller
             return [
                 'student' => [
                     'id' => $student->id,
+                    'code' => $student->code,
                     'name' => $student->name,
                 ],
                 'records' => $records,
             ];
         });
 
+        // Get holidays for this month
+        $holidays = Holiday::getForMonth($year, $month, $organization_id, null);
+
         return Inertia::render('Organization/Attendances/Index', [
             'studentsWithAttendance' => $studentsWithAttendance,
-            'clubs' => Club::where('organization_id', $organization_id)->get(),
-            'filters' => $request->only('club_id', 'date'), // removed 'organization_id'
+            'holidays' => $holidays,
+            'filters' => [
+                'date' => $request->date ?? "{$year}-{$month}",
+            ],
         ]);
     }
 
@@ -152,13 +165,12 @@ class AttendanceController extends Controller
 
         $organizationId = $user->userable_id;
 
-        $request->validate([
-            'club_id' => 'nullable|integer',
-        ]);
-
+        // Get students from clubs that belong to this organization
         $students = Student::query()
             ->where('organization_id', $organizationId)
-            ->when($request->club_id, fn($q) => $q->where('club_id', $request->club_id))
+            ->whereHas('club', function ($query) use ($organizationId) {
+                $query->where('organization_id', $organizationId);
+            })
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -201,9 +213,15 @@ class AttendanceController extends Controller
         $status = $request->input('status');
 
         try {
-            // Verify student belongs to organization
-            $student = Student::find($studentId);
-            if (!$student || $student->organization_id !== $organizationId) {
+            // Verify student belongs to organization's clubs
+            $student = Student::where('id', $studentId)
+                ->where('organization_id', $organizationId)
+                ->whereHas('club', function ($query) use ($organizationId) {
+                    $query->where('organization_id', $organizationId);
+                })
+                ->first();
+
+            if (!$student) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 

@@ -22,9 +22,15 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        $organizationId = $user->userable_id;
+
+        // Get payments for students from clubs that belong to this organization
         $query = Payment::with(['student', 'currency', 'attachment'])
-            ->whereHas('student', function ($query) use ($user) {
-                $query->where('organization_id', $user->userable_id);
+            ->whereHas('student', function ($query) use ($organizationId) {
+                $query->where('organization_id', $organizationId)
+                    ->whereHas('club', function ($q) use ($organizationId) {
+                        $q->where('organization_id', $organizationId);
+                    });
             });
 
         // Filter by status
@@ -67,10 +73,16 @@ class PaymentController extends Controller
 
         $defaultCurrencyCode = $user->userable->default_currency ?? 'MYR';
 
-        // Get only students who have payments in this organization
-        $studentsWithPayments = Student::where('organization_id', $user->userable_id)
-            ->whereIn('id', Payment::whereHas('student', function ($q) use ($user) {
-                $q->where('organization_id', $user->userable_id);
+        // Get only students who have payments in this organization (from clubs belonging to this org)
+        $studentsWithPayments = Student::where('organization_id', $organizationId)
+            ->whereHas('club', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->whereIn('id', Payment::whereHas('student', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId)
+                    ->whereHas('club', function ($clubQ) use ($organizationId) {
+                        $clubQ->where('organization_id', $organizationId);
+                    });
             })->distinct()->pluck('student_id'))
             ->select('id', 'name')
             ->orderBy('name')
@@ -103,15 +115,21 @@ class PaymentController extends Controller
 
         $organizationId = $user->userable_id;
 
-        // Get students with fee plans in this organization
+        // Get students with fee plans in this organization (from clubs belonging to this org)
         $feePlans = StudentFeePlan::with(['plan', 'student'])
             ->whereHas('student', function ($q) use ($organizationId) {
-                $q->where('organization_id', $organizationId);
+                $q->where('organization_id', $organizationId)
+                    ->whereHas('club', function ($clubQ) use ($organizationId) {
+                        $clubQ->where('organization_id', $organizationId);
+                    });
             })
             ->get();
 
         $studentIdsWithPlans = $feePlans->pluck('student_id')->unique()->values();
         $studentsWithPlans = Student::where('organization_id', $organizationId)
+            ->whereHas('club', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
             ->whereIn('id', $studentIdsWithPlans)
             ->get();
 
@@ -153,9 +171,15 @@ class PaymentController extends Controller
             'bank_information.*' => 'exists:bank_information,id',
         ]);
 
-        // Verify student belongs to organization
-        $student = Student::findOrFail($validated['student_id']);
-        if ($student->organization_id !== $organizationId) {
+        // Verify student belongs to organization's clubs
+        $student = Student::where('id', $validated['student_id'])
+            ->where('organization_id', $organizationId)
+            ->whereHas('club', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->first();
+
+        if (!$student) {
             abort(403, 'Unauthorized to create payment for this student.');
         }
 
@@ -196,16 +220,24 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized to access this payment.');
         }
 
-        // Get students with fee plans in this organization
+        // Get students with fee plans in this organization (from clubs belonging to this org)
         $feePlans = StudentFeePlan::with(['plan', 'student'])
             ->whereHas('student', function ($q) use ($organizationId) {
-                $q->where('organization_id', $organizationId);
+                $q->where('organization_id', $organizationId)
+                    ->whereHas('club', function ($clubQ) use ($organizationId) {
+                        $clubQ->where('organization_id', $organizationId);
+                    });
             })
             ->get();
 
         return Inertia::render('Organization/Payments/Edit', [
             'payment' => $payment->load(['student']),
-            'students' => Student::where('organization_id', $organizationId)->whereHas('feePlan')->get(),
+            'students' => Student::where('organization_id', $organizationId)
+                ->whereHas('club', function ($q) use ($organizationId) {
+                    $q->where('organization_id', $organizationId);
+                })
+                ->whereHas('feePlan')
+                ->get(),
             'studentFeePlans' => $feePlans,
             'currencies' => Currency::getActive(),
             'bank_information' => BankInformation::where('userable_type', 'App\Models\Organization')
@@ -247,9 +279,15 @@ class PaymentController extends Controller
             'bank_information.*' => 'exists:bank_information,id',
         ]);
 
-        // Verify student belongs to organization
-        $student = Student::findOrFail($validated['student_id']);
-        if ($student->organization_id !== $organizationId) {
+        // Verify student belongs to organization's clubs
+        $student = Student::where('id', $validated['student_id'])
+            ->where('organization_id', $organizationId)
+            ->whereHas('club', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->first();
+
+        if (!$student) {
             abort(403, 'Unauthorized to update payment for this student.');
         }
 

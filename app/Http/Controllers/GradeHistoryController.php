@@ -80,15 +80,25 @@ class GradeHistoryController extends Controller
     {
         $histories = $student->gradeHistories()->orderBy('achieved_at', 'asc')->get();
 
+        // Get the first (oldest) grade entry
+        $firstHistory = $histories->first();
+
+        // Calculate total days since first grade
+        $totalDays = $firstHistory ? (int) $firstHistory->achieved_at->diffInDays(now()) : 0;
+
+        // Calculate average days per grade (only count grades with duration_days set)
+        $gradesWithDuration = $histories->filter(fn($h) => $h->duration_days !== null);
+        $averageDays = $gradesWithDuration->count() > 0
+            ? (int) round($gradesWithDuration->sum('duration_days') / $gradesWithDuration->count())
+            : 0;
+
         return [
             'total_grades_achieved' => $histories->count(),
             'current_grade' => $student->grade,
-            'first_grade_date' => $histories->last()?->achieved_at,
-            'latest_grade_date' => $histories->first()?->achieved_at,
-            'total_progression_days' => $histories->last() ? $histories->last()->achieved_at->diffInDays(now()) : 0,
-            'average_days_per_grade' => $histories->count() > 0
-                ? collect($histories)->sum('duration_days') / $histories->count()
-                : 0,
+            'first_grade_date' => $firstHistory?->achieved_at,
+            'latest_grade_date' => $histories->last()?->achieved_at,
+            'total_progression_days' => $totalDays,
+            'average_days_per_grade' => $averageDays,
         ];
     }
 

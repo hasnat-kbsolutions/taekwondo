@@ -25,6 +25,11 @@ import {
     Upload,
     FileCheck,
     Trash2,
+    History,
+    CalendarDays,
+    TrendingUp,
+    CheckCircle2,
+    Clock,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -72,6 +77,17 @@ interface Payment {
     };
 }
 
+interface MonthlyBreakdown {
+    month: string;
+    month_name: string;
+    total_amount: number;
+    paid_amount: number;
+    unpaid_amount: number;
+    paid_count: number;
+    unpaid_count: number;
+    status: "paid" | "partial" | "none";
+}
+
 interface Props {
     year: number;
     payments: Payment[];
@@ -80,7 +96,13 @@ interface Props {
     pendingPayments?: number;
     unpaidPayments?: number;
     amountsByCurrency?: Record<string, number>;
+    paidAmountsByCurrency?: Record<string, number>;
+    unpaidAmountsByCurrency?: Record<string, number>;
+    monthlyBreakdown?: MonthlyBreakdown[];
+    allTimePaidByCurrency?: Record<string, number>;
+    allTimeTotalByCurrency?: Record<string, number>;
     defaultCurrencyCode?: string;
+    availableYears?: string[];
 }
 
 // Utility function to safely format amounts
@@ -110,7 +132,13 @@ export default function Payment({
     pendingPayments,
     unpaidPayments,
     amountsByCurrency,
+    paidAmountsByCurrency,
+    unpaidAmountsByCurrency,
+    monthlyBreakdown,
+    allTimePaidByCurrency,
+    allTimeTotalByCurrency,
     defaultCurrencyCode,
+    availableYears,
 }: Props) {
     const [selectedYear, setSelectedYear] = useState(year || currentYear);
 
@@ -572,12 +600,70 @@ export default function Payment({
                     </CardContent>
                 </Card>
 
-                {/* Stats Cards */}
+                {/* All-Time Summary Card */}
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <History className="h-5 w-5 text-blue-600" />
+                            <CardTitle className="text-lg">All-Time Payment History</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">Total Paid (All Time)</p>
+                                <p className="text-2xl font-bold text-green-600">
+                                    {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
+                                    {formatAmount(
+                                        allTimePaidByCurrency?.[defaultCurrencyCode || "MYR"] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </p>
+                                {allTimePaidByCurrency &&
+                                    Object.keys(allTimePaidByCurrency).length > 1 && (
+                                        <div className="text-xs text-muted-foreground">
+                                            {Object.entries(allTimePaidByCurrency)
+                                                .filter(([code]) => code !== defaultCurrencyCode)
+                                                .map(([code, amount]) => (
+                                                    <span key={code} className="mr-3">
+                                                        {code}: {formatAmount(amount, code)}
+                                                    </span>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">Total Billed (All Time)</p>
+                                <p className="text-2xl font-bold text-primary">
+                                    {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
+                                    {formatAmount(
+                                        allTimeTotalByCurrency?.[defaultCurrencyCode || "MYR"] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </p>
+                                {allTimeTotalByCurrency &&
+                                    Object.keys(allTimeTotalByCurrency).length > 1 && (
+                                        <div className="text-xs text-muted-foreground">
+                                            {Object.entries(allTimeTotalByCurrency)
+                                                .filter(([code]) => code !== defaultCurrencyCode)
+                                                .map(([code, amount]) => (
+                                                    <span key={code} className="mr-3">
+                                                        {code}: {formatAmount(amount, code)}
+                                                    </span>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Year Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total Payments
+                                Total Payments ({selectedYear})
                             </CardTitle>
                             <Wallet className="h-6 w-6 text-primary" />
                         </CardHeader>
@@ -616,49 +702,96 @@ export default function Payment({
                         </CardContent>
                     </Card>
 
-                    <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total Revenue
+                                Year Total
                             </CardTitle>
-                            <Wallet className="h-6 w-6 text-primary" />
+                            <TrendingUp className="h-6 w-6 text-primary" />
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-1 w-full">
-                                <div className="text-lg font-bold">
+                            <div className="text-lg font-bold">
+                                {defaultCurrencyCode === "MYR"
+                                    ? "RM"
+                                    : defaultCurrencyCode}{" "}
+                                {formatAmount(
+                                    amountsByCurrency?.[
+                                        defaultCurrencyCode || "MYR"
+                                    ] || 0,
+                                    defaultCurrencyCode || "MYR"
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Year Payment Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Paid Amount ({selectedYear})
+                            </CardTitle>
+                            <CheckCircle2 className="h-6 w-6 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-1">
+                                <div className="text-2xl font-bold text-green-600">
                                     {defaultCurrencyCode === "MYR"
                                         ? "RM"
                                         : defaultCurrencyCode}{" "}
                                     {formatAmount(
-                                        amountsByCurrency?.[
+                                        paidAmountsByCurrency?.[
                                             defaultCurrencyCode || "MYR"
                                         ] || 0,
                                         defaultCurrencyCode || "MYR"
                                     )}
                                 </div>
-                                {amountsByCurrency &&
-                                    Object.keys(amountsByCurrency).length >
-                                        1 && (
-                                        <div className="text-xs text-muted-foreground space-y-1">
-                                            {Object.entries(amountsByCurrency)
-                                                .filter(
-                                                    ([code]) =>
-                                                        code !==
-                                                        defaultCurrencyCode
-                                                )
+                                {paidAmountsByCurrency &&
+                                    Object.keys(paidAmountsByCurrency).length > 1 && (
+                                        <div className="text-xs text-muted-foreground">
+                                            {Object.entries(paidAmountsByCurrency)
+                                                .filter(([code]) => code !== defaultCurrencyCode)
                                                 .map(([code, amount]) => (
-                                                    <div
-                                                        key={code}
-                                                        className="flex justify-between"
-                                                    >
-                                                        <span>{code}:</span>
-                                                        <span>
-                                                            {formatAmount(
-                                                                amount,
-                                                                code
-                                                            )}
-                                                        </span>
-                                                    </div>
+                                                    <span key={code} className="mr-3">
+                                                        {code}: {formatAmount(amount, code)}
+                                                    </span>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Unpaid Amount ({selectedYear})
+                            </CardTitle>
+                            <Clock className="h-6 w-6 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-1">
+                                <div className="text-2xl font-bold text-yellow-500">
+                                    {defaultCurrencyCode === "MYR"
+                                        ? "RM"
+                                        : defaultCurrencyCode}{" "}
+                                    {formatAmount(
+                                        unpaidAmountsByCurrency?.[
+                                            defaultCurrencyCode || "MYR"
+                                        ] || 0,
+                                        defaultCurrencyCode || "MYR"
+                                    )}
+                                </div>
+                                {unpaidAmountsByCurrency &&
+                                    Object.keys(unpaidAmountsByCurrency).length > 1 && (
+                                        <div className="text-xs text-muted-foreground">
+                                            {Object.entries(unpaidAmountsByCurrency)
+                                                .filter(([code]) => code !== defaultCurrencyCode)
+                                                .map(([code, amount]) => (
+                                                    <span key={code} className="mr-3">
+                                                        {code}: {formatAmount(amount, code)}
+                                                    </span>
                                                 ))}
                                         </div>
                                     )}
@@ -666,6 +799,62 @@ export default function Payment({
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Monthly Breakdown */}
+                {monthlyBreakdown && monthlyBreakdown.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center gap-2">
+                                <CalendarDays className="h-5 w-5 text-primary" />
+                                <CardTitle>Monthly Breakdown ({selectedYear})</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-3">
+                                {monthlyBreakdown.map((month) => (
+                                    <div
+                                        key={month.month}
+                                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div
+                                                className={`w-3 h-3 rounded-full ${
+                                                    month.status === "paid"
+                                                        ? "bg-green-500"
+                                                        : month.status === "partial"
+                                                        ? "bg-yellow-500"
+                                                        : "bg-gray-300"
+                                                }`}
+                                            />
+                                            <div>
+                                                <p className="font-medium">{month.month_name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {month.paid_count} paid, {month.unpaid_count} unpaid
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold">
+                                                {defaultCurrencyCode === "MYR" ? "RM" : defaultCurrencyCode}{" "}
+                                                {formatAmount(month.total_amount, defaultCurrencyCode || "MYR")}
+                                            </p>
+                                            <div className="flex gap-2 text-xs">
+                                                <span className="text-green-600">
+                                                    Paid: {formatAmount(month.paid_amount, defaultCurrencyCode || "MYR")}
+                                                </span>
+                                                {month.unpaid_amount > 0 && (
+                                                    <span className="text-yellow-600">
+                                                        Due: {formatAmount(month.unpaid_amount, defaultCurrencyCode || "MYR")}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Payments Table */}
                 <Card>
